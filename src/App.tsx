@@ -44,6 +44,7 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [postItColor, setPostItColor] = useState('#FEF9C3');
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -148,7 +149,7 @@ export default function App() {
           <div 
             onClick={() => !hasActiveGoal && setIsBottomSheetOpen(true)}
             style={{ 
-              position: 'relative', width: '100%', minHeight: 180, backgroundColor: '#FEF9C3', 
+              position: 'relative', width: '100%', minHeight: 180, backgroundColor: postItColor, 
               border: '2px solid #191f28', boxShadow: '4px 4px 0px rgba(0,0,0,0.1)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               cursor: hasActiveGoal ? 'default' : 'pointer', padding: '32px 24px 24px', marginBottom: 28,
@@ -285,14 +286,67 @@ export default function App() {
       >
         <div style={{ width: 40, height: 6, backgroundColor: '#E5E7EB', borderRadius: 3, marginBottom: 24 }} />
         <h2 style={{ fontSize: 20, fontWeight: 800, color: '#191f28', marginBottom: 8 }}>목표를 적어보세요</h2>
-        <p style={{ fontSize: 14, color: '#4E5968', marginBottom: 24 }}>입력창에 적으면 포스트잇에 기록됩니다.</p>
+        <p style={{ fontSize: 14, color: '#4E5968', marginBottom: 20 }}>다이어리에 어떻게 적힐지 미리 볼 수 있어요.</p>
+
+        {/* Color Palette */}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+          {['#FEF9C3', '#FBCFE8', '#BAE6FD', '#D1FAE5'].map(color => (
+            <div 
+              key={color}
+              onClick={() => setPostItColor(color)}
+              style={{
+                width: 32, height: 32, borderRadius: '50%', backgroundColor: color,
+                border: postItColor === color ? '3px solid #191f28' : '2px solid #E5E7EB',
+                cursor: 'pointer',
+                transform: postItColor === color ? 'scale(1.1)' : 'scale(1)',
+                transition: 'all 0.2s ease',
+                boxShadow: postItColor === color ? '2px 2px 0px rgba(0,0,0,0.2)' : 'none'
+              }}
+            />
+          ))}
+        </div>
         
-        <input 
-          className="neo-input" placeholder="예) 포트폴리오 첫 장 만들기" 
-          value={goal} onChange={e => setGoal(e.target.value)} 
-          style={{ width: '100%', marginBottom: 20 }}
-          autoFocus
-        />
+        {/* Live Preview Post-it with hidden input */}
+        <div 
+          style={{ 
+            position: 'relative', width: '100%', minHeight: 160, backgroundColor: postItColor, 
+            border: '2px solid #191f28', boxShadow: '4px 4px 0px rgba(0,0,0,0.1)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            padding: '32px 24px 24px', marginBottom: 28,
+            transition: 'background-color 0.2s ease'
+          }}
+        >
+          {/* Masking Tape */}
+          <div style={{
+            position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%) rotate(2deg)',
+            width: 80, height: 24, backgroundColor: '#E5E7EB', opacity: 0.9, border: '1px solid #191f28'
+          }} />
+
+          <h2 style={{ fontSize: 13, color: '#4B5563', fontWeight: 800, marginBottom: 12, letterSpacing: 1 }}>TODAY'S GOAL</h2>
+          
+          <textarea
+            className="handwriting"
+            placeholder="예) 포트폴리오 첫 장 만들기"
+            value={goal}
+            onChange={e => setGoal(e.target.value)}
+            autoFocus
+            style={{ 
+              width: '100%',
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              resize: 'none',
+              textAlign: 'center',
+              fontSize: 26, 
+              fontWeight: 800, 
+              color: '#191f28', 
+              lineHeight: 1.3,
+              overflow: 'hidden'
+            }}
+            rows={2}
+          />
+        </div>
+
         <button 
           className="neo-btn" style={{ backgroundColor: '#A7F3D0', width: '100%' }}
           onClick={async () => {
@@ -334,7 +388,7 @@ export default function App() {
           </div>
           
           {/* Main Goal Display */}
-          <div className="neo-card" style={{ marginBottom: 24, padding: 20, backgroundColor: '#FEF08A', border: '3px solid #191f28', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="neo-card" style={{ marginBottom: 24, padding: 20, backgroundColor: postItColor, border: '3px solid #191f28', display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ fontSize: 13, fontWeight: 800, color: '#B45309' }}>오늘의 단 하나 (목표)</div>
             <div style={{ fontSize: 20, fontWeight: 800, color: '#191f28', wordBreak: 'keep-all' }}>{goal}</div>
           </div>
