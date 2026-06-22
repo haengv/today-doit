@@ -172,10 +172,34 @@ export default function App() {
             <h2 style={{ fontSize: 13, color: '#4B5563', fontWeight: 800, marginBottom: 16, letterSpacing: 1 }}>TODAY'S GOAL</h2>
             
             {!hasActiveGoal ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: '#9CA3AF' }}>
-                <div style={{ fontSize: 32, fontWeight: 300, lineHeight: 1 }}>+</div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>할 일을 추가해보세요</div>
-              </div>
+              isBottomSheetOpen ? (
+                <textarea
+                  className="handwriting"
+                  placeholder="예) 포트폴리오 첫 장 만들기"
+                  value={goal}
+                  onChange={e => setGoal(e.target.value)}
+                  autoFocus
+                  style={{ 
+                    width: '100%',
+                    background: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    resize: 'none',
+                    textAlign: 'center',
+                    fontSize: 26, 
+                    fontWeight: 800, 
+                    color: '#191f28', 
+                    lineHeight: 1.3,
+                    overflow: 'hidden'
+                  }}
+                  rows={2}
+                />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: '#9CA3AF' }}>
+                  <div style={{ fontSize: 32, fontWeight: 300, lineHeight: 1 }}>+</div>
+                  <div style={{ fontSize: 16, fontWeight: 700 }}>할 일을 추가해보세요</div>
+                </div>
+              )
             ) : (
               <h1 className="handwriting" style={{ fontSize: 26, fontWeight: 800, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'center', lineHeight: 1.3 }}>
                 {goal}
@@ -270,8 +294,7 @@ export default function App() {
         onClick={() => setIsBottomSheetOpen(false)}
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 2000,
-          animation: 'fadeIn 0.2s ease-out'
+          backgroundColor: 'transparent', zIndex: 2000,
         }}
       />
       <div 
@@ -281,21 +304,21 @@ export default function App() {
           borderTopLeftRadius: 24, borderTopRightRadius: 24,
           padding: '24px 24px 40px', zIndex: 2001,
           animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center'
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          boxShadow: '0 -4px 12px rgba(0,0,0,0.05)'
         }}
       >
         <div style={{ width: 40, height: 6, backgroundColor: '#E5E7EB', borderRadius: 3, marginBottom: 24 }} />
-        <h2 style={{ fontSize: 20, fontWeight: 800, color: '#191f28', marginBottom: 8 }}>목표를 적어보세요</h2>
-        <p style={{ fontSize: 14, color: '#4E5968', marginBottom: 20 }}>다이어리에 어떻게 적힐지 미리 볼 수 있어요.</p>
+        <h2 style={{ fontSize: 16, fontWeight: 800, color: '#4E5968', marginBottom: 16 }}>포스트잇 색상을 골라주세요</h2>
 
         {/* Color Palette */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 32 }}>
           {['#FEF9C3', '#FBCFE8', '#BAE6FD', '#D1FAE5'].map(color => (
             <div 
               key={color}
               onClick={() => setPostItColor(color)}
               style={{
-                width: 32, height: 32, borderRadius: '50%', backgroundColor: color,
+                width: 36, height: 36, borderRadius: '50%', backgroundColor: color,
                 border: postItColor === color ? '3px solid #191f28' : '2px solid #E5E7EB',
                 cursor: 'pointer',
                 transform: postItColor === color ? 'scale(1.1)' : 'scale(1)',
@@ -304,47 +327,6 @@ export default function App() {
               }}
             />
           ))}
-        </div>
-        
-        {/* Live Preview Post-it with hidden input */}
-        <div 
-          style={{ 
-            position: 'relative', width: '100%', minHeight: 160, backgroundColor: postItColor, 
-            border: '2px solid #191f28', boxShadow: '4px 4px 0px rgba(0,0,0,0.1)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            padding: '32px 24px 24px', marginBottom: 28,
-            transition: 'background-color 0.2s ease'
-          }}
-        >
-          {/* Masking Tape */}
-          <div style={{
-            position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%) rotate(2deg)',
-            width: 80, height: 24, backgroundColor: '#E5E7EB', opacity: 0.9, border: '1px solid #191f28'
-          }} />
-
-          <h2 style={{ fontSize: 13, color: '#4B5563', fontWeight: 800, marginBottom: 12, letterSpacing: 1 }}>TODAY'S GOAL</h2>
-          
-          <textarea
-            className="handwriting"
-            placeholder="예) 포트폴리오 첫 장 만들기"
-            value={goal}
-            onChange={e => setGoal(e.target.value)}
-            autoFocus
-            style={{ 
-              width: '100%',
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              resize: 'none',
-              textAlign: 'center',
-              fontSize: 26, 
-              fontWeight: 800, 
-              color: '#191f28', 
-              lineHeight: 1.3,
-              overflow: 'hidden'
-            }}
-            rows={2}
-          />
         </div>
 
         <button 
