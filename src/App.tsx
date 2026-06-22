@@ -121,8 +121,10 @@ export default function App() {
 
   const renderHome = () => {
     const today = new Date();
-    const dateOptions: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', weekday: 'long' };
-    const dateString = today.toLocaleDateString('ko-KR', dateOptions);
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    const dateString = `${y} / ${m} / ${d}`;
 
     const completedCount = steps.filter(s => s.completed).length;
     const totalCount = steps.length;
@@ -136,11 +138,11 @@ export default function App() {
           <h1 style={{ fontSize: 24, fontWeight: 900, color: '#191f28', margin: '0 0 16px 0' }}>
             {dateString}
           </h1>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <p style={{ fontSize: 16, fontWeight: 800, color: '#191f28', margin: 0, wordBreak: 'keep-all', lineHeight: 1.5 }}>
-              "기회는 새와 같은 것 날아가기 전에 꼭 잡아야 한다."
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, border: '1.5px solid #4E5968', borderRadius: 24, padding: '20px 24px', backgroundColor: '#FFF' }}>
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#191f28', margin: 0, wordBreak: 'keep-all', lineHeight: 1.5 }}>
+              꿈은 도망가지 않아. 도망가는 건 늘 나 자신이야
             </p>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#8B95A1' }}>스마일즈</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#8B95A1' }}>짱구아빠</span>
           </div>
         </div>
         
@@ -149,27 +151,16 @@ export default function App() {
           <div 
             onClick={() => !hasActiveGoal && setIsBottomSheetOpen(true)}
             style={{ 
-              position: 'relative', width: '100%', minHeight: 180, backgroundColor: postItColor, 
-              border: '2px solid #191f28', boxShadow: '4px 4px 0px rgba(0,0,0,0.1)',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              cursor: hasActiveGoal ? 'default' : 'pointer', padding: '32px 24px 24px', marginBottom: 28,
-              transform: 'rotate(-1deg)'
+              position: 'relative', width: '100%', minHeight: 240, backgroundColor: postItColor, 
+              border: '1.5px solid #4E5968',
+              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center',
+              cursor: hasActiveGoal ? 'default' : 'pointer', padding: '32px 24px 24px', marginBottom: 28
             }}
           >
-            {/* Masking Tape */}
-            <div style={{
-              position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%) rotate(2deg)',
-              width: 80, height: 24, backgroundColor: '#E5E7EB', opacity: 0.9, border: '1px solid #191f28'
-            }} />
-            
-            {/* Blue Star Decoration */}
-            <div style={{ position: 'absolute', bottom: -12, right: -12, transform: 'rotate(15deg)' }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="#93C5FD" stroke="#191f28" strokeWidth="2">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
+            {/* Pill Badge */}
+            <div style={{ position: 'absolute', top: 24, left: 24, backgroundColor: '#BAE6FD', border: '1.5px solid #4E5968', borderRadius: 20, padding: '4px 12px' }}>
+              <span style={{ fontSize: 13, color: '#4E5968', fontWeight: 800 }}>오늘 꼭 할 일</span>
             </div>
-
-            <h2 style={{ fontSize: 13, color: '#4B5563', fontWeight: 800, marginBottom: 16, letterSpacing: 1 }}>TODAY'S GOAL</h2>
             
             {!hasActiveGoal ? (
               isBottomSheetOpen ? (
@@ -185,7 +176,7 @@ export default function App() {
                     border: 'none',
                     outline: 'none',
                     resize: 'none',
-                    textAlign: 'center',
+                    textAlign: 'left',
                     fontSize: 26, 
                     fontWeight: 800, 
                     color: '#191f28', 
@@ -195,13 +186,12 @@ export default function App() {
                   rows={2}
                 />
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: '#9CA3AF' }}>
-                  <div style={{ fontSize: 32, fontWeight: 300, lineHeight: 1 }}>+</div>
-                  <div style={{ fontSize: 16, fontWeight: 700 }}>할 일을 추가해보세요</div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, color: '#4E5968', marginLeft: 4 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }}>오늘 할 일을<br />입력해주세요</div>
                 </div>
               )
             ) : (
-              <h1 className="handwriting" style={{ fontSize: 26, fontWeight: 800, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'center', lineHeight: 1.3 }}>
+              <h1 className="handwriting" style={{ fontSize: 26, fontWeight: 800, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.3, marginLeft: 4 }}>
                 {goal}
               </h1>
             )}
@@ -507,7 +497,7 @@ export default function App() {
     const currentStep = steps[currentStepIndex];
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#DDD6FE', padding: 20, paddingBottom: 100, position: 'relative' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#F8F9FA', padding: 20, paddingBottom: 100, position: 'relative' }}>
         <div style={{ position: 'absolute', top: 40, left: 20 }}>
           {renderBackButton(() => {
             if (window.confirm('현재 진행 중인 행동이 있습니다. 타이머를 멈추고 정말 나가시겠습니까?')) {
@@ -525,7 +515,7 @@ export default function App() {
           </h1>
           
           {/* Mini Timeline */}
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32, textAlign: 'left', background: '#F3F4F6', padding: 16, borderRadius: 12, border: '2px solid #191f28' }}>
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32, textAlign: 'left', background: '#F8F9FA', padding: 16, borderRadius: 16 }}>
             <h3 style={{ fontSize: 14, fontWeight: 800, margin: '0 0 4px 0', color: '#4E5968' }}>진행 상황</h3>
             {steps.map((step, idx) => {
               const isCurrent = idx === currentStepIndex;
@@ -544,10 +534,9 @@ export default function App() {
           
           {/* Stopwatch */}
           <div style={{ 
-            fontSize: 56, fontWeight: 800, fontFamily: 'monospace', 
-            background: '#191f28', color: '#FFF', padding: '16px 32px', 
-            borderRadius: 16, border: '4px solid #000', marginBottom: 40,
-            boxShadow: '4px 4px 0px #FDE047'
+            fontSize: 64, fontWeight: 300, fontFamily: 'monospace', 
+            color: '#191f28', padding: '16px 32px', 
+            marginBottom: 40, letterSpacing: 2
           }}>
             {formatTime(elapsedSeconds)}
           </div>
@@ -784,32 +773,33 @@ export default function App() {
       {/* Bottom Navigation Tab Bar */}
       {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && (
         <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0,
-          background: '#FFF', borderTop: '3px solid #191f28',
-          display: 'flex', height: 80, zIndex: 1000
+          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          background: '#FFF', border: '1.5px solid #4E5968', borderRadius: 40,
+          display: 'flex', alignItems: 'center', padding: '8px 16px', zIndex: 1000,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.08)', gap: 16
         }}>
-        <div 
-          onClick={() => { setTab('home'); setScreen('home'); }}
-          style={{ 
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            background: tab === 'home' ? '#E5E7EB' : '#FFF', cursor: 'pointer',
-            borderRight: '3px solid #191f28'
-          }}
-        >
-          <div style={{ fontSize: 24, marginBottom: 4 }}>🏠</div>
-          <div style={{ fontSize: 14, fontWeight: 800, color: '#191f28' }}>홈</div>
+          <div 
+            onClick={() => { setTab('home'); setScreen('home'); }}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px',
+              background: tab === 'home' ? '#F3F4F6' : 'transparent', borderRadius: 24, cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+          >
+            <div style={{ fontSize: 20 }}>🏠</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#191f28' }}>홈</div>
+          </div>
+          <div 
+            onClick={() => setTab('history')}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px',
+              background: tab === 'history' ? '#F3F4F6' : 'transparent', borderRadius: 24, cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+          >
+            <div style={{ fontSize: 20 }}>🗂</div>
+          </div>
         </div>
-        <div 
-          onClick={() => setTab('history')}
-          style={{ 
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            background: tab === 'history' ? '#E5E7EB' : '#FFF', cursor: 'pointer'
-          }}
-        >
-          <div style={{ fontSize: 24, marginBottom: 4 }}>🗂</div>
-          <div style={{ fontSize: 14, fontWeight: 800, color: '#191f28' }}>기록</div>
-        </div>
-      </div>
       )}
     </div>
   );
