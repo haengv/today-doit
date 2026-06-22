@@ -37,11 +37,12 @@ export default function App() {
   const [steps, setSteps] = useState<Step[]>([]);
   const [isBreakingDown, setIsBreakingDown] = useState(false);
   const [isMicroBreaking, setIsMicroBreaking] = useState(false);
-  const [history, setHistory] = useState<{id: number, text: string, date: string}[]>([]);
+  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[]}[]>([]);
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [historyView, setHistoryView] = useState<'list' | 'calendar'>('list');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[]} | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [postItColor, setPostItColor] = useState('#FEF9C3');
@@ -324,13 +325,15 @@ export default function App() {
           onClick={async () => {
             if (!goal.trim()) return;
             
-            setHistory(prev => [{id: Date.now(), text: goal, date: new Date().toLocaleDateString()}, ...prev]);
+            const historyId = Date.now();
+            setHistory(prev => [{id: historyId, text: goal, date: new Date().toLocaleDateString()}, ...prev]);
             
             setIsBottomSheetOpen(false);
             setScreen('breakdown');
             setIsBreakingDown(true);
             const newSteps = await simulateBreakdown(goal);
             setSteps(newSteps);
+            setHistory(prev => prev.map(h => h.id === historyId ? { ...h, steps: newSteps } : h));
             setIsBreakingDown(false);
           }}
         >
@@ -674,9 +677,10 @@ export default function App() {
                 return (
                   <div 
                     key={item.id} 
+                    onClick={() => setSelectedHistoryItem(item)}
                     style={{ 
                       padding: '20px 16px', backgroundColor: bgColor, 
-                      border: '1.5px solid #4E5968',
+                      border: '1.5px solid #4E5968', cursor: 'pointer',
                       display: 'flex', flexDirection: 'column', 
                       aspectRatio: '1', position: 'relative'
                     }}
@@ -695,13 +699,17 @@ export default function App() {
     );
   };
 
-  const renderReceipt = () => {
+  const renderReceipt = (historyItem?: {id: number, text: string, date: string, steps?: Step[]}) => {
+    const isHistoryView = !!historyItem;
+    const displayGoal = isHistoryView ? historyItem.text : goal;
+    const displaySteps = isHistoryView ? (historyItem.steps || []) : steps;
+
     const today = new Date();
     const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     const timeStr = today.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#000', padding: '40px 20px', paddingBottom: 100 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#000', padding: '40px 20px', paddingBottom: 100, position: 'relative', zIndex: 2000 }}>
         <style>{`@keyframes slideUp { from { transform: translateY(100vh); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`}</style>
         <div style={{ width: '100%', maxWidth: 360, background: '#F9A8D4', padding: '32px 24px', position: 'relative', overflow: 'hidden', animation: 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
           {/* Header */}
@@ -724,7 +732,7 @@ export default function App() {
 
           <div style={{ display: 'flex', gap: 16, fontSize: 16, fontWeight: 800, marginBottom: 24 }}>
             <span style={{ flexShrink: 0 }}>목표 :</span>
-            <span style={{ wordBreak: 'keep-all' }}>{goal}</span>
+            <span style={{ wordBreak: 'keep-all' }}>{displayGoal}</span>
           </div>
 
           {/* Barcode */}
@@ -736,7 +744,7 @@ export default function App() {
 
           {/* List */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 40 }}>
-            {steps.map((step, idx) => (
+            {displaySteps.map((step, idx) => (
               <div key={step.id} style={{ display: 'flex', alignItems: 'flex-end', fontSize: 14, fontWeight: 800 }}>
                 <span style={{ maxWidth: '75%', wordBreak: 'keep-all' }}>{step.text}</span>
                 <div style={{ flex: 1, borderBottom: '2px dotted #000', margin: '0 8px', position: 'relative', top: -4 }}></div>
@@ -755,17 +763,21 @@ export default function App() {
           </div>
         </div>
 
-        {/* Reset Button outside receipt */}
+        {/* Action Button outside receipt */}
         <button 
           className="neo-btn" 
           style={{ backgroundColor: '#FFF', color: '#191f28', width: '100%', maxWidth: 360, marginTop: 40 }}
           onClick={() => {
-            setGoal('');
-            setSteps([]);
-            setScreen('home');
+            if (isHistoryView) {
+              setSelectedHistoryItem(null);
+            } else {
+              setGoal('');
+              setSteps([]);
+              setScreen('home');
+            }
           }}
         >
-          새로운 목표 시작하기
+          {isHistoryView ? '닫기' : '새로운 목표 시작하기'}
         </button>
       </div>
     );
@@ -780,6 +792,13 @@ export default function App() {
       {tab === 'home' && screen === 'action' && renderAction()}
       {tab === 'home' && screen === 'receipt' && renderReceipt()}
       
+      {/* Detail Overlay */}
+      {selectedHistoryItem && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000, overflowY: 'auto', background: '#000' }}>
+          {renderReceipt(selectedHistoryItem)}
+        </div>
+      )}
+
       {/* Bottom Sheet Overlay */}
       {isBottomSheetOpen && renderBottomSheet()}
       
