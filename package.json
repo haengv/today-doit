@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "granite dev",
-    "build": "ait build",
+    "build": "vite build",
     "deploy": "ait deploy",
     "lint": "eslint .",
     "format": "prettier --write ."
