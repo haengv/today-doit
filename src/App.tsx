@@ -644,16 +644,16 @@ export default function App() {
         </div>
 
         {/* View Toggle */}
-        <div style={{ display: 'flex', width: '100%', border: '3px solid #191f28', borderRadius: 8, overflow: 'hidden', marginBottom: 24 }}>
+        <div style={{ display: 'flex', width: '100%', border: '1.5px solid #4E5968', borderRadius: 24, overflow: 'hidden', marginBottom: 24 }}>
           <button 
             onClick={() => setHistoryView('list')}
-            style={{ flex: 1, padding: 12, fontSize: 16, fontWeight: 800, background: historyView === 'list' ? '#191f28' : '#FFF', color: historyView === 'list' ? '#FFF' : '#191f28', border: 'none', borderRight: '3px solid #191f28', cursor: 'pointer' }}
+            style={{ flex: 1, padding: 12, fontSize: 15, fontWeight: 800, background: historyView === 'list' ? '#4E5968' : '#FFF', color: historyView === 'list' ? '#FFF' : '#4E5968', border: 'none', borderRight: '1.5px solid #4E5968', cursor: 'pointer' }}
           >
-            📝 리스트
+            📋 보드
           </button>
           <button 
             onClick={() => setHistoryView('calendar')}
-            style={{ flex: 1, padding: 12, fontSize: 16, fontWeight: 800, background: historyView === 'calendar' ? '#191f28' : '#FFF', color: historyView === 'calendar' ? '#FFF' : '#191f28', border: 'none', cursor: 'pointer' }}
+            style={{ flex: 1, padding: 12, fontSize: 15, fontWeight: 800, background: historyView === 'calendar' ? '#4E5968' : '#FFF', color: historyView === 'calendar' ? '#FFF' : '#4E5968', border: 'none', cursor: 'pointer' }}
           >
             📅 캘린더
           </button>
@@ -666,13 +666,28 @@ export default function App() {
               <p style={{ fontSize: 18, fontWeight: 700 }}>아직 기록된 목표가 없어요!</p>
             </div>
           ) : (
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {history.map(item => (
-                 <div key={item.id} className="neo-card" style={{ padding: 20, border: '3px solid #191f28', backgroundColor: '#FFFFFF' }}>
-                   <div style={{ fontSize: 14, color: '#4E5968', fontWeight: 800, marginBottom: 8 }}>{item.date}</div>
-                   <div style={{ fontSize: 18, fontWeight: 800, color: '#191f28', wordBreak: 'keep-all' }}>{item.text}</div>
-                 </div>
-              ))}
+            <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              {history.map((item, idx) => {
+                const colors = ['#FEF9C3', '#FBCFE8', '#BAE6FD', '#D1FAE5'];
+                const bgColor = colors[idx % colors.length];
+                
+                return (
+                  <div 
+                    key={item.id} 
+                    style={{ 
+                      padding: '20px 16px', backgroundColor: bgColor, 
+                      border: '1.5px solid #4E5968',
+                      display: 'flex', flexDirection: 'column', 
+                      aspectRatio: '1', position: 'relative'
+                    }}
+                  >
+                    <div style={{ fontSize: 12, color: '#4E5968', fontWeight: 800, marginBottom: 12 }}>{item.date}</div>
+                    <div className="handwriting" style={{ fontSize: 24, fontWeight: 800, color: '#191f28', wordBreak: 'keep-all', lineHeight: 1.3 }}>
+                      {item.text}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )
         )}
