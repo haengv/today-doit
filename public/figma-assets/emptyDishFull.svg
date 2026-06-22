@@ -1,0 +1,17 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 138.973 62.332" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 13">
+<path id="Union" d="M86.0541 46.5078C96.6797 49.3082 104.14 54.7176 105.043 61.0371C105.145 61.7468 104.554 62.3319 103.837 62.332H35.1371C34.4201 62.332 33.8297 61.7469 33.9311 61.0371C34.834 54.7179 42.2936 49.3092 52.9184 46.5088V28.0205H86.0541V46.5078Z" fill="url(#paint0_linear_2049_7548)"/>
+<path id="Union_2" d="M127.392 0C133.788 0 138.973 3.13847 138.973 7.00977C138.973 8.06737 138.584 9.06863 137.891 9.96777L125.632 28.7695C124.114 31.0972 121.523 32.501 118.744 32.501H20.4346C17.6854 32.501 15.1177 31.1273 13.5928 28.8398L0.990234 9.93457H1.05664C0.3797 9.04398 0 8.05435 0 7.00977C7.23799e-05 3.13851 5.18506 1.02946e-05 11.5811 0C17.9771 0 23.162 3.13851 23.1621 7.00977C23.1621 3.13848 28.3471 1.40383e-05 34.7432 0C41.1392 0 46.3242 3.13847 46.3242 7.00977C46.3242 3.13847 51.5092 0 57.9053 0C64.3012 0.000111989 69.4863 3.13854 69.4863 7.00977C69.4863 3.13847 74.6713 0 81.0674 0C87.4633 0.000114484 92.6484 3.13854 92.6484 7.00977C92.6484 3.13847 97.8334 7.79909e-06 104.229 0C110.626 0 115.811 3.13847 115.811 7.00977C115.811 3.13847 120.996 5.30338e-06 127.392 0Z" fill="var(--fill-0, white)"/>
+<path id="Vector 7" opacity="0.6" d="M24.3256 12.6609L27.8945 24.9377" stroke="var(--stroke-0, #E6DCD1)" stroke-width="2" stroke-linecap="round"/>
+<path id="Vector 8" opacity="0.6" d="M46.5599 12.8058L47.5905 24.9377" stroke="var(--stroke-0, #E6DCD1)" stroke-width="2" stroke-linecap="round"/>
+<path id="Vector 10" opacity="0.6" d="M114.647 12.6609L111.078 24.9377" stroke="var(--stroke-0, #E6DCD1)" stroke-width="2" stroke-linecap="round"/>
+<path id="Vector 11" opacity="0.6" d="M92.4129 12.8058L91.3823 24.9377" stroke="var(--stroke-0, #E6DCD1)" stroke-width="2" stroke-linecap="round"/>
+<path id="Vector 9" opacity="0.6" d="M69.4863 12.8058V24.9377" stroke="var(--stroke-0, #E6DCD1)" stroke-width="2" stroke-linecap="round"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_2049_7548" x1="66.9793" y1="28.0205" x2="69.4871" y2="49.8347" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E0DBD3"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+</defs>
+</svg>
