@@ -322,13 +322,42 @@ export default function App() {
           ))}
         </div>
 
+        {/* Implementation Intention Card */}
+        <div style={{ 
+          width: '100%', border: '1.5px solid #4E5968', borderRadius: 16, padding: '20px 16px', 
+          backgroundColor: '#FFF', display: 'flex', flexDirection: 'column', gap: 16,
+          marginBottom: 32
+        }}>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#191f28' }}>나의 시작 다짐</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 20 }}>⏰</span>
+              <input 
+                placeholder="예: 오늘 저녁 8시"
+                value={startWhen}
+                onChange={e => setStartWhen(e.target.value)}
+                style={{ flex: 1, border: 'none', borderBottom: '1px solid #E5E7EB', padding: '8px 0', fontSize: 14, outline: 'none', background: 'transparent' }}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 20 }}>📍</span>
+              <input 
+                placeholder="예: 내 방 책상 앞"
+                value={startWhere}
+                onChange={e => setStartWhere(e.target.value)}
+                style={{ flex: 1, border: 'none', borderBottom: '1px solid #E5E7EB', padding: '8px 0', fontSize: 14, outline: 'none', background: 'transparent' }}
+              />
+            </div>
+          </div>
+        </div>
+
         <button 
           className="neo-btn" style={{ backgroundColor: '#A7F3D0', width: '100%' }}
           onClick={async () => {
             if (!goal.trim()) return;
             
             const historyId = Date.now();
-            setHistory(prev => [{id: historyId, text: goal, date: new Date().toLocaleDateString()}, ...prev]);
+            setHistory(prev => [{id: historyId, text: goal, date: new Date().toLocaleDateString(), when: startWhen, where: startWhere}, ...prev]);
             
             setIsBottomSheetOpen(false);
             setScreen('breakdown');
@@ -484,52 +513,13 @@ export default function App() {
             })}
           </div>
 
-          {/* Implementation Intention Card */}
-          <div style={{ 
-            width: '100%', border: '1.5px solid #4E5968', borderRadius: 16, padding: 24, 
-            backgroundColor: '#FFF', display: 'flex', flexDirection: 'column', gap: 16,
-            marginBottom: 20
-          }}>
-            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#191f28' }}>나의 시작 다짐</h3>
-            <p style={{ margin: 0, fontSize: 13, color: '#4E5968' }}>언제 어디서 시작할지 구체적으로 다짐해 보세요!</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 20 }}>⏰</span>
-                <input 
-                  placeholder="예: 오늘 퇴근 후 8시"
-                  value={startWhen}
-                  onChange={e => setStartWhen(e.target.value)}
-                  style={{ flex: 1, border: 'none', borderBottom: '1px solid #E5E7EB', padding: '8px 0', fontSize: 15, outline: 'none', background: 'transparent' }}
-                />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 20 }}>📍</span>
-                <input 
-                  placeholder="예: 내 방 책상 앞"
-                  value={startWhere}
-                  onChange={e => setStartWhere(e.target.value)}
-                  style={{ flex: 1, border: 'none', borderBottom: '1px solid #E5E7EB', padding: '8px 0', fontSize: 15, outline: 'none', background: 'transparent' }}
-                />
-              </div>
-            </div>
-          </div>
-
           <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '20px', background: '#FFF', borderTop: '1.5px solid #E5E7EB', zIndex: 100 }}>
             <button 
               className="neo-btn" 
               style={{ backgroundColor: '#191f28', color: '#FFF', width: '100%' }}
-              onClick={() => {
-                setHistory(prev => {
-                  const newHistory = [...prev];
-                  if (newHistory.length > 0) {
-                    newHistory[0] = { ...newHistory[0], when: startWhen, where: startWhere };
-                  }
-                  return newHistory;
-                });
-                setScreen('action');
-              }}
+              onClick={() => setScreen('action')}
             >
-              첫 번째 행동 시작하기
+              첫 번째 행동 지금 바로 시작하기
             </button>
           </div>
         </div>
