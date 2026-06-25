@@ -166,33 +166,9 @@ export default function App() {
             </div>
             
             {!hasActiveGoal ? (
-              isBottomSheetOpen ? (
-                <textarea
-                  className="handwriting"
-                  placeholder="예) 포트폴리오 첫 장 만들기"
-                  value={goal}
-                  onChange={e => setGoal(e.target.value)}
-                  autoFocus
-                  style={{ 
-                    width: '100%',
-                    background: 'transparent',
-                    border: 'none',
-                    outline: 'none',
-                    resize: 'none',
-                    textAlign: 'left',
-                    fontSize: 26, 
-                    fontWeight: 800, 
-                    color: '#191f28', 
-                    lineHeight: 1.3,
-                    overflow: 'hidden'
-                  }}
-                  rows={2}
-                />
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, color: '#4E5968', marginLeft: 4 }}>
-                  <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }}>오늘 할 일을<br />입력해주세요</div>
-                </div>
-              )
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, color: '#4E5968', marginLeft: 4 }}>
+                <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }}>오늘 할 일을<br />입력해주세요</div>
+              </div>
             ) : (
               <h1 className="handwriting" style={{ fontSize: 26, fontWeight: 800, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.3, marginLeft: 4 }}>
                 {goal}
@@ -298,14 +274,33 @@ export default function App() {
           padding: '24px 24px 40px', zIndex: 2001,
           animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           display: 'flex', flexDirection: 'column', alignItems: 'center',
-          boxShadow: '0 -4px 12px rgba(0,0,0,0.05)'
+          boxShadow: '0 -4px 12px rgba(0,0,0,0.05)',
+          maxHeight: '90vh', overflowY: 'auto'
         }}
       >
-        <div style={{ width: 40, height: 6, backgroundColor: '#E5E7EB', borderRadius: 3, marginBottom: 24 }} />
-        <h2 style={{ fontSize: 16, fontWeight: 800, color: '#4E5968', marginBottom: 16 }}>포스트잇 색상을 골라주세요</h2>
+        <div style={{ width: 40, height: 6, backgroundColor: '#E5E7EB', borderRadius: 3, marginBottom: 24, flexShrink: 0 }} />
+        
+        {/* Goal Input inside Bottom Sheet */}
+        <div style={{ width: '100%', marginBottom: 32 }}>
+          <textarea
+            className="handwriting"
+            placeholder="오늘 꼭 달성할 목표 하나를 적어보세요"
+            value={goal}
+            onChange={e => setGoal(e.target.value)}
+            autoFocus
+            style={{ 
+              width: '100%', background: postItColor, border: '1.5px solid #4E5968', borderRadius: 12, padding: 20,
+              outline: 'none', resize: 'none', textAlign: 'left', fontSize: 24, fontWeight: 800, color: '#191f28', lineHeight: 1.3,
+              boxShadow: '2px 2px 0px rgba(0,0,0,0.1)', boxSizing: 'border-box'
+            }}
+            rows={2}
+          />
+        </div>
+
+        <h2 style={{ fontSize: 14, fontWeight: 800, color: '#4E5968', marginBottom: 12, alignSelf: 'flex-start' }}>포스트잇 색상</h2>
 
         {/* Color Palette */}
-        <div style={{ display: 'flex', gap: 16, marginBottom: 32 }}>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 32, alignSelf: 'flex-start' }}>
           {['#FEF9C3', '#FBCFE8', '#BAE6FD', '#D1FAE5'].map(color => (
             <div 
               key={color}
@@ -325,28 +320,60 @@ export default function App() {
         {/* Implementation Intention Card */}
         <div style={{ 
           width: '100%', border: '1.5px solid #4E5968', borderRadius: 16, padding: '20px 16px', 
-          backgroundColor: '#FFF', display: 'flex', flexDirection: 'column', gap: 16,
+          backgroundColor: '#FFF', display: 'flex', flexDirection: 'column', gap: 24,
           marginBottom: 32
         }}>
-          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#191f28' }}>나의 시작 다짐</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 20 }}>⏰</span>
               <input 
-                placeholder="예: 오늘 저녁 8시"
+                placeholder="언제 시작할까요?"
                 value={startWhen}
                 onChange={e => setStartWhen(e.target.value)}
-                style={{ flex: 1, border: 'none', borderBottom: '1px solid #E5E7EB', padding: '8px 0', fontSize: 14, outline: 'none', background: 'transparent' }}
+                style={{ flex: 1, border: 'none', borderBottom: '1.5px solid #191f28', padding: '4px 0', fontSize: 16, fontWeight: 700, outline: 'none', background: 'transparent', color: '#191f28' }}
               />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 8, paddingLeft: 32, flexWrap: 'wrap' }}>
+              {['아침에 눈뜨자마자', '점심시간', '퇴근 직후', '자기 전'].map(chip => (
+                <button 
+                  key={chip} onClick={() => setStartWhen(chip)}
+                  style={{ 
+                    padding: '6px 12px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                    background: startWhen === chip ? '#191f28' : '#F3F4F6',
+                    color: startWhen === chip ? '#FFF' : '#4E5968',
+                    border: 'none'
+                  }}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 20 }}>📍</span>
               <input 
-                placeholder="예: 내 방 책상 앞"
+                placeholder="어디서 시작할까요?"
                 value={startWhere}
                 onChange={e => setStartWhere(e.target.value)}
-                style={{ flex: 1, border: 'none', borderBottom: '1px solid #E5E7EB', padding: '8px 0', fontSize: 14, outline: 'none', background: 'transparent' }}
+                style={{ flex: 1, border: 'none', borderBottom: '1.5px solid #191f28', padding: '4px 0', fontSize: 16, fontWeight: 700, outline: 'none', background: 'transparent', color: '#191f28' }}
               />
+            </div>
+            <div style={{ display: 'flex', gap: 8, paddingLeft: 32, flexWrap: 'wrap' }}>
+              {['내 방 책상', '침대 위', '자주 가는 카페', '사무실'].map(chip => (
+                <button 
+                  key={chip} onClick={() => setStartWhere(chip)}
+                  style={{ 
+                    padding: '6px 12px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                    background: startWhere === chip ? '#191f28' : '#F3F4F6',
+                    color: startWhere === chip ? '#FFF' : '#4E5968',
+                    border: 'none'
+                  }}
+                >
+                  {chip}
+                </button>
+              ))}
             </div>
           </div>
         </div>
