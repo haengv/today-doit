@@ -49,18 +49,22 @@ export default function App() {
   const [startWhen, setStartWhen] = useState('');
   const [startWhere, setStartWhere] = useState('');
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
+  const [isTimerPaused, setIsTimerPaused] = useState(false);
+  const [showActionPopup, setShowActionPopup] = useState(false);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (screen === 'action') {
+    if (screen === 'action' && !isTimerPaused && !showActionPopup) {
       interval = setInterval(() => {
         setElapsedSeconds(prev => prev + 1);
       }, 1000);
-    } else {
+    } else if (screen !== 'action') {
       setElapsedSeconds(0);
+      setIsTimerPaused(false);
+      setShowActionPopup(false);
     }
     return () => clearInterval(interval);
-  }, [screen]);
+  }, [screen, isTimerPaused, showActionPopup]);
 
   const formatTime = (totalSeconds: number) => {
     const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -609,31 +613,40 @@ export default function App() {
             {currentStep?.text || '모든 할 일을 마쳤습니다!'}
           </h1>
           
-          {/* Mini Timeline */}
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32, textAlign: 'left', background: '#F8F9FA', padding: 16, borderRadius: 16 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 800, margin: '0 0 4px 0', color: '#4E5968' }}>진행 상황</h3>
-            {steps.map((step, idx) => {
-              const isCurrent = idx === currentStepIndex;
-              return (
-                <div key={step.id} style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: step.completed ? 0.4 : (isCurrent ? 1 : 0.6) }}>
-                  <div style={{ width: 16, height: 16, borderRadius: '50%', background: step.completed ? '#10B981' : (isCurrent ? '#3B82F6' : '#9CA3AF'), color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, flexShrink: 0 }}>
-                    {step.completed ? '✓' : (isCurrent ? '▶' : '')}
-                  </div>
-                  <span style={{ fontSize: 13, fontWeight: isCurrent ? 800 : 700, color: '#191f28', textDecoration: step.completed ? 'line-through' : 'none', wordBreak: 'keep-all' }}>
-                    {step.text}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+          {/* Mini Timeline (Only Next Step) */}
+          {currentStepIndex + 1 < steps.length && (
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32, textAlign: 'left', background: '#F8F9FA', padding: 16, borderRadius: 16 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 800, margin: '0 0 4px 0', color: '#4E5968' }}>다음 행동</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: 0.6 }}>
+                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#9CA3AF', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, flexShrink: 0 }} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#191f28', wordBreak: 'keep-all' }}>
+                  {steps[currentStepIndex + 1].text}
+                </span>
+              </div>
+            </div>
+          )}
           
           {/* Stopwatch */}
           <div style={{ 
-            fontSize: 64, fontWeight: 300, fontFamily: 'monospace', 
-            color: '#191f28', padding: '16px 32px', 
-            marginBottom: 40, letterSpacing: 2
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
+            marginBottom: 40
           }}>
-            {formatTime(elapsedSeconds)}
+            <div style={{ 
+              fontSize: 64, fontWeight: 300, fontFamily: 'monospace', 
+              color: '#191f28', letterSpacing: 2
+            }}>
+              {formatTime(elapsedSeconds)}
+            </div>
+            <button 
+              onClick={() => setIsTimerPaused(!isTimerPaused)}
+              style={{
+                width: 48, height: 48, borderRadius: '50%', backgroundColor: '#F3F4F6', 
+                border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                cursor: 'pointer', fontSize: 20
+              }}
+            >
+              {isTimerPaused ? '▶️' : '⏸️'}
+            </button>
           </div>
 
           <button 
@@ -641,17 +654,7 @@ export default function App() {
             style={{ backgroundColor: '#10B981', color: '#FFF', width: '100%' }}
             onClick={() => {
               if (currentStep) {
-                const newSteps = [...steps];
-                newSteps[currentStepIndex].completed = true;
-                setSteps(newSteps);
-                
-                const remainingSteps = newSteps.filter(s => !s.completed);
-                if (remainingSteps.length > 0) {
-                  setElapsedSeconds(0);
-                } else {
-                  alert('🎉 오늘의 모든 행동을 완료했습니다! 수고하셨어요!');
-                  setScreen('home');
-                }
+                setShowActionPopup(true);
               } else {
                 setScreen('home');
               }
@@ -660,6 +663,59 @@ export default function App() {
             해냈어요! (완료)
           </button>
         </div>
+
+        {/* Action Completion Popup */}
+        {showActionPopup && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+            backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 4000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
+          }}>
+            <div className="neo-card anim-pop" style={{ width: '100%', maxWidth: 320, padding: 32, backgroundColor: '#FFF', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>👏</div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: '#191f28', marginBottom: 8 }}>정말 해내셨군요! 고생했어요</h2>
+              <p style={{ fontSize: 15, color: '#4E5968', marginBottom: 32, wordBreak: 'keep-all' }}>진짜 완벽하게 마무리하셨나요?</p>
+              
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <button 
+                  className="neo-btn" 
+                  style={{ backgroundColor: '#191f28', color: '#FFF', width: '100%', padding: '16px 0', fontSize: 16 }}
+                  onClick={() => {
+                    const newSteps = [...steps];
+                    newSteps[currentStepIndex].completed = true;
+                    setSteps(newSteps);
+                    
+                    const remainingSteps = newSteps.filter(s => !s.completed);
+                    if (remainingSteps.length > 0) {
+                      setElapsedSeconds(0);
+                      setShowActionPopup(false);
+                    } else {
+                      setShowActionPopup(false);
+                      alert('🎉 오늘의 모든 행동을 완료했습니다! 수고하셨어요!');
+                      setScreen('home');
+                    }
+                  }}
+                >
+                  네! 다음 행동으로 넘어갈게요
+                </button>
+                <button 
+                  className="neo-btn" 
+                  style={{ backgroundColor: '#F3F4F6', color: '#4E5968', width: '100%', padding: '16px 0', fontSize: 16 }}
+                  onClick={() => {
+                    // Mark as completed but go back to home to rest
+                    const newSteps = [...steps];
+                    newSteps[currentStepIndex].completed = true;
+                    setSteps(newSteps);
+                    setShowActionPopup(false);
+                    setScreen('home');
+                  }}
+                >
+                  나중에 다시 할게요 (홈으로)
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -913,7 +969,7 @@ export default function App() {
       {tab === 'history' && renderHistory()}
 
       {/* Bottom Navigation Tab Bar */}
-      {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && (
+      {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && screen !== 'action' && (
         <div style={{
           position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
           background: '#FFF', border: '1.5px solid #4E5968', borderRadius: 40,
