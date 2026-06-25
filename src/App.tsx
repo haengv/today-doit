@@ -49,28 +49,14 @@ export default function App() {
   const [startWhen, setStartWhen] = useState('');
   const [startWhere, setStartWhere] = useState('');
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
-  const [isTimerPaused, setIsTimerPaused] = useState(false);
   const [showActionPopup, setShowActionPopup] = useState(false);
+  const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (screen === 'action' && !isTimerPaused && !showActionPopup) {
-      interval = setInterval(() => {
-        setElapsedSeconds(prev => prev + 1);
-      }, 1000);
-    } else if (screen !== 'action') {
-      setElapsedSeconds(0);
-      setIsTimerPaused(false);
+    if (screen !== 'action') {
       setShowActionPopup(false);
     }
-    return () => clearInterval(interval);
-  }, [screen, isTimerPaused, showActionPopup]);
-
-  const formatTime = (totalSeconds: number) => {
-    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-    const s = (totalSeconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
+  }, [screen]);
 
   const moveStep = (index: number, direction: 'up' | 'down') => {
     if (direction === 'up' && index === 0) return;
@@ -255,7 +241,10 @@ export default function App() {
                 <button 
                   className="neo-btn" 
                   style={{ backgroundColor: '#3B82F6', color: '#FFF', width: '100%' }}
-                  onClick={() => setScreen('action')}
+                  onClick={() => {
+                    setActionStartTime(new Date());
+                    setScreen('action');
+                  }}
                 >
                   ▶ 다음 행동 이어서 시작하기
                 </button>
@@ -581,7 +570,10 @@ export default function App() {
             <button 
               className="neo-btn" 
               style={{ backgroundColor: '#191f28', color: '#FFF', width: '100%' }}
-              onClick={() => setScreen('action')}
+              onClick={() => {
+                setActionStartTime(new Date());
+                setScreen('action');
+              }}
             >
               첫 번째 행동 지금 바로 시작하기
             </button>
@@ -595,73 +587,68 @@ export default function App() {
     const currentStepIndex = steps.findIndex(s => !s.completed);
     const currentStep = steps[currentStepIndex];
 
+    const timeString = actionStartTime 
+      ? actionStartTime.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' })
+      : '';
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#F8F9FA', padding: 20, paddingBottom: 100, position: 'relative' }}>
-        <div style={{ position: 'absolute', top: 40, left: 20 }}>
-          {renderBackButton(() => {
-            if (window.confirm('현재 진행 중인 행동이 있습니다. 타이머를 멈추고 정말 나가시겠습니까?')) {
-              setScreen('home');
-            }
-          })}
-        </div>
         <div 
           className="neo-card anim-pop"
-          style={{ width: '100%', maxWidth: 320, padding: 40, backgroundColor: '#FFF', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          style={{ width: '100%', maxWidth: 320, padding: '40px 24px', backgroundColor: '#FFF', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
         >
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#4E5968', marginBottom: 12 }}>현재 진행 중인 행동</h2>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#191f28', marginBottom: 24, wordBreak: 'keep-all' }}>
-            {currentStep?.text || '모든 할 일을 마쳤습니다!'}
-          </h1>
+          {/* Top: Goal */}
+          <h3 style={{ fontSize: 13, fontWeight: 800, color: '#3B82F6', marginBottom: 8, background: '#EFF6FF', padding: '4px 12px', borderRadius: 16 }}>오늘 목표</h3>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: '#191f28', marginBottom: 24, wordBreak: 'keep-all' }}>{goal}</h2>
           
-          {/* Mini Timeline (Only Next Step) */}
-          {currentStepIndex + 1 < steps.length && (
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32, textAlign: 'left', background: '#F8F9FA', padding: 16, borderRadius: 16 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 800, margin: '0 0 4px 0', color: '#4E5968' }}>다음 행동</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: 0.6 }}>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#9CA3AF', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, flexShrink: 0 }} />
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#191f28', wordBreak: 'keep-all' }}>
-                  {steps[currentStepIndex + 1].text}
-                </span>
-              </div>
-            </div>
-          )}
-          
-          {/* Stopwatch */}
-          <div style={{ 
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
-            marginBottom: 40
-          }}>
-            <div style={{ 
-              fontSize: 64, fontWeight: 300, fontFamily: 'monospace', 
-              color: '#191f28', letterSpacing: 2
-            }}>
-              {formatTime(elapsedSeconds)}
-            </div>
-            <button 
-              onClick={() => setIsTimerPaused(!isTimerPaused)}
-              style={{
-                width: 48, height: 48, borderRadius: '50%', backgroundColor: '#F3F4F6', 
-                border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                cursor: 'pointer', fontSize: 20
-              }}
-            >
-              {isTimerPaused ? '▶️' : '⏸️'}
-            </button>
+          <div style={{ width: '100%', height: '1.5px', background: '#E5E7EB', marginBottom: 32 }} />
+
+          {/* Main: Current Step */}
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#4E5968', marginBottom: 12 }}>지금은 이것만 해볼까요?</p>
+          <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 24 }}>
+            {/* Pulsing indicator background */}
+            <div style={{ position: 'absolute', width: 80, height: 80, background: '#DBEAFE', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#191f28', margin: 0, wordBreak: 'keep-all', position: 'relative', zIndex: 1, padding: '0 20px' }}>
+              [ {currentStep?.text || '모든 할 일을 마쳤습니다!'} ]
+            </h1>
+            <style>{`@keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.4); opacity: 0; } 100% { transform: scale(1); opacity: 0; } }`}</style>
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: '#9CA3AF', marginBottom: 40 }}>
+            {currentStepIndex + 1} / {steps.length} step
           </div>
 
-          <button 
-            className="neo-btn" 
-            style={{ backgroundColor: '#10B981', color: '#FFF', width: '100%' }}
-            onClick={() => {
-              if (currentStep) {
-                setShowActionPopup(true);
-              } else {
-                setScreen('home');
-              }
-            }}
-          >
-            해냈어요! (완료)
-          </button>
+          <div style={{ fontSize: 16, fontWeight: 800, color: '#3B82F6', marginBottom: 8 }}>지금 시작했어요 🚀</div>
+          <div style={{ fontSize: 13, color: '#4E5968', marginBottom: 40 }}>({timeString} 시작)</div>
+
+          {/* Bottom text */}
+          <p style={{ fontSize: 14, color: '#8B95A1', marginBottom: 24 }}>처음 시작하는 게 가장 어려워요.<br/>가벼운 마음으로 딱 이것만 해봐요!</p>
+
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <button 
+              className="neo-btn" 
+              style={{ backgroundColor: '#10B981', color: '#FFF', width: '100%', padding: '16px 0', fontSize: 16 }}
+              onClick={() => {
+                if (currentStep) {
+                  setShowActionPopup(true);
+                } else {
+                  setScreen('home');
+                }
+              }}
+            >
+              좋아요, 했어요
+            </button>
+            <button 
+              className="neo-btn" 
+              style={{ backgroundColor: '#F3F4F6', color: '#4E5968', width: '100%', padding: '16px 0', fontSize: 16 }}
+              onClick={() => {
+                if (window.confirm('현재 진행 중인 행동이 있습니다. 정말 멈추시겠습니까?')) {
+                  setScreen('home');
+                }
+              }}
+            >
+              잠깐 멈출게요
+            </button>
+          </div>
         </div>
 
         {/* Action Completion Popup */}
@@ -687,7 +674,7 @@ export default function App() {
                     
                     const remainingSteps = newSteps.filter(s => !s.completed);
                     if (remainingSteps.length > 0) {
-                      setElapsedSeconds(0);
+                      setActionStartTime(new Date());
                       setShowActionPopup(false);
                     } else {
                       setShowActionPopup(false);
