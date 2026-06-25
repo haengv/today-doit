@@ -37,15 +37,17 @@ export default function App() {
   const [steps, setSteps] = useState<Step[]>([]);
   const [isBreakingDown, setIsBreakingDown] = useState(false);
   const [isMicroBreaking, setIsMicroBreaking] = useState(false);
-  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[]}[]>([]);
+  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string}[]>([]);
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [historyView, setHistoryView] = useState<'list' | 'calendar'>('list');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[]} | null>(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string} | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [postItColor, setPostItColor] = useState('#FEF9C3');
+  const [startWhen, setStartWhen] = useState('');
+  const [startWhere, setStartWhere] = useState('');
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -481,13 +483,53 @@ export default function App() {
               );
             })}
           </div>
-          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '20px', background: '#FCE7F3', borderTop: '3px solid #191f28', zIndex: 100 }}>
+
+          {/* Implementation Intention Card */}
+          <div style={{ 
+            width: '100%', border: '1.5px solid #4E5968', borderRadius: 16, padding: 24, 
+            backgroundColor: '#FFF', display: 'flex', flexDirection: 'column', gap: 16,
+            marginBottom: 20
+          }}>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#191f28' }}>나의 시작 다짐</h3>
+            <p style={{ margin: 0, fontSize: 13, color: '#4E5968' }}>언제 어디서 시작할지 구체적으로 다짐해 보세요!</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 20 }}>⏰</span>
+                <input 
+                  placeholder="예: 오늘 퇴근 후 8시"
+                  value={startWhen}
+                  onChange={e => setStartWhen(e.target.value)}
+                  style={{ flex: 1, border: 'none', borderBottom: '1px solid #E5E7EB', padding: '8px 0', fontSize: 15, outline: 'none', background: 'transparent' }}
+                />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 20 }}>📍</span>
+                <input 
+                  placeholder="예: 내 방 책상 앞"
+                  value={startWhere}
+                  onChange={e => setStartWhere(e.target.value)}
+                  style={{ flex: 1, border: 'none', borderBottom: '1px solid #E5E7EB', padding: '8px 0', fontSize: 15, outline: 'none', background: 'transparent' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '20px', background: '#FFF', borderTop: '1.5px solid #E5E7EB', zIndex: 100 }}>
             <button 
               className="neo-btn" 
-              style={{ backgroundColor: '#3B82F6', color: '#FFF', width: '100%' }}
-              onClick={() => setScreen('action')}
+              style={{ backgroundColor: '#191f28', color: '#FFF', width: '100%' }}
+              onClick={() => {
+                setHistory(prev => {
+                  const newHistory = [...prev];
+                  if (newHistory.length > 0) {
+                    newHistory[0] = { ...newHistory[0], when: startWhen, where: startWhere };
+                  }
+                  return newHistory;
+                });
+                setScreen('action');
+              }}
             >
-              첫 번째 행동 지금 바로 시작하기
+              첫 번째 행동 시작하기
             </button>
           </div>
         </div>
@@ -699,7 +741,7 @@ export default function App() {
     );
   };
 
-  const renderReceipt = (historyItem?: {id: number, text: string, date: string, steps?: Step[]}) => {
+  const renderReceipt = (historyItem?: {id: number, text: string, date: string, steps?: Step[], when?: string, where?: string}) => {
     const isHistoryView = !!historyItem;
     const displayGoal = isHistoryView ? historyItem.text : goal;
     const displaySteps = isHistoryView ? (historyItem.steps || []) : steps;
@@ -730,10 +772,24 @@ export default function App() {
             ***************************************
           </div>
 
-          <div style={{ display: 'flex', gap: 16, fontSize: 16, fontWeight: 800, marginBottom: 24 }}>
+          <div style={{ display: 'flex', gap: 16, fontSize: 16, fontWeight: 800, marginBottom: 12 }}>
             <span style={{ flexShrink: 0 }}>목표 :</span>
             <span style={{ wordBreak: 'keep-all' }}>{displayGoal}</span>
           </div>
+
+          {(isHistoryView ? historyItem?.when : startWhen) && (
+            <div style={{ display: 'flex', gap: 16, fontSize: 14, fontWeight: 700, marginBottom: 8, color: '#4E5968' }}>
+              <span style={{ flexShrink: 0, width: 40 }}>시간 :</span>
+              <span style={{ wordBreak: 'keep-all' }}>{isHistoryView ? historyItem?.when : startWhen}</span>
+            </div>
+          )}
+          
+          {(isHistoryView ? historyItem?.where : startWhere) && (
+            <div style={{ display: 'flex', gap: 16, fontSize: 14, fontWeight: 700, marginBottom: 24, color: '#4E5968' }}>
+              <span style={{ flexShrink: 0, width: 40 }}>장소 :</span>
+              <span style={{ wordBreak: 'keep-all' }}>{isHistoryView ? historyItem?.where : startWhere}</span>
+            </div>
+          )}
 
           {/* Barcode */}
           <div style={{ display: 'flex', justifyContent: 'space-between', height: 60, marginBottom: 32, gap: 2 }}>
@@ -773,6 +829,8 @@ export default function App() {
             } else {
               setGoal('');
               setSteps([]);
+              setStartWhen('');
+              setStartWhere('');
               setScreen('home');
             }
           }}
