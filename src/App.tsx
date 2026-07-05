@@ -143,7 +143,7 @@ export default function App() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
         {/* Date Header Wrapper */}
-        <div style={{ width: '100%', maxWidth: 375, padding: '32px 20px 0 20px', display: 'flex', justifyContent: 'flex-start' }}>
+        <div style={{ width: '100%', maxWidth: 375, padding: '20px 20px 0 20px', display: 'flex', justifyContent: 'flex-start' }}>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 4 }}>
             <h1 style={{ fontSize: 16, fontWeight: 400, color: '#191f28', margin: 0, display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
               {dateString} 
