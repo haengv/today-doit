@@ -50,6 +50,8 @@ export default function App() {
   
   const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
   
+  const [currentActionStepIndex, setCurrentActionStepIndex] = useState(0);
+  
   const handleStartAction = () => {
     setActionStartTime(new Date());
     setCurrentActionStepIndex(0);
@@ -57,7 +59,6 @@ export default function App() {
   };
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
   const [showActionPopup, setShowActionPopup] = useState(false);
-  const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
   const [homeDate, setHomeDate] = useState<Date>(new Date());
 
   useEffect(() => {
