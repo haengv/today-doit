@@ -96,6 +96,11 @@ input:focus, textarea:focus {
   to { transform: translateY(0); }
 }
 
+@keyframes slideUpCentered {
+  from { transform: translate(-50%, 100%); }
+  to { transform: translate(-50%, 0); }
+}
+
 /* ---------------------------------
    Clean Line Styles
 --------------------------------- */

@@ -364,7 +364,7 @@ export default function App() {
           width: '100%', maxWidth: 375,
           backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
           padding: '16px 20px 40px', zIndex: 2002,
-          animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           display: 'flex', flexDirection: 'column',
           maxHeight: '90vh', overflowY: 'auto'
         }}
@@ -968,48 +968,70 @@ export default function App() {
               position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
               width: '100%', maxWidth: 375,
               backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
-              padding: '30px 20px 40px', zIndex: 2002,
-              animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              padding: '16px 20px 40px', zIndex: 2002,
+              animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
               display: 'flex', flexDirection: 'column', gap: 24,
               boxSizing: 'border-box'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: -10 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
               <div style={{ width: 48, height: 4, backgroundColor: '#E5E8EB', borderRadius: 40 }} />
             </div>
             
-            <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: '#191f28' }}>새로운 단계 추가</h2>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <input 
-                type="text"
-                placeholder="어떤 행동을 해야 하나요?"
-                value={newStepText}
-                onChange={(e) => setNewStepText(e.target.value)}
-                autoFocus
-                className="neo-input"
-                style={{ fontSize: 16 }}
-              />
-              <div style={{ display: 'flex', gap: 8 }}>
-                {['30초', '1분', '3분', '5분'].map(time => (
-                  <button
-                    key={time}
-                    onClick={() => setNewStepTime(time)}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 38 }}>
+              {/* Input Section */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <label style={{ fontSize: 16, fontWeight: 800, color: '#191f28' }}>추가할 할 일</label>
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    autoFocus
+                    type="text"
+                    value={newStepText}
+                    onChange={(e) => setNewStepText(e.target.value)}
+                    placeholder="예: 영단어 10개 외우기"
+                    className="neo-input"
                     style={{
-                      flex: 1, padding: '10px 0', borderRadius: 12, fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                      border: newStepTime === time ? '1.5px solid #3B82F6' : '1.5px solid #E5E7EB',
-                      backgroundColor: newStepTime === time ? '#EFF6FF' : '#FFF',
-                      color: newStepTime === time ? '#1D4ED8' : '#4E5968'
+                      paddingRight: 40,
+                      backgroundColor: '#F3F4F6'
                     }}
-                  >
-                    {time}
-                  </button>
-                ))}
+                  />
+                  {newStepText && (
+                    <button 
+                      onClick={() => setNewStepText('')}
+                      style={{
+                        position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                        background: 'transparent', border: 'none', cursor: 'pointer', padding: 4,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      }}
+                    >
+                      <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#D1D5DB', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 }}>✕</div>
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <label style={{ fontSize: 16, fontWeight: 800, color: '#191f28' }}>소요 시간</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {['30초', '1분', '3분', '5분'].map(time => (
+                    <button
+                      key={time}
+                      onClick={() => setNewStepTime(time)}
+                      style={{
+                        flex: 1, padding: '10px 0', borderRadius: 12, fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                        border: newStepTime === time ? '1.5px solid #3B82F6' : '1.5px solid #E5E7EB',
+                        backgroundColor: newStepTime === time ? '#EFF6FF' : '#FFF',
+                        color: newStepTime === time ? '#1D4ED8' : '#4E5968'
+                      }}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-            
+
             <button 
-              className="neo-btn" 
               onClick={() => {
                 if (!newStepText.trim()) return;
                 const newStep: Step = {
@@ -1021,9 +1043,15 @@ export default function App() {
                 setSteps([...steps, newStep]);
                 setIsAddStepSheetOpen(false);
               }}
-              style={{ backgroundColor: newStepText.trim() ? '#191f28' : '#E5E8EB', color: newStepText.trim() ? '#FFF' : '#9CA3AF', marginTop: 10 }}
+              style={{ 
+                backgroundColor: newStepText.trim() ? '#c5e3ff' : '#E5E8EB',
+                border: newStepText.trim() ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid transparent',
+                color: newStepText.trim() ? '#130537' : '#9CA3AF',
+                padding: '16px', borderRadius: 16, fontSize: 16, fontWeight: 700,
+                cursor: 'pointer', transition: 'all 0.2s', marginTop: 10
+              }}
             >
-              추가하기
+              추가 완료
             </button>
           </div>
         </>
