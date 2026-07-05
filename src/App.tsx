@@ -109,7 +109,7 @@ export default function App() {
         marginBottom: 10, padding: 0
       }}
     >
-      ←
+      <img src="/assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 24, height: 24 }} />
     </button>
   );
 
@@ -130,7 +130,7 @@ export default function App() {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
         <div style={{ width: '100%', maxWidth: 335, textAlign: 'left', marginBottom: 32, marginTop: 12 }}>
           <h1 style={{ fontSize: 16, fontWeight: 500, color: '#191f28', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
-            {dateString} <span style={{ fontSize: 12 }}>▼</span>
+            {dateString} <img src="/assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
           </h1>
           <div style={{ 
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
@@ -145,7 +145,7 @@ export default function App() {
               <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>아리스토텔레스</span>
             </div>
             <div style={{ width: 50, height: 50, borderRadius: '50%', backgroundColor: '#F3F4F6', border: '1.5px solid #191f28', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              <div style={{ fontSize: 32, marginTop: 10 }}>🧑🏻</div>
+              <img src="/assets/img-character.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
         </div>
@@ -176,9 +176,9 @@ export default function App() {
                 </span>
               </div>
 
-              {/* Top Right Illustration Placeholder */}
-              <div style={{ position: 'absolute', top: 16.5, right: 16.5, fontSize: 40, opacity: 0.8, transform: 'rotate(15deg)' }}>
-                📓
+              {/* Top Right Illustration */}
+              <div style={{ position: 'absolute', top: 10, right: 10, width: 70, height: 70 }}>
+                <img src="/assets/img-default.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               
               {!hasActiveGoal ? (
@@ -207,10 +207,10 @@ export default function App() {
                 style={{
                   width: 48, height: 48, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)',
                   borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', fontSize: 24, padding: 0
+                  cursor: 'pointer', padding: 0
                 }}
               >
-                +
+                <img src="/assets/icon-plus.svg" alt="" style={{ width: 20, height: 20 }} />
               </button>
             </div>
           )}
@@ -381,7 +381,7 @@ export default function App() {
                 onClick={() => setBottomSheetStep(1)}
                 style={{ background: 'transparent', border: 'none', fontSize: 16, fontWeight: 800, color: '#4E5968', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
               >
-                ← 뒤로
+                <img src="/assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 16, height: 16 }} /> 뒤로
               </button>
               <div style={{ flex: 1 }} />
             </div>
@@ -1015,7 +1015,7 @@ export default function App() {
                 justifyContent: 'center', transition: 'background 0.2s'
               }}
             >
-              <div style={{ fontSize: 20 }}>🏠</div>
+              <img src="/assets/icon-home.svg" alt="" style={{ width: 20, height: 20 }} />
               <div style={{ fontSize: 16, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>홈</div>
             </div>
             <div 
@@ -1026,7 +1026,7 @@ export default function App() {
                 justifyContent: 'center', transition: 'background 0.2s'
               }}
             >
-              <div style={{ fontSize: 20, opacity: 0.7 }}>🗃️</div>
+              <img src="/assets/icon-archieve.svg" alt="" style={{ width: 20, height: 20 }} />
             </div>
           </div>
         </div>
