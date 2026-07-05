@@ -61,7 +61,7 @@ export default function App() {
     const animate = () => {
       if (!startTimeRef.current) return;
       const elapsed = Date.now() - startTimeRef.current;
-      const progress = Math.min((elapsed / 3500) * 100, 100);
+      const progress = Math.min((elapsed / 1000) * 100, 100);
       setPressProgress(progress);
       
       if (progress < 100) {
@@ -481,7 +481,7 @@ export default function App() {
         </button>
       </div>
 
-      <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 20px 140px' }}>
+      <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 20px 40px' }}>
         {/* Title Area */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>오늘의 할 일</div>
@@ -557,7 +557,7 @@ export default function App() {
       </div>
 
       {/* Bottom CTA */}
-      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 30%, #FFFFFF 100%)', zIndex: 100, boxSizing: 'border-box' }}>
+      <div style={{ position: 'sticky', bottom: 0, width: '100%', padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box', marginTop: 'auto' }}>
         <button 
           onMouseDown={startPress}
           onMouseUp={endPress}
@@ -566,6 +566,11 @@ export default function App() {
           onTouchEnd={endPress}
           onTouchCancel={endPress}
           onContextMenu={(e) => { e.preventDefault(); return false; }}
+          onClick={() => {
+            if (pressProgress < 100) {
+              alert("버튼을 1초 동안 꾹~ 눌러주세요!");
+            }
+          }}
           style={{ 
             background: pressProgress > 0 
               ? `linear-gradient(90deg, #93c5fd ${pressProgress}%, #c5e3ff ${pressProgress}%)`
