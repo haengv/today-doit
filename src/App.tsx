@@ -51,6 +51,7 @@ export default function App() {
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
   const [showActionPopup, setShowActionPopup] = useState(false);
   const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
+  const [homeDate, setHomeDate] = useState<Date>(new Date());
 
   useEffect(() => {
     if (screen !== 'action') {
@@ -114,7 +115,7 @@ export default function App() {
   );
 
   const renderHome = () => {
-    const today = new Date();
+    const today = homeDate;
     const y = today.getFullYear();
     const m = String(today.getMonth() + 1).padStart(2, '0');
     const d = String(today.getDate()).padStart(2, '0');
@@ -129,9 +130,24 @@ export default function App() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
         <div style={{ width: '100%', maxWidth: 335, textAlign: 'left', marginBottom: 32, marginTop: 12 }}>
-          <h1 style={{ fontSize: 16, fontWeight: 400, color: '#191f28', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
-            {dateString} <img src="/assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
-          </h1>
+          <div style={{ position: 'relative', display: 'inline-block', marginBottom: 16 }}>
+            <h1 style={{ fontSize: 16, fontWeight: 400, color: '#191f28', margin: 0, display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
+              {dateString} <img src="/assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
+            </h1>
+            <input 
+              type="date" 
+              value={`${y}-${m}-${d}`}
+              onChange={(e) => {
+                if (e.target.value) {
+                  setHomeDate(new Date(e.target.value));
+                }
+              }}
+              style={{
+                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                opacity: 0, cursor: 'pointer'
+              }}
+            />
+          </div>
           <div style={{ 
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
             border: '1.5px solid rgba(0,12,30,0.8)', 
