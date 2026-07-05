@@ -45,7 +45,7 @@ export default function App() {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string} | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
-  const [postItColor, setPostItColor] = useState('#FEF9C3');
+  const [postItColor, setPostItColor] = useState('#FAE588');
   const [startWhen, setStartWhen] = useState('');
   const [startWhere, setStartWhere] = useState('');
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
@@ -394,16 +394,25 @@ export default function App() {
             {/* Done Button */}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
               <div 
-                onClick={() => {
+                onClick={async () => {
                   if (!goal.trim()) return;
-                  setBottomSheetStep(2);
+                  const historyId = Date.now();
+                  setHistory(prev => [{id: historyId, text: goal, date: new Date().toLocaleDateString(), when: '', where: ''}, ...prev]);
+                  
+                  setIsBottomSheetOpen(false);
+                  setScreen('breakdown');
+                  setIsBreakingDown(true);
+                  const newSteps = await simulateBreakdown(goal);
+                  setSteps(newSteps);
+                  setHistory(prev => prev.map(h => h.id === historyId ? { ...h, steps: newSteps } : h));
+                  setIsBreakingDown(false);
                 }}
                 style={{ 
-                  backgroundColor: goal.trim() ? '#191F28' : '#E5E8EB',
-                  border: goal.trim() ? 'none' : '1.5px solid #8B95A1',
+                  backgroundColor: goal.trim() ? '#c5e3ff' : '#E5E8EB',
+                  border: goal.trim() ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid #8B95A1',
                   borderRadius: 12, padding: '13.5px 0',
                   width: '100%', textAlign: 'center', fontSize: 18, fontWeight: 600,
-                  color: goal.trim() ? '#FFF' : 'rgba(3,24,50,0.46)',
+                  color: goal.trim() ? '#130537' : 'rgba(3,24,50,0.46)',
                   cursor: goal.trim() ? 'pointer' : 'not-allowed'
                 }}
               >
@@ -413,99 +422,7 @@ export default function App() {
           </div>
         )}
 
-        {bottomSheetStep === 2 && (
-          <>
-            <div style={{ width: '100%', display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-              <button 
-                onClick={() => setBottomSheetStep(1)}
-                style={{ background: 'transparent', border: 'none', fontSize: 16, fontWeight: 800, color: '#4E5968', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-              >
-                <img src="/assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 16, height: 16 }} /> 뒤로
-              </button>
-              <div style={{ flex: 1 }} />
-            </div>
 
-            {/* Implementation Intention Card */}
-            <div style={{ 
-              width: '100%', border: '1.5px solid #4E5968', borderRadius: 16, padding: '20px 16px', 
-              backgroundColor: '#FFF', display: 'flex', flexDirection: 'column', gap: 24,
-              marginBottom: 32
-            }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#191f28' }}>나의 시작 다짐</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>⏰</span>
-                  <input 
-                    placeholder="언제 시작할까요?"
-                    value={startWhen}
-                    onChange={e => setStartWhen(e.target.value)}
-                    style={{ flex: 1, border: 'none', borderBottom: '1.5px solid #191f28', padding: '4px 0', fontSize: 16, fontWeight: 700, outline: 'none', background: 'transparent', color: '#191f28' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: 8, paddingLeft: 32, flexWrap: 'wrap' }}>
-                  {['아침에 눈뜨자마자', '점심시간', '퇴근 직후', '자기 전'].map(chip => (
-                    <button 
-                      key={chip} onClick={() => setStartWhen(chip)}
-                      style={{ 
-                        padding: '6px 12px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                        background: startWhen === chip ? '#191f28' : '#F3F4F6',
-                        color: startWhen === chip ? '#FFF' : '#4E5968',
-                        border: 'none'
-                      }}
-                    >
-                      {chip}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>📍</span>
-                  <input 
-                    placeholder="어디서 시작할까요?"
-                    value={startWhere}
-                    onChange={e => setStartWhere(e.target.value)}
-                    style={{ flex: 1, border: 'none', borderBottom: '1.5px solid #191f28', padding: '4px 0', fontSize: 16, fontWeight: 700, outline: 'none', background: 'transparent', color: '#191f28' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: 8, paddingLeft: 32, flexWrap: 'wrap' }}>
-                  {['내 방 책상', '침대 위', '자주 가는 카페', '사무실'].map(chip => (
-                    <button 
-                      key={chip} onClick={() => setStartWhere(chip)}
-                      style={{ 
-                        padding: '6px 12px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                        background: startWhere === chip ? '#191f28' : '#F3F4F6',
-                        color: startWhere === chip ? '#FFF' : '#4E5968',
-                        border: 'none'
-                      }}
-                    >
-                      {chip}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <button 
-              className="neo-btn" style={{ backgroundColor: '#A7F3D0', width: '100%' }}
-              onClick={async () => {
-                const historyId = Date.now();
-                setHistory(prev => [{id: historyId, text: goal, date: new Date().toLocaleDateString(), when: startWhen, where: startWhere}, ...prev]);
-                
-                setIsBottomSheetOpen(false);
-                setScreen('breakdown');
-                setIsBreakingDown(true);
-                const newSteps = await simulateBreakdown(goal);
-                setSteps(newSteps);
-                setHistory(prev => prev.map(h => h.id === historyId ? { ...h, steps: newSteps } : h));
-                setIsBreakingDown(false);
-              }}
-            >
-              목표 설정 완료하기
-            </button>
-          </>
-        )}
       </div>
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
