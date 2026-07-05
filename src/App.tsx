@@ -643,13 +643,11 @@ export default function App() {
           <button 
             onClick={() => setScreen('breakdown')}
             style={{ 
-              width: 34, height: 34, borderRadius: 34, border: '1.5px solid rgba(3,18,40,0.7)', background: 'transparent',
+              width: 34, height: 34, borderRadius: '50%', background: '#FFF', border: '1.5px solid rgba(3,18,40,0.7)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
+            <img src="/assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 20, height: 20, marginRight: 2 }} />
           </button>
 
           {/* Dots */}
