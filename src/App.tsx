@@ -770,63 +770,74 @@ export default function App() {
 
         {/* Action Completion Popup */}
         {showActionPopup && (
-          <div style={{
-            position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
-            backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 4000,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
-          }}>
-            <div 
-              className="anim-pop"
-              style={{ width: '100%', maxWidth: 320, backgroundColor: '#FFF', borderRadius: 24, padding: '32px 24px', textAlign: 'center', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
-            >
-              <div style={{ fontSize: 48, marginBottom: 16 }}>👏</div>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: '#191f28', marginBottom: 12 }}>수고하셨어요! 🎉</h2>
-              <p style={{ fontSize: 16, color: '#4E5968', marginBottom: 24, lineHeight: 1.5 }}>
-                모든 할 일을 완벽하게<br/>마무리하셨네요. 정말 멋져요!
-              </p>
+          <>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)', zIndex: 4000 }} />
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#FFF', width: 311, maxHeight: 640, borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 4001, overflow: 'hidden' }}>
               
-              <button 
-                className="neo-btn" 
-                onClick={() => {
-                  setShowActionPopup(false);
-                  
-                  const newItem = {
-                    id: Date.now(),
-                    text: goal,
-                    date: new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }),
-                    when: startWhen,
-                    where: startWhere,
-                    steps: steps
-                  };
-                  setHistory([newItem, ...history]);
-                  setSelectedHistoryItem(newItem);
-                  
-                  // Trigger confetti
-                  const confettiDivs = Array.from({ length: 30 }).map((_, i) => {
-                    const el = document.createElement('div');
-                    el.className = 'confetti-piece';
-                    el.style.left = `${Math.random() * 100}%`;
-                    el.style.backgroundColor = ['#FFC800', '#FF0000', '#0044FF', '#00CC00', '#FF00CC'][Math.floor(Math.random() * 5)];
-                    el.style.animationDelay = `${Math.random() * 0.5}s`;
-                    return el;
-                  });
-                  const container = document.getElementById('confetti-container');
-                  if (container) {
-                    confettiDivs.forEach(div => container.appendChild(div));
-                    setTimeout(() => {
-                      confettiDivs.forEach(div => div.remove());
+              <div style={{ width: '100%', padding: '22px 22px 0 22px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box' }}>
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
+                  <p style={{ fontSize: 20, fontWeight: 700, color: 'rgba(0,12,30,0.8)', margin: 0, lineHeight: 1.35, fontFamily: "'Pretendard', sans-serif" }}>
+                    수고하셨어요!
+                  </p>
+                  <p style={{ fontSize: 16, fontWeight: 500, color: 'rgba(3,18,40,0.7)', margin: 0, lineHeight: 1.6, fontFamily: "'Pretendard', sans-serif" }}>
+                    오늘 할 일을 멋지게 완료했어요
+                  </p>
+                </div>
+              </div>
+              
+              <div style={{ width: 140, height: 140, position: 'relative', overflow: 'hidden', flexShrink: 0, marginTop: 16 }}>
+                <img src="/assets/img-character-complete.png" alt="완료 그래픽" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+              
+              <div style={{ width: '100%', padding: '24px 16px 16px', display: 'flex', justifyContent: 'center', boxSizing: 'border-box' }}>
+                <button 
+                  onClick={() => {
+                    setShowActionPopup(false);
+                    
+                    const newItem = {
+                      id: Date.now(),
+                      text: goal,
+                      date: new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }),
+                      when: startWhen,
+                      where: startWhere,
+                      steps: steps
+                    };
+                    setHistory([newItem, ...history]);
+                    setSelectedHistoryItem(newItem);
+                    
+                    // Trigger confetti
+                    const confettiDivs = Array.from({ length: 30 }).map((_, i) => {
+                      const el = document.createElement('div');
+                      el.className = 'confetti-piece';
+                      el.style.left = `${Math.random() * 100}%`;
+                      el.style.backgroundColor = ['#FFC800', '#FF0000', '#0044FF', '#00CC00', '#FF00CC'][Math.floor(Math.random() * 5)];
+                      el.style.animationDelay = `${Math.random() * 0.5}s`;
+                      return el;
+                    });
+                    const container = document.getElementById('confetti-container');
+                    if (container) {
+                      confettiDivs.forEach(div => container.appendChild(div));
+                      setTimeout(() => {
+                        confettiDivs.forEach(div => div.remove());
+                        setScreen('receipt');
+                      }, 2500);
+                    } else {
                       setScreen('receipt');
-                    }, 2500);
-                  } else {
-                    setScreen('receipt');
-                  }
-                }}
-                style={{ backgroundColor: '#3B82F6', color: '#FFF', width: '100%', padding: '16px 0', fontSize: 16 }}
-              >
-                결과 영수증 보기
-              </button>
+                    }
+                  }}
+                  style={{ 
+                    flex: 1, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, 
+                    padding: '13.5px 9.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' 
+                  }}
+                >
+                  <span style={{ fontSize: 18, fontWeight: 600, color: '#130537', fontFamily: "'Pretendard', sans-serif", lineHeight: 1.5 }}>
+                    확인
+                  </span>
+                </button>
+              </div>
+
             </div>
-          </div>
+          </>
         )}
 
         {/* Confetti container */}
