@@ -288,6 +288,10 @@ export default function App() {
                   </h1>
                 </div>
               )}
+              
+              <div style={{ position: 'absolute', bottom: 12, right: 16, color: 'rgba(3,24,50,0.46)', fontSize: 11, fontWeight: 500 }}>
+                최대 30글자
+              </div>
             </div>
           </div>
 
