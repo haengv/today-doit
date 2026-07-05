@@ -676,27 +676,31 @@ export default function App() {
 
         {/* Main Content */}
         <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 40, paddingBottom: 150 }}>
-          {/* Layered Card */}
+          {/* Layered Card Container (No animation here) */}
           <div 
             key={currentActionStepIndex}
             style={{ 
-              position: 'relative', width: 315, height: 257, marginBottom: 20,
-              animation: isAnimatingNext 
-                ? 'cardSwipeOut 0.35s forwards cubic-bezier(0.16, 1, 0.3, 1)' 
-                : 'cardSwipeIn 0.35s backwards cubic-bezier(0.16, 1, 0.3, 1)'
+              position: 'relative', width: 315, height: 257, marginBottom: 20
             }}
           >
             {/* Background Blue Card */}
             <div style={{ 
               position: 'absolute', top: 11, left: 7, width: 315, height: 257,
-              backgroundColor: '#c5e3ff', border: '1.5px solid #000', borderRadius: 14, zIndex: 1
+              backgroundColor: '#c5e3ff', border: '1.5px solid #000', borderRadius: 14, zIndex: 1,
+              animation: isAnimatingNext 
+                ? 'cardMoveForward 0.35s forwards cubic-bezier(0.16, 1, 0.3, 1)' 
+                : 'cardFadeInBack 0.35s backwards cubic-bezier(0.16, 1, 0.3, 1)'
             }} />
             
             {/* Foreground White Card */}
             <div style={{ 
               position: 'absolute', top: 0, left: 0, width: 315, height: 257,
               backgroundColor: '#FFF', border: '1.5px solid #000', borderRadius: 14, zIndex: 2,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 20px'
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 20px',
+              animation: isAnimatingNext 
+                ? 'cardSwipeOut 0.35s forwards cubic-bezier(0.16, 1, 0.3, 1)' 
+                : 'none',
+              transformOrigin: 'bottom center'
             }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11, marginBottom: 25, marginTop: 25 }}>
                 <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', letterSpacing: '-0.28px' }}>
