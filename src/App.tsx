@@ -323,7 +323,7 @@ export default function App() {
       <div 
         style={{
           position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-          width: '100%', maxWidth: 480,
+          width: '100%', maxWidth: 375,
           backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
           padding: '16px 20px 40px', zIndex: 2002,
           animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -508,7 +508,7 @@ export default function App() {
       </div>
 
       {/* Bottom CTA */}
-      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box' }}>
+      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box' }}>
         <button 
           onClick={() => {
             setActionStartTime(new Date());
