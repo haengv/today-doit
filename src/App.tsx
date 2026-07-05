@@ -1015,30 +1015,29 @@ export default function App() {
         <div style={{
           position: 'fixed', bottom: 30, left: '50%', transform: 'translateX(-50%)',
           background: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 156,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 14px', zIndex: 1000,
+          display: 'flex', alignItems: 'center', padding: '6px', zIndex: 1000,
+          width: 156
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div 
-              onClick={() => { setTab('home'); setScreen('home'); }}
-              style={{ 
-                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', minWidth: 46,
-                background: tab === 'home' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
-                justifyContent: 'center', transition: 'background 0.2s'
-              }}
-            >
-              <img src="/assets/icon-home.svg" alt="" style={{ width: 20, height: 20 }} />
-              <div style={{ fontSize: 16, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>홈</div>
-            </div>
-            <div 
-              onClick={() => setTab('history')}
-              style={{ 
-                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', minWidth: 46,
-                background: tab === 'history' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
-                justifyContent: 'center', transition: 'background 0.2s'
-              }}
-            >
-              <img src="/assets/icon-archieve.svg" alt="" style={{ width: 20, height: 20 }} />
-            </div>
+          <div 
+            onClick={() => { setTab('home'); setScreen('home'); }}
+            style={{ 
+              flex: 1, display: 'flex', alignItems: 'center', gap: 6, height: 36,
+              background: tab === 'home' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
+              justifyContent: 'center', transition: 'background 0.2s'
+            }}
+          >
+            <img src="/assets/icon-home.svg" alt="" style={{ width: 18, height: 18 }} />
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>홈</div>
+          </div>
+          <div 
+            onClick={() => setTab('history')}
+            style={{ 
+              flex: 1, display: 'flex', alignItems: 'center', gap: 6, height: 36,
+              background: tab === 'history' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
+              justifyContent: 'center', transition: 'background 0.2s'
+            }}
+          >
+            <img src="/assets/icon-archieve.svg" alt="" style={{ width: 20, height: 20 }} />
           </div>
         </div>
       )}
