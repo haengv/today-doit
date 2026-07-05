@@ -61,6 +61,7 @@ export default function App() {
   const [showActionPopup, setShowActionPopup] = useState(false);
   const [isAnimatingNext, setIsAnimatingNext] = useState(false);
   const [isGeneratingSteps, setIsGeneratingSteps] = useState(false);
+  const [isStopPopupOpen, setIsStopPopupOpen] = useState(false);
   const [showBreakdownToast, setShowBreakdownToast] = useState(false);
   const [breakdownToastMessage, setBreakdownToastMessage] = useState('');
   const [homeDate, setHomeDate] = useState<Date>(new Date());
@@ -738,7 +739,7 @@ export default function App() {
         {/* Bottom CTAs */}
         <div style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '0 20px', display: 'flex', gap: 8, boxSizing: 'border-box', zIndex: 10 }}>
           <button 
-            onClick={() => setScreen('breakdown')}
+            onClick={() => setIsStopPopupOpen(true)}
             style={{ 
               flex: 1, backgroundColor: '#FFF', border: '1.5px solid rgba(2,9,19,0.91)', borderRadius: 12,
               padding: '13.5px 9.5px', fontSize: 18, fontWeight: 600, color: 'rgba(0,12,30,0.8)', cursor: 'pointer',
@@ -831,6 +832,33 @@ export default function App() {
             pointerEvents: 'none', zIndex: 5000, overflow: 'hidden' 
           }} 
         />
+
+        {/* Stop Popup Dialog */}
+        {isStopPopupOpen && (
+          <>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)', zIndex: 2000 }} onClick={() => setIsStopPopupOpen(false)} />
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#FFF', width: 311, borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2001, overflow: 'hidden' }}>
+              <div style={{ width: '100%', padding: '22px 22px 0 22px', display: 'flex', flexDirection: 'column', gap: 4, boxSizing: 'border-box' }}>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'rgba(0,12,30,0.8)', lineHeight: 1.35 }}>여기서 멈출까요?</div>
+                <div style={{ fontSize: 16, fontWeight: 500, color: 'rgba(3,18,40,0.7)', lineHeight: 1.6 }}>언제든지 다시 시작할 수 있어요!</div>
+              </div>
+              <div style={{ width: '100%', display: 'flex', gap: 8, padding: '24px 16px 16px', boxSizing: 'border-box' }}>
+                <button 
+                  onClick={() => setIsStopPopupOpen(false)}
+                  style={{ flex: 1, backgroundColor: '#FFF', border: '1.5px solid rgba(2,9,19,0.91)', borderRadius: 12, padding: '13.5px 9.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                >
+                  <span style={{ fontSize: 18, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>더 할래요</span>
+                </button>
+                <button 
+                  onClick={() => { setIsStopPopupOpen(false); setScreen('breakdown'); }}
+                  style={{ flex: 1, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, padding: '13.5px 9.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                >
+                  <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>네 멈출래요</span>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     );
   };
