@@ -168,7 +168,11 @@ export default function App() {
         
         <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', position: isBottomSheetOpen ? 'relative' : 'static', zIndex: isBottomSheetOpen ? 2001 : 'auto' }}>
           {/* Post-it UI Goal Card */}
-          <div style={{ position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ 
+            position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center',
+            transform: isBottomSheetOpen ? 'translateY(-24px)' : 'translateY(0)',
+            transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}>
             <div 
               style={{ 
                 position: 'relative', width: 240, height: 280, backgroundColor: (hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588', 
@@ -322,7 +326,8 @@ export default function App() {
       />
       <div 
         style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, 
+          position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+          width: '100%', maxWidth: 480,
           backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
           padding: '16px 20px 40px', zIndex: 2002,
           animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -375,7 +380,8 @@ export default function App() {
                     key={chip}
                     onClick={() => setGoal(chip)}
                     style={{
-                      backgroundColor: '#F2F4F6', borderRadius: 8, padding: '4px 12px',
+                      backgroundColor: '#F2F4F6', borderRadius: 8, padding: '4px 12px', height: 36,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 13, fontWeight: 500, color: 'rgba(0,19,43,0.58)', cursor: 'pointer'
                     }}
                   >
