@@ -7,20 +7,17 @@ type Step = {
   id: string;
   text: string;
   completed: boolean;
-  timeEstimate: number;
+  timeEstimate: string;
 };
 
-const simulateBreakdown = (goal: string): Promise<Step[]> => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve([
-        { id: '1', text: '일단 노트북 전원 켜기', completed: false, timeEstimate: 2 },
-        { id: '2', text: '작업할 폴더 및 파일 생성하기', completed: false, timeEstimate: 5 },
-        { id: '3', text: '관련 자료 검색 및 수집하기', completed: false, timeEstimate: 15 },
-        { id: '4', text: '초안 작성 시작하기', completed: false, timeEstimate: 30 },
-      ]);
-    }, 1500);
-  });
+const simulateBreakdown = async (goal: string): Promise<Step[]> => {
+  return [
+    { id: '1', text: '노트북 전원 켜기', completed: false, timeEstimate: '30초' },
+    { id: '2', text: '폴더 열기', completed: false, timeEstimate: '1분' },
+    { id: '3', text: '수정할 화면 정하기', completed: false, timeEstimate: '1분' },
+    { id: '4', text: '첫번째 요소 수정하기', completed: false, timeEstimate: '1분' },
+    { id: '5', text: '나머지 요소 수정하기', completed: false, timeEstimate: '1분' },
+  ];
 };
 
 const simulateMicroBreakdown = (): Promise<string> => {
@@ -35,7 +32,6 @@ export default function App() {
   
   const [goal, setGoal] = useState('');
   const [steps, setSteps] = useState<Step[]>([]);
-  const [isBreakingDown, setIsBreakingDown] = useState(false);
   const [isMicroBreaking, setIsMicroBreaking] = useState(false);
   const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string}[]>([]);
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
@@ -401,11 +397,9 @@ export default function App() {
                   
                   setIsBottomSheetOpen(false);
                   setScreen('breakdown');
-                  setIsBreakingDown(true);
                   const newSteps = await simulateBreakdown(goal);
                   setSteps(newSteps);
                   setHistory(prev => prev.map(h => h.id === historyId ? { ...h, steps: newSteps } : h));
-                  setIsBreakingDown(false);
                 }}
                 style={{ 
                   backgroundColor: goal.trim() ? '#c5e3ff' : '#E5E8EB',
@@ -431,155 +425,107 @@ export default function App() {
   );
 
   const renderBreakdown = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '40px 20px', minHeight: '100vh', background: '#FCE7F3', paddingBottom: 140 }}>
-      {isBreakingDown ? (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="anim-float" style={{ fontSize: 60, marginBottom: 20 }}>🪄</div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, textAlign: 'center' }}>목표를 아주 잘게<br />부수고 있어요...</h2>
-        </div>
-      ) : (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10, marginBottom: 20 }}>
-            {renderBackButton(() => setScreen('input'))}
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: '#191f28', margin: 0 }}>
-              순서를 바꿀 수 있어요!
-            </h1>
-          </div>
-          
-          {/* Main Goal Display */}
-          <div className="neo-card" style={{ marginBottom: 24, padding: 20, backgroundColor: postItColor, border: '3px solid #191f28', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#B45309' }}>오늘의 단 하나 (목표)</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#191f28', wordBreak: 'keep-all' }}>{goal}</div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
-            {steps.map((step, idx) => {
-              const isFirst = idx === 0;
-              return (
-                <div 
-                  key={step.id} 
-                  draggable
-                  onDragStart={(e) => {
-                    setDraggedItemIndex(idx);
-                    e.dataTransfer.effectAllowed = 'move';
-                  }}
-                  onDragEnter={(e) => {
-                    if (draggedItemIndex === null || draggedItemIndex === idx) return;
-                    const newSteps = [...steps];
-                    const item = newSteps.splice(draggedItemIndex, 1)[0];
-                    newSteps.splice(idx, 0, item);
-                    setDraggedItemIndex(idx);
-                    setSteps(newSteps);
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDragEnd={() => setDraggedItemIndex(null)}
-                  className="neo-card"
-                  style={{ 
-                    backgroundColor: isFirst ? '#FFFFFF' : '#F3F4F6', padding: 20,
-                    border: isFirst ? '3px solid #3B82F6' : '3px solid #191f28',
-                    position: 'relative', display: 'flex', flexDirection: 'column', gap: 12,
-                    opacity: draggedItemIndex === idx ? 0.5 : 1
-                  }}
-                >
-                  {isFirst && (
-                    <div style={{ 
-                      position: 'absolute', top: -14, left: 16, background: '#3B82F6', color: '#FFF', 
-                      padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800, border: '2px solid #000' 
-                    }}>
-                      ⏳ 2분 안에 가능한 첫 걸음
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: isFirst ? 8 : 0 }}>
-                    {/* Drag Handle */}
-                    <div style={{ cursor: 'grab', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', marginRight: 4 }}>
-                      <svg width="12" height="20" viewBox="0 0 10 16" fill="currentColor">
-                        <circle cx="2" cy="3" r="1.5" />
-                        <circle cx="8" cy="3" r="1.5" />
-                        <circle cx="2" cy="8" r="1.5" />
-                        <circle cx="8" cy="8" r="1.5" />
-                        <circle cx="2" cy="13" r="1.5" />
-                        <circle cx="8" cy="13" r="1.5" />
-                      </svg>
-                    </div>
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#191f28', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, flexShrink: 0 }}>
-                      {idx + 1}
-                    </div>
-                    {/* Editable Text Input */}
-                    {editingStepId === step.id ? (
-                      <input 
-                        autoFocus
-                        value={step.text}
-                        onChange={e => updateStepText(idx, e.target.value)}
-                        onBlur={() => setEditingStepId(null)}
-                        onKeyDown={e => { if (e.key === 'Enter') setEditingStepId(null) }}
-                        style={{
-                          flex: 1, fontSize: 16, fontWeight: 700, color: '#191f28',
-                          border: 'none', background: 'transparent', outline: 'none',
-                          borderBottom: '2px dashed #191f28', paddingBottom: 4
-                        }}
-                      />
-                    ) : (
-                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                          <div style={{ fontSize: 16, fontWeight: 700, color: '#191f28', wordBreak: 'keep-all' }}>{step.text}</div>
-                          <span style={{ fontSize: 12, backgroundColor: '#E5E7EB', padding: '2px 8px', borderRadius: 12, color: '#4E5968', width: 'fit-content' }}>⏱️ {step.timeEstimate}분</span>
-                        </div>
-                        <div style={{ display: 'flex', gap: 4 }}>
-                          <button 
-                            onClick={() => setEditingStepId(step.id)}
-                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4, fontSize: 16, flexShrink: 0 }}
-                          >
-                            ✏️
-                          </button>
-                          <button 
-                            onClick={() => {
-                              const newSteps = steps.filter(s => s.id !== step.id);
-                              setSteps(newSteps);
-                            }}
-                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4, fontSize: 16, flexShrink: 0 }}
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  {isFirst && (
-                    <button 
-                      onClick={async () => {
-                        if(isMicroBreaking) return;
-                        setIsMicroBreaking(true);
-                        const microText = await simulateMicroBreakdown();
-                        updateStepText(0, microText);
-                        setIsMicroBreaking(false);
-                      }}
-                      style={{ 
-                        alignSelf: 'flex-start', background: '#FDE047', border: '2px solid #000', 
-                        borderRadius: 6, padding: '6px 12px', fontSize: 13, fontWeight: 700, 
-                        cursor: 'pointer', opacity: isMicroBreaking ? 0.5 : 1
-                      }}
-                    >
-                      이것도 부담되나요? 더 작게 쪼개기
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#FFF', paddingBottom: 100 }}>
+      {/* Top Navigation */}
+      <div style={{ width: '100%', display: 'flex', alignItems: 'center', padding: '10px 20px', boxSizing: 'border-box' }}>
+        <button 
+          onClick={() => setScreen('home')}
+          style={{ 
+            width: 34, height: 34, borderRadius: '50%', background: '#FFF', border: '1.5px solid rgba(3,18,40,0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
+          }}
+        >
+          <img src="/assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 20, height: 20, marginRight: 2 }} />
+        </button>
+      </div>
 
-          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '20px', background: '#FFF', borderTop: '1.5px solid #E5E7EB', zIndex: 100 }}>
-            <button 
-              className="neo-btn" 
-              style={{ backgroundColor: '#191f28', color: '#FFF', width: '100%' }}
-              onClick={() => {
-                setActionStartTime(new Date());
-                setScreen('action');
-              }}
-            >
-              첫 번째 행동 지금 바로 시작하기
-            </button>
-          </div>
+      <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 20px 40px' }}>
+        {/* Title Area */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+          <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>오늘의 할 일</div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>{goal || "포트폴리오 수정 완료하기"}</div>
         </div>
-      )}
+        
+        {/* Illustration */}
+        <div style={{ width: 140, height: 140, marginBottom: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src="/assets/img-default.png" alt="노트북" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        </div>
+
+        {/* Steps Header */}
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>아래 단계별로 시작해봐요</div>
+          <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+            <span style={{ fontSize: 16 }}>📝</span>
+            <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>직접 수정하기</span>
+          </button>
+        </div>
+
+        {/* Steps List */}
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {steps.map((step, idx) => {
+            const isFirst = idx === 0;
+            return (
+              <div 
+                key={step.id} 
+                style={{ 
+                  backgroundColor: isFirst ? '#FAE588' : '#F2F4F6', 
+                  border: isFirst ? '1.5px solid #130537' : 'none',
+                  borderRadius: 8, padding: isFirst ? '11.5px 17.5px' : '10px 16px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+                    <span style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)' }}>{idx + 1}</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,12,30,0.8)' : 'rgba(0,19,43,0.58)' }}>
+                    {step.text}
+                  </div>
+                </div>
+                <div style={{ 
+                  backgroundColor: isFirst ? '#FFF2B7' : '#FFF', 
+                  padding: '2px 6px', borderRadius: 4, 
+                  fontSize: 12, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)' 
+                }}>
+                  {step.timeEstimate}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Plus Button */}
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+          <button style={{ 
+            width: 32, height: 32, borderRadius: 8, backgroundColor: '#191f28', color: '#FFF',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer'
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom CTA */}
+      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box' }}>
+        <button 
+          onClick={() => {
+            setActionStartTime(new Date());
+            setScreen('action');
+          }}
+          style={{ 
+            backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 16,
+            width: '100%', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            cursor: 'pointer'
+          }}
+        >
+          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>꾹 눌러 첫 행동 시작</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
     </div>
   );
 
