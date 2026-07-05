@@ -233,12 +233,7 @@ export default function App() {
           {hasActiveGoal && <div style={{ height: 28 }} />}
 
           {/* Dynamic Bottom Area */}
-          {!hasActiveGoal ? (
-            <div style={{ textAlign: 'center', color: '#9CA3AF', marginTop: 40 }}>
-              <div style={{ fontSize: 40, marginBottom: 16 }}>🌱</div>
-              <p style={{ fontSize: 16, fontWeight: 700 }}>아직 오늘의 목표를 설정하지 않았어요.<br/>위 버튼을 눌러 시작해보세요!</p>
-            </div>
-          ) : (
+          {!hasActiveGoal ? null : (
             <>
               {/* Progress Box */}
               <div className="neo-card" style={{ padding: 20, backgroundColor: '#FFFFFF', border: '3px solid #191f28', marginBottom: 20 }}>
@@ -1022,7 +1017,7 @@ export default function App() {
           background: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 156,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 14px', zIndex: 1000,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div 
               onClick={() => { setTab('home'); setScreen('home'); }}
               style={{ 
