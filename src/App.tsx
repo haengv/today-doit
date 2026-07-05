@@ -1021,7 +1021,7 @@ export default function App() {
             <div 
               onClick={() => { setTab('home'); setScreen('home'); }}
               style={{ 
-                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 0', width: 76,
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', minWidth: 46,
                 background: tab === 'home' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
                 justifyContent: 'center', transition: 'background 0.2s'
               }}
@@ -1032,7 +1032,7 @@ export default function App() {
             <div 
               onClick={() => setTab('history')}
               style={{ 
-                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 0', width: 76,
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', minWidth: 46,
                 background: tab === 'history' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
                 justifyContent: 'center', transition: 'background 0.2s'
               }}
