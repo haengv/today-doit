@@ -215,12 +215,12 @@ export default function App() {
               </div>
               
               {!hasActiveGoal && !goal.trim() ? (
-                <div style={{ position: 'absolute', top: 140.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
+                <div style={{ position: 'absolute', top: 120.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
                   <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>오늘 꼭 해야 할</span>
                   <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한가지 일을 적어주세요</span>
                 </div>
               ) : (
-                <div style={{ position: 'absolute', top: 130.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <div style={{ position: 'absolute', top: 110.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <h1 style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap', maxWidth: 200 }}>
                     {goal}
                   </h1>
