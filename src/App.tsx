@@ -141,11 +141,15 @@ export default function App() {
     const allCompleted = hasActiveGoal && completedCount === totalCount;
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
-        <div style={{ width: '100%', maxWidth: 335, textAlign: 'left', marginBottom: 32, marginTop: 12 }}>
-          <div style={{ position: 'relative', display: 'inline-block', marginBottom: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
+        {/* Date Header Wrapper */}
+        <div style={{ width: '100%', maxWidth: 375, padding: '32px 20px 0 20px', display: 'flex', justifyContent: 'flex-start' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 4 }}>
             <h1 style={{ fontSize: 16, fontWeight: 400, color: '#191f28', margin: 0, display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
-              {dateString} <img src="/assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
+              {dateString} 
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9L12 15L18 9" stroke="#191f28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </h1>
             <input 
               type="date" 
@@ -161,6 +165,10 @@ export default function App() {
               }}
             />
           </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div style={{ width: '100%', maxWidth: 335, textAlign: 'left', marginBottom: 32, marginTop: 16 }}>
           <div style={{ 
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
             border: '1.5px solid rgba(0,12,30,0.8)', 
