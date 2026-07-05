@@ -282,8 +282,8 @@ export default function App() {
                   <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한가지 일을 적어주세요</span>
                 </div>
               ) : (
-                <div style={{ position: 'absolute', top: 100.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <h1 style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap', maxWidth: 200 }}>
+                <div style={{ position: 'absolute', top: 100.5, left: 16.5, width: 187, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <h1 style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'break-word', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
                     {goal}
                   </h1>
                 </div>
@@ -442,11 +442,18 @@ export default function App() {
                 placeholder="오늘 꼭 할 일 한가지를 입력하세요"
                 value={goal}
                 onChange={e => setGoal(e.target.value)}
+                maxLength={30}
                 style={{ 
                   width: '100%', border: '1.5px solid #B0B8C1', borderRadius: 12, padding: '13.5px 17.5px',
                   outline: 'none', fontSize: 16, fontWeight: 400, color: '#191f28', boxSizing: 'border-box'
                 }}
               />
+              
+              {goal.length > 0 && goal.trim().length < 5 && (
+                <div style={{ fontSize: 13, color: '#EF4444', marginLeft: 4, marginTop: -4 }}>
+                  5글자 이상 작성해주세요.
+                </div>
+              )}
 
               {/* Suggestion Chips */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
@@ -470,7 +477,7 @@ export default function App() {
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
               <div 
                 onClick={async () => {
-                  if (!goal.trim()) return;
+                  if (goal.trim().length < 5) return;
                   const historyId = Date.now();
                   setHistory(prev => [{id: historyId, text: goal, date: new Date().toLocaleDateString(), when: '', where: ''}, ...prev]);
                   
@@ -493,12 +500,12 @@ export default function App() {
                   setTimeout(() => setShowBreakdownToast(false), 3000);
                 }}
                 style={{ 
-                  backgroundColor: goal.trim() ? '#c5e3ff' : '#E5E8EB',
-                  border: goal.trim() ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid #8B95A1',
+                  backgroundColor: goal.trim().length >= 5 ? '#c5e3ff' : '#E5E8EB',
+                  border: goal.trim().length >= 5 ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid #8B95A1',
                   borderRadius: 12, padding: '13.5px 0',
                   width: '100%', textAlign: 'center', fontSize: 18, fontWeight: 600,
-                  color: goal.trim() ? '#130537' : 'rgba(3,24,50,0.46)',
-                  cursor: goal.trim() ? 'pointer' : 'not-allowed'
+                  color: goal.trim().length >= 5 ? '#130537' : 'rgba(3,24,50,0.46)',
+                  cursor: goal.trim().length >= 5 ? 'pointer' : 'not-allowed'
                 }}
               >
                 완료
