@@ -93,23 +93,68 @@ export default function App() {
   // --- Screens ---
 
   const renderOnboarding = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', minHeight: '100vh', background: '#FCE7F3' }}>
-      <div style={{ textAlign: 'center', marginBottom: 60 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#191f28', lineHeight: 1.4, margin: 0, wordBreak: 'keep-all' }}>
-          오늘 하루,<br />단 한 가지에만<br />집중해보세요.
-        </h1>
-        <p style={{ fontSize: 16, color: '#4E5968', marginTop: 16 }}>
-          아무리 큰 목표라도<br />첫 걸음부터 시작할 수 있게 도와드릴게요.
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', minHeight: '100vh', background: '#FFF', position: 'relative', overflow: 'hidden' }}>
+      <style>{`
+        @keyframes flutter {
+          0% { transform: translateY(0px) rotate(-4deg); box-shadow: 2px 8px 15px rgba(0,0,0,0.1); }
+          50% { transform: translateY(-12px) rotate(3deg); box-shadow: 6px 15px 20px rgba(0,0,0,0.08); }
+          100% { transform: translateY(0px) rotate(-4deg); box-shadow: 2px 8px 15px rgba(0,0,0,0.1); }
+        }
+      `}</style>
+      
+      {/* Top Section */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12vh', marginBottom: 40 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <h1 style={{ fontSize: 50, fontWeight: 800, fontFamily: "'Lexend', sans-serif", color: '#191f28', margin: 0, lineHeight: 1.2 }}>
+            DO IT
+          </h1>
+          <img src="/assets/img-default.png" alt="!" style={{ width: 14, height: 38, transform: 'rotate(15deg)', objectFit: 'contain' }} />
+        </div>
+        <p style={{ fontSize: 18, fontWeight: 500, color: 'rgba(3,18,40,0.7)', margin: 0, marginTop: 8 }}>
+          하루 한 가지만 시작하기
         </p>
       </div>
-      
-      <button 
-        className="neo-btn" 
-        style={{ backgroundColor: '#3B82F6', color: '#FFF', width: '100%', maxWidth: 320 }}
-        onClick={() => setScreen('home')}
-      >
-        시작하기
-      </button>
+
+      {/* Middle Graphic Section */}
+      <div style={{ width: '100%', maxWidth: 300, height: 300, backgroundColor: '#f2f4f6', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        {/* Fluttering Post-it */}
+        <div style={{ 
+          width: 140, height: 160, backgroundColor: '#fae588', 
+          border: '1.5px solid #000', borderRadius: 4,
+          animation: 'flutter 3.5s ease-in-out infinite',
+          position: 'relative',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 16, boxSizing: 'border-box'
+        }}>
+          {/* Post-it Tape */}
+          <div style={{ position: 'absolute', top: -12, width: 45, height: 24, backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: 2, transform: 'rotate(-2deg)', border: '1px solid rgba(0,0,0,0.05)' }} />
+          
+          {/* Mock Lines */}
+          <div style={{ marginTop: 20, width: '100%', height: 3, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 2, marginBottom: 12 }} />
+          <div style={{ width: '80%', alignSelf: 'flex-start', height: 3, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 2, marginBottom: 12 }} />
+          <div style={{ width: '60%', alignSelf: 'flex-start', height: 3, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 2 }} />
+          
+          <img src="/assets/img-character.png" alt="character" style={{ width: 60, height: 60, position: 'absolute', bottom: 10, right: 10, objectFit: 'contain' }} />
+        </div>
+      </div>
+
+      {/* Bottom CTA Area */}
+      <div style={{ position: 'absolute', bottom: 50, left: 20, right: 20, display: 'flex', justifyContent: 'center' }}>
+        <button 
+          onClick={() => setScreen('home')}
+          style={{ 
+            backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
+            width: '100%', maxWidth: 335, padding: '13.5px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            cursor: 'pointer', transition: 'transform 0.1s'
+          }}
+          className="neo-btn"
+        >
+          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>시작하기</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14"></path>
+            <path d="M12 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      </div>
     </div>
   );
 
