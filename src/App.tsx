@@ -316,7 +316,7 @@ export default function App() {
       <div 
         onClick={() => setIsBottomSheetOpen(false)}
         style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
           backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)', zIndex: 2000,
         }}
       />
@@ -600,7 +600,7 @@ export default function App() {
         {/* Action Completion Popup */}
         {showActionPopup && (
           <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+            position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
             backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 4000,
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
           }}>
@@ -891,7 +891,7 @@ export default function App() {
       
       {/* Detail Overlay */}
       {selectedHistoryItem && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000, overflowY: 'auto', background: '#000' }}>
+        <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh', zIndex: 3000, overflowY: 'auto', background: '#000' }}>
           {renderReceipt(selectedHistoryItem)}
         </div>
       )}
