@@ -168,8 +168,8 @@ export default function App() {
               </p>
               <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>아리스토텔레스</span>
             </div>
-            <div style={{ width: 50, height: 50, borderRadius: '50%', backgroundColor: '#F3F4F6', border: '1.5px solid #191f28', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              <img src="/assets/img-character.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 2, boxSizing: 'border-box' }}>
+              <img src="/assets/img-character.png" alt="캐릭터" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
           </div>
         </div>
