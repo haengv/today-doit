@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 type TabState = 'home' | 'history';
 type ScreenState = 'onboarding' | 'home' | 'breakdown' | 'action' | 'receipt';
@@ -44,6 +44,41 @@ export default function App() {
   const [postItColor, setPostItColor] = useState('#FAE588');
   const [startWhen, setStartWhen] = useState('');
   const [startWhere, setStartWhere] = useState('');
+  
+  const [pressProgress, setPressProgress] = useState(0);
+  const animationRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+
+  const startPress = () => {
+    startTimeRef.current = Date.now();
+    
+    const animate = () => {
+      if (!startTimeRef.current) return;
+      const elapsed = Date.now() - startTimeRef.current;
+      const progress = Math.min((elapsed / 700) * 100, 100);
+      setPressProgress(progress);
+      
+      if (progress < 100) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        startTimeRef.current = null;
+        setPressProgress(0);
+        setActionStartTime(new Date());
+        setScreen('action');
+      }
+    };
+    
+    animationRef.current = requestAnimationFrame(animate);
+  };
+
+  const endPress = () => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    startTimeRef.current = null;
+    setPressProgress(0);
+  };
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
   const [showActionPopup, setShowActionPopup] = useState(false);
   const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
@@ -510,14 +545,22 @@ export default function App() {
       {/* Bottom CTA */}
       <div style={{ position: 'sticky', bottom: 0, width: '100%', padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box', marginTop: 'auto' }}>
         <button 
-          onClick={() => {
-            setActionStartTime(new Date());
-            setScreen('action');
-          }}
+          onMouseDown={startPress}
+          onMouseUp={endPress}
+          onMouseLeave={endPress}
+          onTouchStart={startPress}
+          onTouchEnd={endPress}
           style={{ 
-            backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 16,
+            background: pressProgress > 0 
+              ? `linear-gradient(90deg, #93c5fd ${pressProgress}%, #c5e3ff ${pressProgress}%)`
+              : '#c5e3ff',
+            border: pressProgress > 0 ? '1.5px solid #2563eb' : '1.5px solid rgba(0,12,30,0.8)',
+            transform: pressProgress > 0 ? `scale(${1 - (pressProgress / 100) * 0.04})` : 'scale(1)',
+            borderRadius: 16,
             width: '100%', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            userSelect: 'none',
+            WebkitUserSelect: 'none'
           }}
         >
           <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>꾹 눌러 첫 행동 시작</span>
