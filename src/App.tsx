@@ -582,71 +582,153 @@ export default function App() {
   );
 
   const renderAction = () => {
-    const currentStepIndex = steps.findIndex(s => !s.completed);
-    const currentStep = steps[currentStepIndex];
+    const currentStep = steps[currentActionStepIndex];
+    const nextStep = steps[currentActionStepIndex + 1];
 
     const timeString = actionStartTime 
-      ? actionStartTime.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' })
+      ? actionStartTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
       : '';
 
+    const handleNext = () => {
+      // Mark current as completed
+      const newSteps = [...steps];
+      if (newSteps[currentActionStepIndex]) {
+        newSteps[currentActionStepIndex].completed = true;
+      }
+      setSteps(newSteps);
+
+      if (currentActionStepIndex < steps.length - 1) {
+        // Move to next step
+        setCurrentActionStepIndex(currentActionStepIndex + 1);
+        setActionStartTime(new Date());
+      } else {
+        // Finished all steps
+        setShowActionPopup(true);
+      }
+    };
+
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#F8F9FA', padding: 20, paddingBottom: 100, position: 'relative' }}>
-        <div 
-          className="neo-card anim-pop"
-          style={{ width: '100%', maxWidth: 320, padding: '40px 24px', backgroundColor: '#FFF', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-        >
-          {/* Top: Goal */}
-          <h3 style={{ fontSize: 13, fontWeight: 800, color: '#3B82F6', marginBottom: 8, background: '#EFF6FF', padding: '4px 12px', borderRadius: 16 }}>오늘 목표</h3>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: '#191f28', marginBottom: 24, wordBreak: 'keep-all' }}>{goal}</h2>
-          
-          <div style={{ width: '100%', height: '1.5px', background: '#E5E7EB', marginBottom: 32 }} />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#FFF', position: 'relative' }}>
+        {/* Top Navigation */}
+        <div style={{ width: '100%', height: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', boxSizing: 'border-box' }}>
+          <button 
+            onClick={() => setScreen('breakdown')}
+            style={{ 
+              width: 34, height: 34, borderRadius: 34, border: '1.5px solid rgba(3,18,40,0.7)', background: 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 6 }}>
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
 
-          {/* Main: Current Step */}
-          <p style={{ fontSize: 14, fontWeight: 700, color: '#4E5968', marginBottom: 12 }}>지금은 이것만 해볼까요?</p>
-          <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 24 }}>
-            {/* Pulsing indicator background */}
-            <div style={{ position: 'absolute', width: 80, height: 80, background: '#DBEAFE', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#191f28', margin: 0, wordBreak: 'keep-all', position: 'relative', zIndex: 1, padding: '0 20px' }}>
-              [ {currentStep?.text || '모든 할 일을 마쳤습니다!'} ]
-            </h1>
-            <style>{`@keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.4); opacity: 0; } 100% { transform: scale(1); opacity: 0; } }`}</style>
+          {/* Dots */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {steps.map((_, idx) => (
+              <div 
+                key={idx}
+                style={{
+                  height: 6,
+                  borderRadius: 6,
+                  backgroundColor: idx === currentActionStepIndex ? '#6b7684' : '#E5E8EB',
+                  width: idx === currentActionStepIndex ? 16 : 6,
+                  transition: 'all 0.3s ease'
+                }}
+              />
+            ))}
           </div>
-          <div style={{ fontSize: 14, fontWeight: 800, color: '#9CA3AF', marginBottom: 40 }}>
-            {currentStepIndex + 1} / {steps.length} step
+
+          <div style={{ backgroundColor: '#f2f4f6', padding: '2px 8px', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#6b7684' }}>{currentActionStepIndex + 1}</span>
+            <span style={{ fontSize: 14, fontWeight: 500, color: '#b0b8c1' }}>/{steps.length}</span>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 40, paddingBottom: 150 }}>
+          {/* Layered Card */}
+          <div style={{ position: 'relative', width: 315, height: 257, marginBottom: 20 }}>
+            {/* Background Blue Card */}
+            <div style={{ 
+              position: 'absolute', top: 11, left: 7, width: 315, height: 257,
+              backgroundColor: '#c5e3ff', border: '1.5px solid #000', borderRadius: 14, zIndex: 1
+            }} />
+            
+            {/* Foreground White Card */}
+            <div style={{ 
+              position: 'absolute', top: 0, left: 0, width: 315, height: 257,
+              backgroundColor: '#FFF', border: '1.5px solid #000', borderRadius: 14, zIndex: 2,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 20px'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11, marginBottom: 50 }}>
+                <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', letterSpacing: '-0.28px' }}>
+                  지금 이것만 해볼까요?
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontSize: 24, fontWeight: 600, color: '#191f28', letterSpacing: '-0.48px', wordBreak: 'keep-all', textAlign: 'center' }}>
+                    {currentStep?.text || '알 수 없는 작업'}
+                  </div>
+                  <div style={{ backgroundColor: '#f2f4f6', padding: '4px 6px', borderRadius: 4 }}>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>
+                      {currentStep?.timeEstimate || '1분'}면 충분해요
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ fontSize: 11, fontWeight: 400, color: 'rgba(3,24,50,0.46)', letterSpacing: '-0.11px', fontFamily: 'Lexend, sans-serif' }}>
+                  STARTED
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 500, color: 'rgba(0,12,30,0.8)', letterSpacing: '-0.15px', fontFamily: 'Lexend, sans-serif' }}>
+                  {timeString}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div style={{ fontSize: 16, fontWeight: 800, color: '#3B82F6', marginBottom: 8 }}>지금 시작했어요 🚀</div>
-          <div style={{ fontSize: 13, color: '#4E5968', marginBottom: 40 }}>({timeString} 시작)</div>
+          {/* Next Step Preview */}
+          {nextStep ? (
+            <div style={{ width: 335, backgroundColor: '#f2f4f6', borderRadius: 8, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 16, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>다음</span>
+                <span style={{ fontSize: 16, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>{nextStep.text}</span>
+              </div>
+              <div style={{ backgroundColor: '#FFF', padding: '1px 6px', borderRadius: 4 }}>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>{nextStep.timeEstimate}</span>
+              </div>
+            </div>
+          ) : (
+            <div style={{ height: 44 }} /> /* Placeholder for alignment */
+          )}
+        </div>
 
-          {/* Bottom text */}
-          <p style={{ fontSize: 14, color: '#8B95A1', marginBottom: 24 }}>처음 시작하는 게 가장 어려워요.<br/>가벼운 마음으로 딱 이것만 해봐요!</p>
-
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <button 
-              className="neo-btn" 
-              style={{ backgroundColor: '#10B981', color: '#FFF', width: '100%', padding: '16px 0', fontSize: 16 }}
-              onClick={() => {
-                if (currentStep) {
-                  setShowActionPopup(true);
-                } else {
-                  setScreen('home');
-                }
-              }}
-            >
-              좋아요, 했어요
-            </button>
-            <button 
-              className="neo-btn" 
-              style={{ backgroundColor: '#F3F4F6', color: '#4E5968', width: '100%', padding: '16px 0', fontSize: 16 }}
-              onClick={() => {
-                if (window.confirm('현재 진행 중인 행동이 있습니다. 정말 멈추시겠습니까?')) {
-                  setScreen('home');
-                }
-              }}
-            >
-              잠깐 멈출게요
-            </button>
-          </div>
+        {/* Bottom CTAs */}
+        <div style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '0 20px', display: 'flex', gap: 8, boxSizing: 'border-box', zIndex: 10 }}>
+          <button 
+            onClick={() => setScreen('breakdown')}
+            style={{ 
+              flex: 1, backgroundColor: '#FFF', border: '1.5px solid rgba(2,9,19,0.91)', borderRadius: 12,
+              padding: '13.5px 9.5px', fontSize: 18, fontWeight: 600, color: 'rgba(0,12,30,0.8)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}
+          >
+            여기서 멈출게요
+          </button>
+          <button 
+            onClick={handleNext}
+            style={{ 
+              flex: 1, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
+              padding: '13.5px 9.5px', fontSize: 18, fontWeight: 600, color: '#130537', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4
+            }}
+          >
+            <span>완료했어요</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
         </div>
 
         {/* Action Completion Popup */}
@@ -656,51 +738,68 @@ export default function App() {
             backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 4000,
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
           }}>
-            <div className="neo-card anim-pop" style={{ width: '100%', maxWidth: 320, padding: 32, backgroundColor: '#FFF', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div 
+              className="anim-pop"
+              style={{ width: '100%', maxWidth: 320, backgroundColor: '#FFF', borderRadius: 24, padding: '32px 24px', textAlign: 'center', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+            >
               <div style={{ fontSize: 48, marginBottom: 16 }}>👏</div>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: '#191f28', marginBottom: 8 }}>정말 해내셨군요! 고생했어요</h2>
-              <p style={{ fontSize: 15, color: '#4E5968', marginBottom: 32, wordBreak: 'keep-all' }}>진짜 완벽하게 마무리하셨나요?</p>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: '#191f28', marginBottom: 12 }}>수고하셨어요! 🎉</h2>
+              <p style={{ fontSize: 16, color: '#4E5968', marginBottom: 24, lineHeight: 1.5 }}>
+                모든 할 일을 완벽하게<br/>마무리하셨네요. 정말 멋져요!
+              </p>
               
-              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <button 
-                  className="neo-btn" 
-                  style={{ backgroundColor: '#191f28', color: '#FFF', width: '100%', padding: '16px 0', fontSize: 16 }}
-                  onClick={() => {
-                    const newSteps = [...steps];
-                    newSteps[currentStepIndex].completed = true;
-                    setSteps(newSteps);
-                    
-                    const remainingSteps = newSteps.filter(s => !s.completed);
-                    if (remainingSteps.length > 0) {
-                      setActionStartTime(new Date());
-                      setShowActionPopup(false);
-                    } else {
-                      setShowActionPopup(false);
-                      alert('🎉 오늘의 모든 행동을 완료했습니다! 수고하셨어요!');
-                      setScreen('home');
-                    }
-                  }}
-                >
-                  네! 다음 행동으로 넘어갈게요
-                </button>
-                <button 
-                  className="neo-btn" 
-                  style={{ backgroundColor: '#F3F4F6', color: '#4E5968', width: '100%', padding: '16px 0', fontSize: 16 }}
-                  onClick={() => {
-                    // Mark as completed but go back to home to rest
-                    const newSteps = [...steps];
-                    newSteps[currentStepIndex].completed = true;
-                    setSteps(newSteps);
-                    setShowActionPopup(false);
-                    setScreen('home');
-                  }}
-                >
-                  나중에 다시 할게요 (홈으로)
-                </button>
-              </div>
+              <button 
+                className="neo-btn" 
+                onClick={() => {
+                  setShowActionPopup(false);
+                  
+                  const newItem = {
+                    id: Date.now(),
+                    text: goal,
+                    date: new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    when: startWhen,
+                    where: startWhere,
+                    steps: steps
+                  };
+                  setHistory([newItem, ...history]);
+                  setSelectedHistoryItem(newItem);
+                  
+                  // Trigger confetti
+                  const confettiDivs = Array.from({ length: 30 }).map((_, i) => {
+                    const el = document.createElement('div');
+                    el.className = 'confetti-piece';
+                    el.style.left = `${Math.random() * 100}%`;
+                    el.style.backgroundColor = ['#FFC800', '#FF0000', '#0044FF', '#00CC00', '#FF00CC'][Math.floor(Math.random() * 5)];
+                    el.style.animationDelay = `${Math.random() * 0.5}s`;
+                    return el;
+                  });
+                  const container = document.getElementById('confetti-container');
+                  if (container) {
+                    confettiDivs.forEach(div => container.appendChild(div));
+                    setTimeout(() => {
+                      confettiDivs.forEach(div => div.remove());
+                      setScreen('receipt');
+                    }, 2500);
+                  } else {
+                    setScreen('receipt');
+                  }
+                }}
+                style={{ backgroundColor: '#3B82F6', color: '#FFF', width: '100%', padding: '16px 0', fontSize: 16 }}
+              >
+                결과 영수증 보기
+              </button>
             </div>
           </div>
         )}
+
+        {/* Confetti container */}
+        <div 
+          id="confetti-container" 
+          style={{ 
+            position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
+            pointerEvents: 'none', zIndex: 5000, overflow: 'hidden' 
+          }} 
+        />
       </div>
     );
   };
