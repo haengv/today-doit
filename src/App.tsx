@@ -414,6 +414,10 @@ export default function App() {
                   setScreen('breakdown');
                   setIsGeneratingSteps(true);
                   const newSteps = await simulateBreakdown(goal);
+                  
+                  // Artificial delay to show loading skeleton
+                  await new Promise(resolve => setTimeout(resolve, 1500));
+                  
                   setSteps(newSteps);
                   setHistory(prev => prev.map(h => h.id === historyId ? { ...h, steps: newSteps } : h));
                   setIsGeneratingSteps(false);
@@ -500,7 +504,10 @@ export default function App() {
                       backgroundColor: isFirst ? '#FAE588' : '#F2F4F6', 
                       border: isFirst ? '1.5px solid #130537' : 'none',
                       borderRadius: 8, padding: isFirst ? '11.5px 17.5px' : '10px 16px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      opacity: 0,
+                      animation: 'fadeInUp 0.4s ease-out forwards',
+                      animationDelay: `${idx * 0.15}s`
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
