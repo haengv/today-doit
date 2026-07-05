@@ -168,7 +168,7 @@ export default function App() {
         
         <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Post-it UI Goal Card */}
-          <div style={{ position: 'relative', paddingTop: 36, paddingLeft: 36, paddingRight: 36, width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center' }}>
             <div 
               style={{ 
                 position: 'relative', width: 240, height: 280, backgroundColor: hasActiveGoal ? postItColor : '#FAE588', 
@@ -1021,7 +1021,7 @@ export default function App() {
             <div 
               onClick={() => { setTab('home'); setScreen('home'); }}
               style={{ 
-                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', minWidth: 46,
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 0', width: 76,
                 background: tab === 'home' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
                 justifyContent: 'center', transition: 'background 0.2s'
               }}
@@ -1032,7 +1032,7 @@ export default function App() {
             <div 
               onClick={() => setTab('history')}
               style={{ 
-                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', minWidth: 46,
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 0', width: 76,
                 background: tab === 'history' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
                 justifyContent: 'center', transition: 'background 0.2s'
               }}
