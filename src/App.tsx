@@ -52,8 +52,7 @@ export default function App() {
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  const startPress = (e?: React.MouseEvent | React.TouchEvent) => {
-    if (e && e.cancelable) e.preventDefault();
+  const startPress = () => {
     if (startTimeRef.current) return;
     
     startTimeRef.current = Date.now();
@@ -566,11 +565,6 @@ export default function App() {
           onTouchEnd={endPress}
           onTouchCancel={endPress}
           onContextMenu={(e) => { e.preventDefault(); return false; }}
-          onClick={() => {
-            if (pressProgress < 100) {
-              alert("버튼을 1초 동안 꾹~ 눌러주세요!");
-            }
-          }}
           style={{ 
             background: pressProgress > 0 
               ? `linear-gradient(90deg, #93c5fd ${pressProgress}%, #c5e3ff ${pressProgress}%)`
