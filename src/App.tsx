@@ -193,7 +193,7 @@ export default function App() {
           }}>
             <div 
               style={{ 
-                position: 'relative', width: 240, height: 280, backgroundColor: (hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588', 
+                position: 'relative', width: 220, height: 260, backgroundColor: (hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588', 
                 border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 6,
                 boxShadow: '0px 8px 7.5px rgba(22,22,22,0.13)',
                 display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: 16
@@ -220,12 +220,12 @@ export default function App() {
               </div>
               
               {!hasActiveGoal && !goal.trim() ? (
-                <div style={{ position: 'absolute', top: 120.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
+                <div style={{ position: 'absolute', top: 110.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
                   <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>오늘 꼭 해야 할</span>
                   <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한가지 일을 적어주세요</span>
                 </div>
               ) : (
-                <div style={{ position: 'absolute', top: 110.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <div style={{ position: 'absolute', top: 100.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <h1 style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap', maxWidth: 200 }}>
                     {goal}
                   </h1>
@@ -353,12 +353,12 @@ export default function App() {
           maxHeight: '90vh', overflowY: 'auto'
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 38 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
           <div style={{ width: 48, height: 4, backgroundColor: '#E5E8EB', borderRadius: 40 }} />
         </div>
         
         {bottomSheetStep === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 38 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Post-it Color Section */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4 }}>포스트잇 색상</div>
