@@ -1011,97 +1011,96 @@ export default function App() {
     const displayGoal = isHistoryView ? historyItem.text : goal;
     const displaySteps = isHistoryView ? (historyItem.steps || []) : steps;
 
-    const today = new Date();
-    const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    const timeStr = today.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    // Date parsing
+    const dateObj = isHistoryView && historyItem.date ? new Date(historyItem.date) : new Date();
+    const day = dateObj.getDate();
+    const month = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+    
+    const bgColor = isHistoryView ? '#fae588' : (postItColor || '#fae588');
+
+    const handleClose = () => {
+      if (isHistoryView) {
+        setSelectedHistoryItem(null);
+      } else {
+        setGoal('');
+        setSteps([]);
+        setStartWhen('');
+        setStartWhere('');
+        setScreen('home');
+      }
+    };
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#000', padding: '40px 20px', paddingBottom: 100, position: 'relative', zIndex: 2000 }}>
-        <style>{`@keyframes slideUp { from { transform: translateY(100vh); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`}</style>
-        <div style={{ width: '100%', maxWidth: 360, background: '#F9A8D4', padding: '32px 24px', position: 'relative', overflow: 'hidden', animation: 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <h3 style={{ fontSize: 12, fontWeight: 800, margin: 0 }}>@BEGIN_APP</h3>
-            <h1 style={{ fontSize: 64, fontWeight: 900, margin: '-8px 0 8px 0', letterSpacing: -2 }}>BEGIN</h1>
-            <div style={{ fontSize: 14, fontWeight: 800 }}>********** SHORT INTERVIEW **********</div>
-          </div>
-          
-          {/* Meta Info */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14, fontWeight: 800, fontFamily: 'monospace', marginBottom: 24 }}>
-            <div style={{ display: 'flex' }}><span style={{ width: 100 }}>Date:</span><span>{dateStr} {timeStr}</span></div>
-            <div style={{ display: 'flex' }}><span style={{ width: 100 }}>Terminal:</span><span>Begin</span></div>
-            <div style={{ display: 'flex' }}><span style={{ width: 100 }}>Served by:</span><span>My.Will</span></div>
-          </div>
-          
-          <div style={{ fontSize: 14, fontWeight: 800, textAlign: 'center', marginBottom: 24 }}>
-            ***************************************
-          </div>
-
-          <div style={{ display: 'flex', gap: 16, fontSize: 16, fontWeight: 800, marginBottom: 12 }}>
-            <span style={{ flexShrink: 0 }}>목표 :</span>
-            <span style={{ wordBreak: 'keep-all' }}>{displayGoal}</span>
+      <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5000 }}>
+        {/* Dimming Overlay */}
+        <div 
+          onClick={handleClose}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)' }}
+        />
+        
+        <div style={{ position: 'relative', zIndex: 5001, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+          {/* Close Button */}
+          <div 
+            onClick={handleClose}
+            style={{ 
+              width: 44, height: 44, backgroundColor: '#FFF', border: '1.9px solid rgba(3,18,40,0.7)', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#191f28" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </div>
 
-          {(isHistoryView ? historyItem?.when : startWhen) && (
-            <div style={{ display: 'flex', gap: 16, fontSize: 14, fontWeight: 700, marginBottom: 8, color: '#4E5968' }}>
-              <span style={{ flexShrink: 0, width: 40 }}>시간 :</span>
-              <span style={{ wordBreak: 'keep-all' }}>{isHistoryView ? historyItem?.when : startWhen}</span>
+          {/* Card */}
+          <div style={{ position: 'relative', width: 272, height: 469, backgroundColor: bgColor, borderRadius: 16, overflow: 'hidden' }}>
+            {/* Date */}
+            <div style={{ position: 'absolute', top: 20, left: 20, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 50, fontWeight: 300, lineHeight: 1.1, fontFamily: "'Lexend', sans-serif", color: 'rgba(0,12,30,0.8)' }}>{day}</span>
+              <span style={{ fontSize: 16, fontWeight: 400, lineHeight: 1.2, fontFamily: "'Lexend', sans-serif", color: 'rgba(0,12,30,0.8)', letterSpacing: -0.32 }}>{month}</span>
             </div>
-          )}
-          
-          {(isHistoryView ? historyItem?.where : startWhere) && (
-            <div style={{ display: 'flex', gap: 16, fontSize: 14, fontWeight: 700, marginBottom: 24, color: '#4E5968' }}>
-              <span style={{ flexShrink: 0, width: 40 }}>장소 :</span>
-              <span style={{ wordBreak: 'keep-all' }}>{isHistoryView ? historyItem?.where : startWhere}</span>
+
+            {/* Goal */}
+            <div style={{ position: 'absolute', top: 110, left: 20, width: 214 }}>
+              <p style={{ fontSize: 24, fontWeight: 600, color: 'rgba(0,12,30,0.8)', margin: 0, lineHeight: 1.4, whiteSpace: 'pre-wrap', fontFamily: "'Pretendard', sans-serif" }}>
+                {displayGoal}
+              </p>
             </div>
-          )}
 
-          {/* Barcode */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', height: 60, marginBottom: 32, gap: 2 }}>
-            {Array.from({length: 40}).map((_, i) => (
-              <div key={i} style={{ width: Math.random() > 0.5 ? 4 : 2, background: '#000', height: '100%', opacity: Math.random() > 0.2 ? 1 : 0 }} />
-            ))}
-          </div>
+            {/* Graphic Image */}
+            <div style={{ position: 'absolute', top: 10, right: 10, width: 100, height: 100 }}>
+              <img src="/assets/img-default.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </div>
 
-          {/* List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 40 }}>
-            {displaySteps.map((step, idx) => (
-              <div key={step.id} style={{ display: 'flex', alignItems: 'flex-end', fontSize: 14, fontWeight: 800 }}>
-                <span style={{ maxWidth: '75%', wordBreak: 'keep-all' }}>{step.text}</span>
-                <div style={{ flex: 1, borderBottom: '2px dotted #000', margin: '0 8px', position: 'relative', top: -4 }}></div>
-                <span>{(idx + 1).toString().padStart(2, '0')}</span>
-              </div>
-            ))}
-          </div>
+            {/* Steps */}
+            <div style={{ position: 'absolute', top: 227, left: 27, width: 157, display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {displaySteps.slice(0, 5).map((step, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{ fontSize: 14, color: 'rgba(0,19,43,0.58)', fontFamily: "'Pretendard', sans-serif" }}>{idx + 1}</span>
+                  <span style={{ fontSize: 14, color: 'rgba(3,18,40,0.7)', fontFamily: "'Pretendard', sans-serif", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step.text}</span>
+                </div>
+              ))}
+              {displaySteps.length > 5 && (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{ fontSize: 14, color: 'rgba(0,19,43,0.58)', fontFamily: "'Pretendard', sans-serif" }}>...</span>
+                </div>
+              )}
+            </div>
 
-          <div style={{ fontSize: 14, fontWeight: 800, textAlign: 'center', marginBottom: 24 }}>
-            ********** SHORT INTERVIEW **********
-          </div>
+            {/* Duration text */}
+            <div style={{ position: 'absolute', top: 434, left: 20, transform: 'translateY(-50%)' }}>
+              <p style={{ fontSize: 12, fontWeight: 500, color: 'rgba(0,19,43,0.58)', margin: 0, fontFamily: "'Pretendard', sans-serif" }}>
+                {displaySteps.length}가지의 행동을 완료했어요
+              </p>
+            </div>
 
-          <div style={{ textAlign: 'center', fontSize: 16, fontWeight: 800 }}>
-            T H A N K &nbsp;&nbsp;&nbsp;Y O U<br />
-            HAVE A NICE DAY
+            {/* Done Badge */}
+            <div style={{ position: 'absolute', top: 418, right: 20, padding: '4px 16px', height: 31, backgroundColor: '#191f28', borderRadius: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box' }}>
+              <span style={{ fontSize: 14, fontWeight: 500, color: '#FFF', fontFamily: "'Pretendard', sans-serif" }}>완료</span>
+            </div>
           </div>
         </div>
-
-        {/* Action Button outside receipt */}
-        <button 
-          className="neo-btn" 
-          style={{ backgroundColor: '#FFF', color: '#191f28', width: '100%', maxWidth: 360, marginTop: 40 }}
-          onClick={() => {
-            if (isHistoryView) {
-              setSelectedHistoryItem(null);
-            } else {
-              setGoal('');
-              setSteps([]);
-              setStartWhen('');
-              setStartWhere('');
-              setScreen('home');
-            }
-          }}
-        >
-          {isHistoryView ? '닫기' : '새로운 목표 시작하기'}
-        </button>
       </div>
     );
   };
@@ -1116,11 +1115,7 @@ export default function App() {
       {tab === 'home' && screen === 'receipt' && renderReceipt()}
       
       {/* Detail Overlay */}
-      {selectedHistoryItem && (
-        <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh', zIndex: 3000, overflowY: 'auto', background: '#000' }}>
-          {renderReceipt(selectedHistoryItem)}
-        </div>
-      )}
+      {selectedHistoryItem && renderReceipt(selectedHistoryItem)}
 
       {/* Bottom Sheet Overlay */}
       {isBottomSheetOpen && renderBottomSheet()}
