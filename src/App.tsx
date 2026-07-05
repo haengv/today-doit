@@ -129,7 +129,7 @@ export default function App() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
         <div style={{ width: '100%', maxWidth: 335, textAlign: 'left', marginBottom: 32, marginTop: 12 }}>
-          <h1 style={{ fontSize: 16, fontWeight: 500, color: '#191f28', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <h1 style={{ fontSize: 16, fontWeight: 500, color: '#191f28', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
             {dateString} <span style={{ fontSize: 12 }}>▼</span>
           </h1>
           <div style={{ 
@@ -170,8 +170,8 @@ export default function App() {
 
               {/* Top Left Date */}
               <div style={{ position: 'absolute', top: 16.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 38, fontWeight: 300, lineHeight: 1.2, color: 'rgba(0,12,30,0.8)', fontFamily: 'monospace' }}>{d}</span>
-                <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(0,12,30,0.8)', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: 38, fontWeight: 300, lineHeight: 1.2, color: 'rgba(0,12,30,0.8)', fontFamily: "'Lexend', sans-serif" }}>{d}</span>
+                <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(0,12,30,0.8)', fontFamily: "'Lexend', sans-serif" }}>
                   {today.toLocaleString('en-US', { month: 'short' }).toUpperCase()}
                 </span>
               </div>
