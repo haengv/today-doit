@@ -48,42 +48,12 @@ export default function App() {
   const [startWhen, setStartWhen] = useState('');
   const [startWhere, setStartWhere] = useState('');
   
-  const [pressProgress, setPressProgress] = useState(0);
-  const animationRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-
-  const startPress = () => {
-    if (startTimeRef.current) return;
-    
-    startTimeRef.current = Date.now();
-    
-    const animate = () => {
-      if (!startTimeRef.current) return;
-      const elapsed = Date.now() - startTimeRef.current;
-      const progress = Math.min((elapsed / 1000) * 100, 100);
-      setPressProgress(progress);
-      
-      if (progress < 100) {
-        animationRef.current = requestAnimationFrame(animate);
-      } else {
-        startTimeRef.current = null;
-        setPressProgress(0);
-        setActionStartTime(new Date());
-        setCurrentActionStepIndex(0);
-        setScreen('action');
-      }
-    };
-    
-    animationRef.current = requestAnimationFrame(animate);
-  };
-
-  const endPress = () => {
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
-    startTimeRef.current = null;
-    setPressProgress(0);
+  const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
+  
+  const handleStartAction = () => {
+    setActionStartTime(new Date());
+    setCurrentActionStepIndex(0);
+    setScreen('action');
   };
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
   const [showActionPopup, setShowActionPopup] = useState(false);
@@ -558,18 +528,10 @@ export default function App() {
       {/* Bottom CTA */}
       <div style={{ position: 'sticky', bottom: 0, width: '100%', padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box', marginTop: 'auto' }}>
         <button 
-          onMouseDown={startPress}
-          onMouseUp={endPress}
-          onMouseLeave={endPress}
-          onTouchStart={startPress}
-          onTouchEnd={endPress}
-          onTouchCancel={endPress}
-          onContextMenu={(e) => { e.preventDefault(); return false; }}
+          onClick={handleStartAction}
           style={{ 
-            background: pressProgress > 0 
-              ? `linear-gradient(90deg, #93c5fd ${pressProgress}%, #c5e3ff ${pressProgress}%)`
-              : '#c5e3ff',
-            border: pressProgress > 0 ? '1.5px solid #2563eb' : '1.5px solid rgba(0,12,30,0.8)',
+            background: '#c5e3ff',
+            border: '1.5px solid rgba(0,12,30,0.8)',
             borderRadius: 16,
             width: '100%', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             cursor: 'pointer',
@@ -578,7 +540,7 @@ export default function App() {
             WebkitTouchCallout: 'none'
           }}
         >
-          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>꾹 눌러 첫 행동 시작</span>
+          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>첫 행동 시작하기</span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
