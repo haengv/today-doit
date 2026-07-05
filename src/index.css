@@ -173,13 +173,13 @@ input:focus, textarea:focus {
 }
 
 @keyframes cardSwipeOut {
-  0% { transform: scale(1) translateY(0); opacity: 1; }
-  100% { transform: scale(0.8) translateY(-50px); opacity: 0; }
+  0% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(-150px); opacity: 0; }
 }
 
 @keyframes cardSwipeIn {
-  0% { transform: scale(0.8) translateY(50px); opacity: 0; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+  0% { transform: translateX(150px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
 }
 
 .skeleton-shimmer {
