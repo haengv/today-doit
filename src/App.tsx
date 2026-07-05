@@ -62,6 +62,7 @@ export default function App() {
   const [isAnimatingNext, setIsAnimatingNext] = useState(false);
   const [isGeneratingSteps, setIsGeneratingSteps] = useState(false);
   const [showBreakdownToast, setShowBreakdownToast] = useState(false);
+  const [breakdownToastMessage, setBreakdownToastMessage] = useState('');
   const [homeDate, setHomeDate] = useState<Date>(new Date());
 
   useEffect(() => {
@@ -413,15 +414,19 @@ export default function App() {
                   setIsBottomSheetOpen(false);
                   setScreen('breakdown');
                   setIsGeneratingSteps(true);
+                  setBreakdownToastMessage('할 일을 단계별로 쪼개고 있어요.');
+                  setShowBreakdownToast(true);
+                  
                   const newSteps = await simulateBreakdown(goal);
                   
                   // Artificial delay to show loading skeleton
-                  await new Promise(resolve => setTimeout(resolve, 1500));
+                  await new Promise(resolve => setTimeout(resolve, 2500));
                   
                   setSteps(newSteps);
                   setHistory(prev => prev.map(h => h.id === historyId ? { ...h, steps: newSteps } : h));
                   setIsGeneratingSteps(false);
-                  setShowBreakdownToast(true);
+                  
+                  setBreakdownToastMessage('오늘의 할 일을 단계별로 정리했어요 ✨');
                   setTimeout(() => setShowBreakdownToast(false), 3000);
                 }}
                 style={{ 
@@ -557,9 +562,10 @@ export default function App() {
         <div style={{
           position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
           backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFF', padding: '12px 20px', borderRadius: 24,
-          fontSize: 14, fontWeight: 500, zIndex: 1000, animation: 'toastEnter 0.3s ease-out'
+          fontSize: 14, fontWeight: 500, zIndex: 1000, animation: 'toastEnter 0.3s ease-out',
+          whiteSpace: 'nowrap'
         }}>
-          오늘의 할 일을 단계별로 정리했어요 ✨
+          {breakdownToastMessage}
         </div>
       )}
 
