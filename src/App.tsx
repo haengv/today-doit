@@ -170,7 +170,7 @@ export default function App() {
           {/* Post-it UI Goal Card */}
           <div style={{ 
             position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center',
-            transform: isBottomSheetOpen ? 'translateY(-24px)' : 'translateY(0)',
+            transform: isBottomSheetOpen ? 'translateY(-140px)' : 'translateY(0)',
             transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
             <div 
@@ -208,7 +208,7 @@ export default function App() {
                 </div>
               ) : (
                 <div style={{ position: 'absolute', top: 130.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <h1 className="handwriting" style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap', maxWidth: 200 }}>
+                  <h1 style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap', maxWidth: 200 }}>
                     {goal}
                   </h1>
                 </div>
