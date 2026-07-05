@@ -108,7 +108,7 @@ export default function App() {
           <h1 style={{ fontSize: 50, fontWeight: 800, fontFamily: "'Lexend', sans-serif", color: '#191f28', margin: 0, lineHeight: 1.2 }}>
             DO IT
           </h1>
-          <img src="/assets/img-default.png" alt="!" style={{ width: 14, height: 38, transform: 'rotate(15deg)', objectFit: 'contain' }} />
+          <span style={{ fontSize: 50, fontWeight: 800, fontFamily: "'Lexend', sans-serif", color: '#191f28', transform: 'rotate(15deg)', display: 'inline-block', lineHeight: 1.2 }}>!</span>
         </div>
         <p style={{ fontSize: 18, fontWeight: 500, color: 'rgba(3,18,40,0.7)', margin: 0, marginTop: 8 }}>
           하루 한 가지만 시작하기
@@ -133,7 +133,7 @@ export default function App() {
           <div style={{ width: '80%', alignSelf: 'flex-start', height: 3, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 2, marginBottom: 12 }} />
           <div style={{ width: '60%', alignSelf: 'flex-start', height: 3, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 2 }} />
           
-          <img src="/assets/img-character.png" alt="character" style={{ width: 60, height: 60, position: 'absolute', bottom: 10, right: 10, objectFit: 'contain' }} />
+          <img src="/assets/icon-edit.svg" alt="pen" style={{ width: 40, height: 40, position: 'absolute', bottom: -10, right: -10, transform: 'rotate(-10deg)', objectFit: 'contain', background: '#FFF', borderRadius: '50%', padding: 6, border: '1.5px solid #000' }} />
         </div>
       </div>
 
