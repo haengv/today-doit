@@ -60,6 +60,8 @@ export default function App() {
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
   const [showActionPopup, setShowActionPopup] = useState(false);
   const [isAnimatingNext, setIsAnimatingNext] = useState(false);
+  const [isGeneratingSteps, setIsGeneratingSteps] = useState(false);
+  const [showBreakdownToast, setShowBreakdownToast] = useState(false);
   const [homeDate, setHomeDate] = useState<Date>(new Date());
 
   useEffect(() => {
@@ -410,9 +412,13 @@ export default function App() {
                   
                   setIsBottomSheetOpen(false);
                   setScreen('breakdown');
+                  setIsGeneratingSteps(true);
                   const newSteps = await simulateBreakdown(goal);
                   setSteps(newSteps);
                   setHistory(prev => prev.map(h => h.id === historyId ? { ...h, steps: newSteps } : h));
+                  setIsGeneratingSteps(false);
+                  setShowBreakdownToast(true);
+                  setTimeout(() => setShowBreakdownToast(false), 3000);
                 }}
                 style={{ 
                   backgroundColor: goal.trim() ? '#c5e3ff' : '#E5E8EB',
@@ -467,87 +473,112 @@ export default function App() {
         {/* Steps Header */}
         <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>아래 단계별로 시작해봐요</div>
-          <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <img src="/assets/icon-edit.svg" alt="수정" style={{ width: 16, height: 16 }} />
-            <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>직접 수정하기</span>
-          </button>
+          {!isGeneratingSteps && (
+            <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+              <img src="/assets/icon-edit.svg" alt="수정" style={{ width: 16, height: 16 }} />
+              <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>직접 수정하기</span>
+            </button>
+          )}
         </div>
 
-        {/* Steps List */}
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {steps.map((step, idx) => {
-            const isFirst = idx === 0;
-            return (
-              <div 
-                key={step.id} 
+        {/* Steps List or Skeleton */}
+        {isGeneratingSteps ? (
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} className="skeleton-shimmer" style={{ height: 44, borderRadius: 8, width: '100%' }} />
+            ))}
+          </div>
+        ) : (
+          <>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {steps.map((step, idx) => {
+                const isFirst = idx === 0;
+                return (
+                  <div 
+                    key={step.id} 
+                    style={{ 
+                      backgroundColor: isFirst ? '#FAE588' : '#F2F4F6', 
+                      border: isFirst ? '1.5px solid #130537' : 'none',
+                      borderRadius: 8, padding: isFirst ? '11.5px 17.5px' : '10px 16px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+                        <span style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)' }}>{idx + 1}</span>
+                      </div>
+                      <div style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,12,30,0.8)' : 'rgba(0,19,43,0.58)' }}>
+                        {step.text}
+                      </div>
+                    </div>
+                    <div style={{ 
+                      backgroundColor: isFirst ? '#FFF2B7' : '#FFF', 
+                      padding: '2px 6px', borderRadius: 4, 
+                      fontSize: 12, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)' 
+                    }}>
+                      {step.timeEstimate}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Plus Button */}
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+              <button 
+                onClick={() => {
+                  setNewStepText('');
+                  setNewStepTime('1분');
+                  setIsAddStepSheetOpen(true);
+                }}
                 style={{ 
-                  backgroundColor: isFirst ? '#FAE588' : '#F2F4F6', 
-                  border: isFirst ? '1.5px solid #130537' : 'none',
-                  borderRadius: 8, padding: isFirst ? '11.5px 17.5px' : '10px 16px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                  width: 32, height: 32, borderRadius: 8, backgroundColor: '#191f28', color: '#FFF',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
-                    <span style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)' }}>{idx + 1}</span>
-                  </div>
-                  <div style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,12,30,0.8)' : 'rgba(0,19,43,0.58)' }}>
-                    {step.text}
-                  </div>
-                </div>
-                <div style={{ 
-                  backgroundColor: isFirst ? '#FFF2B7' : '#FFF', 
-                  padding: '2px 6px', borderRadius: 4, 
-                  fontSize: 12, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)' 
-                }}>
-                  {step.timeEstimate}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </button>
+            </div>
+          </>
+        )}
+      </div>
 
-        {/* Plus Button */}
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+      {/* Breakdown Toast */}
+      {showBreakdownToast && (
+        <div style={{
+          position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFF', padding: '12px 20px', borderRadius: 24,
+          fontSize: 14, fontWeight: 500, zIndex: 1000, animation: 'toastEnter 0.3s ease-out'
+        }}>
+          오늘의 할 일을 단계별로 정리했어요 ✨
+        </div>
+      )}
+
+      {/* Bottom CTA */}
+      {!isGeneratingSteps && (
+        <div style={{ position: 'sticky', bottom: 0, width: '100%', padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box', marginTop: 'auto' }}>
           <button 
-            onClick={() => {
-              setNewStepText('');
-              setNewStepTime('1분');
-              setIsAddStepSheetOpen(true);
-            }}
+            onClick={handleStartAction}
             style={{ 
-              width: 32, height: 32, borderRadius: 8, backgroundColor: '#191f28', color: '#FFF',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer'
+              background: '#c5e3ff',
+              border: '1.5px solid rgba(0,12,30,0.8)',
+              borderRadius: 16,
+              width: '100%', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              cursor: 'pointer',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              WebkitTouchCallout: 'none'
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-              <path d="M12 5v14M5 12h14" />
+            <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>첫 행동 시작하기</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </button>
         </div>
-      </div>
-
-      {/* Bottom CTA */}
-      <div style={{ position: 'sticky', bottom: 0, width: '100%', padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box', marginTop: 'auto' }}>
-        <button 
-          onClick={handleStartAction}
-          style={{ 
-            background: '#c5e3ff',
-            border: '1.5px solid rgba(0,12,30,0.8)',
-            borderRadius: 16,
-            width: '100%', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            cursor: 'pointer',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            WebkitTouchCallout: 'none'
-          }}
-        >
-          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>첫 행동 시작하기</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
-        </button>
-      </div>
+      )}
     </div>
   );
 
