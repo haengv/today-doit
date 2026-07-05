@@ -146,10 +146,7 @@ export default function App() {
         <div style={{ width: '100%', maxWidth: 375, padding: '20px 20px 0 20px', display: 'flex', justifyContent: 'flex-start' }}>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 4 }}>
             <h1 style={{ fontSize: 16, fontWeight: 400, color: '#191f28', margin: 0, display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
-              {dateString} 
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 9L12 15L18 9" stroke="#191f28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              {dateString} <img src="/assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
             </h1>
             <input 
               type="date" 
