@@ -46,6 +46,14 @@ body[data-scroll-locked] {
   overflow-x: hidden;
   background-color: #FFF;
   box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  
+  /* Hide scrollbar */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+#root > div::-webkit-scrollbar {
+  display: none;
 }
 
 /* Hide TDS portal container when it has no popups to prevent it from taking up inspector space */
