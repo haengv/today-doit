@@ -55,7 +55,7 @@ export default function App() {
     const animate = () => {
       if (!startTimeRef.current) return;
       const elapsed = Date.now() - startTimeRef.current;
-      const progress = Math.min((elapsed / 700) * 100, 100);
+      const progress = Math.min((elapsed / 5000) * 100, 100);
       setPressProgress(progress);
       
       if (progress < 100) {
@@ -555,7 +555,6 @@ export default function App() {
               ? `linear-gradient(90deg, #93c5fd ${pressProgress}%, #c5e3ff ${pressProgress}%)`
               : '#c5e3ff',
             border: pressProgress > 0 ? '1.5px solid #2563eb' : '1.5px solid rgba(0,12,30,0.8)',
-            transform: pressProgress > 0 ? `scale(${1 - (pressProgress / 100) * 0.04})` : 'scale(1)',
             borderRadius: 16,
             width: '100%', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             cursor: 'pointer',
