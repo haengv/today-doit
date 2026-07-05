@@ -850,7 +850,7 @@ export default function App() {
                   <span style={{ fontSize: 18, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>더 할래요</span>
                 </button>
                 <button 
-                  onClick={() => { setIsStopPopupOpen(false); setScreen('breakdown'); }}
+                  onClick={() => { setIsStopPopupOpen(false); setScreen('home'); }}
                   style={{ flex: 1, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, padding: '13.5px 9.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                 >
                   <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>네 멈출래요</span>
