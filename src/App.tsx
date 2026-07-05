@@ -563,8 +563,13 @@ export default function App() {
           position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
           backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFF', padding: '12px 20px', borderRadius: 24,
           fontSize: 14, fontWeight: 500, zIndex: 1000, animation: 'toastEnter 0.3s ease-out',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8
         }}>
+          {isGeneratingSteps && (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
+              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+            </svg>
+          )}
           {breakdownToastMessage}
         </div>
       )}
