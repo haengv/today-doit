@@ -133,7 +133,19 @@ export default function App() {
           <div style={{ width: '80%', alignSelf: 'flex-start', height: 3, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 2, marginBottom: 12 }} />
           <div style={{ width: '60%', alignSelf: 'flex-start', height: 3, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 2 }} />
           
-          <img src="/assets/icon-edit.svg" alt="pen" style={{ width: 40, height: 40, position: 'absolute', bottom: -10, right: -10, transform: 'rotate(-10deg)', objectFit: 'contain', background: '#FFF', borderRadius: '50%', padding: 6, border: '1.5px solid #000' }} />
+          <div style={{ position: 'absolute', bottom: -20, right: -25, transform: 'rotate(-15deg)' }}>
+            <svg width="70" height="70" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.15))' }}>
+              <g transform="translate(30,30) rotate(-40) translate(-30,-30)">
+                <rect x="22" y="8" width="16" height="10" rx="4" fill="#FCA5A5" stroke="#191f28" strokeWidth="2.5" />
+                <rect x="22" y="16" width="16" height="6" fill="#E5E8EB" stroke="#191f28" strokeWidth="2.5" />
+                <rect x="22" y="22" width="16" height="20" fill="#3B82F6" stroke="#191f28" strokeWidth="2.5" />
+                <line x1="27" y1="22" x2="27" y2="42" stroke="#191f28" strokeWidth="2" opacity="0.3" />
+                <line x1="33" y1="22" x2="33" y2="42" stroke="#191f28" strokeWidth="2" opacity="0.3" />
+                <path d="M22 42 L30 54 L38 42 Z" fill="#FDE047" stroke="#191f28" strokeWidth="2.5" strokeLinejoin="round" />
+                <path d="M27.5 50.5 L30 54 L32.5 50.5 Z" fill="#191f28" />
+              </g>
+            </svg>
+          </div>
         </div>
       </div>
 
