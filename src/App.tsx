@@ -168,7 +168,7 @@ export default function App() {
         
         <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Post-it UI Goal Card */}
-          <div style={{ position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center', zIndex: isBottomSheetOpen ? 2001 : 'auto' }}>
             <div 
               style={{ 
                 position: 'relative', width: 240, height: 280, backgroundColor: hasActiveGoal ? postItColor : '#FAE588', 
@@ -317,72 +317,94 @@ export default function App() {
         onClick={() => setIsBottomSheetOpen(false)}
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          backgroundColor: 'transparent', zIndex: 2000,
+          backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)', zIndex: 2000,
         }}
       />
       <div 
         style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, 
-          backgroundColor: '#FFF', borderTop: '3px solid #191f28',
-          borderTopLeftRadius: 24, borderTopRightRadius: 24,
-          padding: '24px 24px 40px', zIndex: 2001,
+          backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
+          padding: '16px 20px 40px', zIndex: 2002,
           animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          boxShadow: '0 -4px 12px rgba(0,0,0,0.05)',
+          display: 'flex', flexDirection: 'column',
           maxHeight: '90vh', overflowY: 'auto'
         }}
       >
-        <div style={{ width: 40, height: 6, backgroundColor: '#E5E7EB', borderRadius: 3, marginBottom: 24, flexShrink: 0 }} />
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 38 }}>
+          <div style={{ width: 48, height: 4, backgroundColor: '#E5E8EB', borderRadius: 40 }} />
+        </div>
         
         {bottomSheetStep === 1 && (
-          <>
-            {/* Goal Input inside Bottom Sheet */}
-            <div style={{ width: '100%', marginBottom: 32 }}>
-              <textarea
-                className="handwriting"
-                placeholder="오늘 꼭 달성할 목표 하나를 적어보세요"
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 38 }}>
+            {/* Post-it Color Section */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4 }}>포스트잇 색상</div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                {['#FAE588', '#C8E2FA', '#C4B5FD', '#A7F3D0', '#FCA5A5', '#FCE7F3'].map(color => (
+                  <div 
+                    key={color}
+                    onClick={() => setPostItColor(color)}
+                    style={{
+                      width: 32, height: 32, borderRadius: '50%', backgroundColor: color,
+                      border: postItColor === color ? '2px solid #000' : 'none',
+                      cursor: 'pointer', boxSizing: 'border-box'
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Goal Input Section */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4 }}>오늘 할 일</div>
+              
+              <input
+                placeholder="오늘 꼭 할 일 한가지를 입력하세요"
                 value={goal}
                 onChange={e => setGoal(e.target.value)}
-                autoFocus
                 style={{ 
-                  width: '100%', background: postItColor, border: '1.5px solid #4E5968', borderRadius: 12, padding: 20,
-                  outline: 'none', resize: 'none', textAlign: 'left', fontSize: 24, fontWeight: 800, color: '#191f28', lineHeight: 1.3,
-                  boxShadow: '2px 2px 0px rgba(0,0,0,0.1)', boxSizing: 'border-box'
+                  width: '100%', border: '1.5px solid #B0B8C1', borderRadius: 12, padding: '13.5px 17.5px',
+                  outline: 'none', fontSize: 16, fontWeight: 400, color: '#191f28', boxSizing: 'border-box'
                 }}
-                rows={2}
               />
+
+              {/* Suggestion Chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                {["포트폴리오 완성하기", "시험 공부하기", "방 청소하기", "발표 자료 만들기", "면접 준비하기"].map(chip => (
+                  <div
+                    key={chip}
+                    onClick={() => setGoal(chip)}
+                    style={{
+                      backgroundColor: '#F2F4F6', borderRadius: 8, padding: '4px 12px',
+                      fontSize: 13, fontWeight: 500, color: 'rgba(0,19,43,0.58)', cursor: 'pointer'
+                    }}
+                  >
+                    {chip}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <h2 style={{ fontSize: 14, fontWeight: 800, color: '#4E5968', marginBottom: 12, alignSelf: 'flex-start' }}>포스트잇 색상</h2>
-
-            {/* Color Palette */}
-            <div style={{ display: 'flex', gap: 16, marginBottom: 32, alignSelf: 'flex-start' }}>
-              {['#FEF9C3', '#FBCFE8', '#BAE6FD', '#D1FAE5'].map(color => (
-                <div 
-                  key={color}
-                  onClick={() => setPostItColor(color)}
-                  style={{
-                    width: 36, height: 36, borderRadius: '50%', backgroundColor: color,
-                    border: postItColor === color ? '3px solid #191f28' : '2px solid #E5E7EB',
-                    cursor: 'pointer',
-                    transform: postItColor === color ? 'scale(1.1)' : 'scale(1)',
-                    transition: 'all 0.2s ease',
-                    boxShadow: postItColor === color ? '2px 2px 0px rgba(0,0,0,0.2)' : 'none'
-                  }}
-                />
-              ))}
+            {/* Done Button */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
+              <div 
+                onClick={() => {
+                  if (!goal.trim()) return;
+                  setBottomSheetStep(2);
+                }}
+                style={{ 
+                  backgroundColor: goal.trim() ? '#191F28' : '#E5E8EB',
+                  border: goal.trim() ? 'none' : '1.5px solid #8B95A1',
+                  borderRadius: 12, padding: '13.5px 0',
+                  width: '100%', textAlign: 'center', fontSize: 18, fontWeight: 600,
+                  color: goal.trim() ? '#FFF' : 'rgba(3,24,50,0.46)',
+                  cursor: goal.trim() ? 'pointer' : 'not-allowed'
+                }}
+              >
+                완료
+              </div>
             </div>
-
-            <button 
-              className="neo-btn" style={{ backgroundColor: '#A7F3D0', width: '100%' }}
-              onClick={() => {
-                if (!goal.trim()) return;
-                setBottomSheetStep(2);
-              }}
-            >
-              다음으로
-            </button>
-          </>
+          </div>
         )}
 
         {bottomSheetStep === 2 && (
