@@ -41,6 +41,9 @@ export default function App() {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string} | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [isAddStepSheetOpen, setIsAddStepSheetOpen] = useState(false);
+  const [newStepText, setNewStepText] = useState('');
+  const [newStepTime, setNewStepTime] = useState('1분');
   const [postItColor, setPostItColor] = useState('#FAE588');
   const [startWhen, setStartWhen] = useState('');
   const [startWhere, setStartWhere] = useState('');
@@ -55,7 +58,7 @@ export default function App() {
     const animate = () => {
       if (!startTimeRef.current) return;
       const elapsed = Date.now() - startTimeRef.current;
-      const progress = Math.min((elapsed / 5000) * 100, 100);
+      const progress = Math.min((elapsed / 3500) * 100, 100);
       setPressProgress(progress);
       
       if (progress < 100) {
@@ -490,7 +493,7 @@ export default function App() {
         <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>아래 단계별로 시작해봐요</div>
           <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <span style={{ fontSize: 16 }}>📝</span>
+            <img src="/assets/icon-edit.svg" alt="수정" style={{ width: 16, height: 16 }} />
             <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>직접 수정하기</span>
           </button>
         </div>
@@ -531,10 +534,17 @@ export default function App() {
 
         {/* Plus Button */}
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 16 }}>
-          <button style={{ 
-            width: 32, height: 32, borderRadius: 8, backgroundColor: '#191f28', color: '#FFF',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => {
+              setNewStepText('');
+              setNewStepTime('1분');
+              setIsAddStepSheetOpen(true);
+            }}
+            style={{ 
+              width: 32, height: 32, borderRadius: 8, backgroundColor: '#191f28', color: '#FFF',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer'
+            }}
+          >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
@@ -940,6 +950,84 @@ export default function App() {
 
       {/* Bottom Sheet Overlay */}
       {isBottomSheetOpen && renderBottomSheet()}
+
+      {/* Add Step Bottom Sheet Overlay */}
+      {isAddStepSheetOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            onClick={() => setIsAddStepSheetOpen(false)}
+            style={{
+              position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
+              backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)', zIndex: 2000,
+            }}
+          />
+          {/* Sheet */}
+          <div 
+            style={{
+              position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+              width: '100%', maxWidth: 375,
+              backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
+              padding: '30px 20px 40px', zIndex: 2002,
+              animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              display: 'flex', flexDirection: 'column', gap: 24,
+              boxSizing: 'border-box'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: -10 }}>
+              <div style={{ width: 48, height: 4, backgroundColor: '#E5E8EB', borderRadius: 40 }} />
+            </div>
+            
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: '#191f28' }}>새로운 단계 추가</h2>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <input 
+                type="text"
+                placeholder="어떤 행동을 해야 하나요?"
+                value={newStepText}
+                onChange={(e) => setNewStepText(e.target.value)}
+                autoFocus
+                className="neo-input"
+                style={{ fontSize: 16 }}
+              />
+              <div style={{ display: 'flex', gap: 8 }}>
+                {['30초', '1분', '3분', '5분'].map(time => (
+                  <button
+                    key={time}
+                    onClick={() => setNewStepTime(time)}
+                    style={{
+                      flex: 1, padding: '10px 0', borderRadius: 12, fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                      border: newStepTime === time ? '1.5px solid #3B82F6' : '1.5px solid #E5E7EB',
+                      backgroundColor: newStepTime === time ? '#EFF6FF' : '#FFF',
+                      color: newStepTime === time ? '#1D4ED8' : '#4E5968'
+                    }}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <button 
+              className="neo-btn" 
+              onClick={() => {
+                if (!newStepText.trim()) return;
+                const newStep: Step = {
+                  id: Date.now().toString(),
+                  text: newStepText,
+                  completed: false,
+                  timeEstimate: newStepTime
+                };
+                setSteps([...steps, newStep]);
+                setIsAddStepSheetOpen(false);
+              }}
+              style={{ backgroundColor: newStepText.trim() ? '#191f28' : '#E5E8EB', color: newStepText.trim() ? '#FFF' : '#9CA3AF', marginTop: 10 }}
+            >
+              추가하기
+            </button>
+          </div>
+        </>
+      )}
       
       {tab === 'history' && renderHistory()}
 
