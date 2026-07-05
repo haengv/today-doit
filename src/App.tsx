@@ -52,7 +52,10 @@ export default function App() {
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  const startPress = () => {
+  const startPress = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e && e.cancelable) e.preventDefault();
+    if (startTimeRef.current) return;
+    
     startTimeRef.current = Date.now();
     
     const animate = () => {
@@ -561,6 +564,8 @@ export default function App() {
           onMouseLeave={endPress}
           onTouchStart={startPress}
           onTouchEnd={endPress}
+          onTouchCancel={endPress}
+          onContextMenu={(e) => { e.preventDefault(); return false; }}
           style={{ 
             background: pressProgress > 0 
               ? `linear-gradient(90deg, #93c5fd ${pressProgress}%, #c5e3ff ${pressProgress}%)`
@@ -570,7 +575,8 @@ export default function App() {
             width: '100%', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             cursor: 'pointer',
             userSelect: 'none',
-            WebkitUserSelect: 'none'
+            WebkitUserSelect: 'none',
+            WebkitTouchCallout: 'none'
           }}
         >
           <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>꾹 눌러 첫 행동 시작</span>
