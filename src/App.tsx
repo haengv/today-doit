@@ -59,6 +59,7 @@ export default function App() {
   };
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
   const [showActionPopup, setShowActionPopup] = useState(false);
+  const [isAnimatingNext, setIsAnimatingNext] = useState(false);
   const [homeDate, setHomeDate] = useState<Date>(new Date());
 
   useEffect(() => {
@@ -559,21 +560,25 @@ export default function App() {
       : '';
 
     const handleNext = () => {
-      // Mark current as completed
-      const newSteps = [...steps];
-      if (newSteps[currentActionStepIndex]) {
-        newSteps[currentActionStepIndex].completed = true;
-      }
-      setSteps(newSteps);
+      setIsAnimatingNext(true);
+      setTimeout(() => {
+        setIsAnimatingNext(false);
+        // Mark current as completed
+        const newSteps = [...steps];
+        if (newSteps[currentActionStepIndex]) {
+          newSteps[currentActionStepIndex].completed = true;
+        }
+        setSteps(newSteps);
 
-      if (currentActionStepIndex < steps.length - 1) {
-        // Move to next step
-        setCurrentActionStepIndex(currentActionStepIndex + 1);
-        setActionStartTime(new Date());
-      } else {
-        // Finished all steps
-        setShowActionPopup(true);
-      }
+        if (currentActionStepIndex < steps.length - 1) {
+          // Move to next step
+          setCurrentActionStepIndex(currentActionStepIndex + 1);
+          setActionStartTime(new Date());
+        } else {
+          // Finished all steps
+          setShowActionPopup(true);
+        }
+      }, 350);
     };
 
     return (
@@ -617,7 +622,15 @@ export default function App() {
         {/* Main Content */}
         <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 40, paddingBottom: 150 }}>
           {/* Layered Card */}
-          <div style={{ position: 'relative', width: 315, height: 257, marginBottom: 20 }}>
+          <div 
+            key={currentActionStepIndex}
+            style={{ 
+              position: 'relative', width: 315, height: 257, marginBottom: 20,
+              animation: isAnimatingNext 
+                ? 'cardSwipeOut 0.35s forwards cubic-bezier(0.16, 1, 0.3, 1)' 
+                : 'cardSwipeIn 0.35s backwards cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
+          >
             {/* Background Blue Card */}
             <div style={{ 
               position: 'absolute', top: 11, left: 7, width: 315, height: 257,
@@ -630,7 +643,7 @@ export default function App() {
               backgroundColor: '#FFF', border: '1.5px solid #000', borderRadius: 14, zIndex: 2,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 20px'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11, marginBottom: 50 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11, marginBottom: 25, marginTop: 25 }}>
                 <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', letterSpacing: '-0.28px' }}>
                   지금 이것만 해볼까요?
                 </div>
