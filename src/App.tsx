@@ -118,7 +118,7 @@ export default function App() {
     const y = today.getFullYear();
     const m = String(today.getMonth() + 1).padStart(2, '0');
     const d = String(today.getDate()).padStart(2, '0');
-    const dateString = `${y} / ${m} / ${d}`;
+    const dateString = `${y}/${m}/${d}`;
 
     const completedCount = steps.filter(s => s.completed).length;
     const totalCount = steps.length;
@@ -129,7 +129,7 @@ export default function App() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
         <div style={{ width: '100%', maxWidth: 335, textAlign: 'left', marginBottom: 32, marginTop: 12 }}>
-          <h1 style={{ fontSize: 16, fontWeight: 500, color: '#191f28', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
+          <h1 style={{ fontSize: 16, fontWeight: 400, color: '#191f28', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
             {dateString} <img src="/assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
           </h1>
           <div style={{ 
