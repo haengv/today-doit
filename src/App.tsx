@@ -65,6 +65,15 @@ export default function App() {
   const [showBreakdownToast, setShowBreakdownToast] = useState(false);
   const [breakdownToastMessage, setBreakdownToastMessage] = useState('');
   const [homeDate, setHomeDate] = useState<Date>(new Date());
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  const formatDateToKoKR = (date: Date) => {
+    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  const isSameDay = (d1: Date, d2: Date) => {
+    return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+  };
 
   useEffect(() => {
     if (screen !== 'action') {
@@ -128,6 +137,129 @@ export default function App() {
   );
 
   const renderHome = () => {
+    const handleSwipeStart = (e: React.TouchEvent | React.MouseEvent) => {
+      if ('touches' in e) {
+        setTouchStartX(e.touches[0].clientX);
+      } else {
+        setTouchStartX((e as React.MouseEvent).clientX);
+      }
+    };
+
+    const handleSwipeEnd = (e: React.TouchEvent | React.MouseEvent) => {
+      if (touchStartX === null) return;
+      
+      let currentX;
+      if ('changedTouches' in e) {
+        currentX = e.changedTouches[0].clientX;
+      } else {
+        currentX = (e as React.MouseEvent).clientX;
+      }
+      
+      const diffX = touchStartX - currentX;
+      
+      if (diffX > 50) {
+        // Swipe left -> Next day
+        const nextDate = new Date(homeDate);
+        nextDate.setDate(homeDate.getDate() + 1);
+        const today = new Date();
+        if (nextDate <= today || isSameDay(nextDate, today)) {
+          setHomeDate(nextDate);
+        }
+      } else if (diffX < -50) {
+        // Swipe right -> Previous day
+        const prevDate = new Date(homeDate);
+        prevDate.setDate(homeDate.getDate() - 1);
+        setHomeDate(prevDate);
+      }
+      setTouchStartX(null);
+    };
+
+    const renderPostItCard = (date: Date, offsetIndex: number) => {
+      const isToday = isSameDay(date, new Date());
+      const isCurrentView = offsetIndex === 0;
+      
+      const dateStr = formatDateToKoKR(date);
+      const historyItem = history.find(h => h.date === dateStr);
+      
+      const d = String(date.getDate()).padStart(2, '0');
+      const mStr = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+      
+      let displayGoal = '';
+      let hasGoal = false;
+      
+      if (isToday && isCurrentView) {
+        displayGoal = goal;
+        hasGoal = goal.trim() !== '' && steps.length > 0;
+      } else if (historyItem) {
+        displayGoal = historyItem.text;
+        hasGoal = true;
+      }
+      
+      const rot = offsetIndex === 0 ? 0 : 5.18;
+      const scale = offsetIndex === 0 ? 1 : 0.95;
+      const yOffset = offsetIndex === 0 ? 0 : 15;
+      const zIndex = 10 - offsetIndex;
+      const bgColor = hasGoal ? (isToday ? postItColor : '#f8dde1') : '#FAE588';
+
+      return (
+        <div 
+          key={date.toISOString()}
+          style={{ 
+            position: offsetIndex === 0 ? 'relative' : 'absolute',
+            top: offsetIndex === 0 ? 0 : yOffset,
+            left: '50%',
+            transform: `translateX(-50%) rotate(${rot}deg) scale(${scale})`,
+            transformOrigin: 'center center',
+            width: 240, height: 280, backgroundColor: bgColor, 
+            border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 6,
+            boxShadow: '0px 8px 7.5px rgba(22,22,22,0.13)',
+            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: 16,
+            zIndex,
+            transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), top 0.4s ease-out'
+          }}
+        >
+          {/* Top Masking Tape */}
+          <div style={{
+            position: 'absolute', top: -12.5, left: '50%', transform: 'translateX(-50%)',
+            width: 100, height: 20, backgroundColor: 'rgba(255,255,255,0.7)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }} />
+
+          {/* Top Left Date */}
+          <div style={{ position: 'absolute', top: 16.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 38, fontWeight: 300, lineHeight: 1.2, color: 'rgba(0,12,30,0.8)', fontFamily: "'Lexend', sans-serif" }}>{d}</span>
+            <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(0,12,30,0.8)', fontFamily: "'Lexend', sans-serif", letterSpacing: '-0.24px' }}>
+              {mStr}
+            </span>
+          </div>
+
+          {/* Top Right Illustration */}
+          <div style={{ position: 'absolute', top: 10, right: 10, width: 70, height: 70 }}>
+            <img src="/assets/img-default.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          </div>
+          
+          {!hasGoal ? (
+            isToday ? (
+              <div style={{ position: 'absolute', top: 140.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
+                <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>오늘 꼭 해야 할</span>
+                <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한가지 일을 적어주세요</span>
+              </div>
+            ) : (
+              <div style={{ position: 'absolute', top: 140.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
+                <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한 일이 없었다</span>
+              </div>
+            )
+          ) : (
+            <div style={{ position: 'absolute', top: 130.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <h1 style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap', maxWidth: 200 }}>
+                {displayGoal}
+              </h1>
+            </div>
+          )}
+        </div>
+      );
+    };
+
     const today = homeDate;
     const y = today.getFullYear();
     const m = String(today.getMonth() + 1).padStart(2, '0');
@@ -181,52 +313,20 @@ export default function App() {
         
         <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', position: isBottomSheetOpen ? 'relative' : 'static', zIndex: isBottomSheetOpen ? 2001 : 'auto' }}>
           {/* Post-it UI Goal Card */}
-          <div style={{ 
-            position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center',
-            transform: isBottomSheetOpen ? 'translateY(-140px)' : 'translateY(0)',
-            transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}>
-            <div 
-              style={{ 
-                position: 'relative', width: 240, height: 280, backgroundColor: (hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588', 
-                border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 6,
-                boxShadow: '0px 8px 7.5px rgba(22,22,22,0.13)',
-                display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: 16
-              }}
-            >
-              {/* Top Masking Tape */}
-              <div style={{
-                position: 'absolute', top: -12.5, left: '50%', transform: 'translateX(-50%)',
-                width: 100, height: 20, backgroundColor: 'rgba(255,255,255,0.7)',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-              }} />
-
-              {/* Top Left Date */}
-              <div style={{ position: 'absolute', top: 16.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 38, fontWeight: 300, lineHeight: 1.2, color: 'rgba(0,12,30,0.8)', fontFamily: "'Lexend', sans-serif" }}>{d}</span>
-                <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(0,12,30,0.8)', fontFamily: "'Lexend', sans-serif" }}>
-                  {today.toLocaleString('en-US', { month: 'short' }).toUpperCase()}
-                </span>
-              </div>
-
-              {/* Top Right Illustration */}
-              <div style={{ position: 'absolute', top: 10, right: 10, width: 70, height: 70 }}>
-                <img src="/assets/img-default.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              </div>
-              
-              {!hasActiveGoal && !goal.trim() ? (
-                <div style={{ position: 'absolute', top: 140.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
-                  <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>오늘 꼭 해야 할</span>
-                  <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한가지 일을 적어주세요</span>
-                </div>
-              ) : (
-                <div style={{ position: 'absolute', top: 130.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <h1 style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap', maxWidth: 200 }}>
-                    {goal}
-                  </h1>
-                </div>
-              )}
-            </div>
+          <div 
+            onTouchStart={handleSwipeStart}
+            onTouchEnd={handleSwipeEnd}
+            onMouseDown={handleSwipeStart}
+            onMouseUp={handleSwipeEnd}
+            style={{ 
+              position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center',
+              transform: isBottomSheetOpen ? 'translateY(-140px)' : 'translateY(0)',
+              transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+              cursor: 'grab'
+            }}
+          >
+            {renderPostItCard(new Date(homeDate.getFullYear(), homeDate.getMonth(), homeDate.getDate() - 1), 1)}
+            {renderPostItCard(homeDate, 0)}
           </div>
 
           {/* Plus FAB Button */}
@@ -410,7 +510,7 @@ export default function App() {
                 onClick={async () => {
                   if (!goal.trim()) return;
                   const historyId = Date.now();
-                  setHistory(prev => [{id: historyId, text: goal, date: new Date().toLocaleDateString(), when: '', where: ''}, ...prev]);
+                  setHistory(prev => [{id: historyId, text: goal, date: formatDateToKoKR(new Date()), when: '', where: ''}, ...prev]);
                   
                   setIsBottomSheetOpen(false);
                   setScreen('breakdown');
