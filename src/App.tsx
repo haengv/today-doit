@@ -166,12 +166,12 @@ export default function App() {
           </div>
         </div>
         
-        <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', position: isBottomSheetOpen ? 'relative' : 'static', zIndex: isBottomSheetOpen ? 2001 : 'auto' }}>
           {/* Post-it UI Goal Card */}
-          <div style={{ position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center', zIndex: isBottomSheetOpen ? 2001 : 'auto' }}>
+          <div style={{ position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center' }}>
             <div 
               style={{ 
-                position: 'relative', width: 240, height: 280, backgroundColor: hasActiveGoal ? postItColor : '#FAE588', 
+                position: 'relative', width: 240, height: 280, backgroundColor: (hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588', 
                 border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 6,
                 boxShadow: '0px 8px 7.5px rgba(22,22,22,0.13)',
                 display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: 16
@@ -197,7 +197,7 @@ export default function App() {
                 <img src="/assets/img-default.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               
-              {!hasActiveGoal ? (
+              {!hasActiveGoal && !goal.trim() ? (
                 <div style={{ position: 'absolute', top: 140.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
                   <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>오늘 꼭 해야 할</span>
                   <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한가지 일을 적어주세요</span>
