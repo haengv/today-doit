@@ -128,49 +128,93 @@ export default function App() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
-        <div style={{ width: '100%', maxWidth: 320, textAlign: 'left', marginBottom: 32, marginTop: 12 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: '#191f28', margin: '0 0 16px 0' }}>
-            {dateString}
+        <div style={{ width: '100%', maxWidth: 335, textAlign: 'left', marginBottom: 32, marginTop: 12 }}>
+          <h1 style={{ fontSize: 16, fontWeight: 500, color: '#191f28', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+            {dateString} <span style={{ fontSize: 12 }}>▼</span>
           </h1>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, border: '1.5px solid #4E5968', borderRadius: 24, padding: '20px 24px', backgroundColor: '#FFF' }}>
-            <p style={{ fontSize: 16, fontWeight: 700, color: '#191f28', margin: 0, wordBreak: 'keep-all', lineHeight: 1.5 }}>
-              꿈은 도망가지 않아. 도망가는 건 늘 나 자신이야
-            </p>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#8B95A1' }}>짱구아빠</span>
+          <div style={{ 
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+            border: '1.5px solid rgba(0,12,30,0.8)', 
+            borderRadius: '30px 30px 30px 6px', 
+            padding: '12px 24px', backgroundColor: '#FFF' 
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <p style={{ fontSize: 16, fontWeight: 600, color: 'rgba(0,12,30,0.8)', margin: 0, wordBreak: 'keep-all', lineHeight: 1.5 }}>
+                시작이 반이다.
+              </p>
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>아리스토텔레스</span>
+            </div>
+            <div style={{ width: 50, height: 50, borderRadius: '50%', backgroundColor: '#F3F4F6', border: '1.5px solid #191f28', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              <div style={{ fontSize: 32, marginTop: 10 }}>🧑🏻</div>
+            </div>
           </div>
         </div>
         
-        <div style={{ width: '100%', maxWidth: 320 }}>
+        <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Post-it UI Goal Card */}
-          <div 
-            onClick={() => {
-              if (!hasActiveGoal) {
-                setIsBottomSheetOpen(true);
-                setBottomSheetStep(1);
-              }
-            }}
-            style={{ 
-              position: 'relative', width: '100%', minHeight: 240, backgroundColor: postItColor, 
-              border: '1.5px solid #4E5968',
-              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center',
-              cursor: hasActiveGoal ? 'default' : 'pointer', padding: '32px 24px 24px', marginBottom: 28
-            }}
-          >
-            {/* Pill Badge */}
-            <div style={{ position: 'absolute', top: 24, left: 24, backgroundColor: '#BAE6FD', border: '1.5px solid #4E5968', borderRadius: 20, padding: '4px 12px' }}>
-              <span style={{ fontSize: 13, color: '#4E5968', fontWeight: 800 }}>오늘 꼭 할 일</span>
-            </div>
-            
-            {!hasActiveGoal ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, color: '#4E5968', marginLeft: 4 }}>
-                <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }}>오늘 할 일을<br />입력해주세요</div>
+          <div style={{ position: 'relative', paddingTop: 36, paddingLeft: 36, paddingRight: 36, width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <div 
+              style={{ 
+                position: 'relative', width: 240, height: 280, backgroundColor: hasActiveGoal ? postItColor : '#FAE588', 
+                border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 6,
+                boxShadow: '0px 8px 7.5px rgba(22,22,22,0.13)',
+                display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: 16
+              }}
+            >
+              {/* Top Masking Tape */}
+              <div style={{
+                position: 'absolute', top: -12.5, left: '50%', transform: 'translateX(-50%)',
+                width: 100, height: 20, backgroundColor: 'rgba(255,255,255,0.7)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              }} />
+
+              {/* Top Left Date */}
+              <div style={{ position: 'absolute', top: 16.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 38, fontWeight: 300, lineHeight: 1.2, color: 'rgba(0,12,30,0.8)', fontFamily: 'monospace' }}>{d}</span>
+                <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(0,12,30,0.8)', fontFamily: 'monospace' }}>
+                  {today.toLocaleString('en-US', { month: 'short' }).toUpperCase()}
+                </span>
               </div>
-            ) : (
-              <h1 className="handwriting" style={{ fontSize: 26, fontWeight: 800, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.3, marginLeft: 4 }}>
-                {goal}
-              </h1>
-            )}
+
+              {/* Top Right Illustration Placeholder */}
+              <div style={{ position: 'absolute', top: 16.5, right: 16.5, fontSize: 40, opacity: 0.8, transform: 'rotate(15deg)' }}>
+                📓
+              </div>
+              
+              {!hasActiveGoal ? (
+                <div style={{ position: 'absolute', top: 140.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
+                  <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>오늘 꼭 해야 할</span>
+                  <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한가지 일을 적어주세요</span>
+                </div>
+              ) : (
+                <div style={{ position: 'absolute', top: 130.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <h1 className="handwriting" style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'keep-all', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap', maxWidth: 200 }}>
+                    {goal}
+                  </h1>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Plus FAB Button */}
+          {!hasActiveGoal && (
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 20, marginBottom: 28 }}>
+              <button
+                onClick={() => {
+                  setIsBottomSheetOpen(true);
+                  setBottomSheetStep(1);
+                }}
+                style={{
+                  width: 48, height: 48, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)',
+                  borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', fontSize: 24, padding: 0
+                }}
+              >
+                +
+              </button>
+            </div>
+          )}
+          {hasActiveGoal && <div style={{ height: 28 }} />}
 
           {/* Dynamic Bottom Area */}
           {!hasActiveGoal ? (
@@ -958,31 +1002,32 @@ export default function App() {
       {/* Bottom Navigation Tab Bar */}
       {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && screen !== 'action' && (
         <div style={{
-          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
-          background: '#FFF', border: '1.5px solid #4E5968', borderRadius: 40,
-          display: 'flex', alignItems: 'center', padding: '8px 16px', zIndex: 1000,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.08)', gap: 16
+          position: 'fixed', bottom: 30, left: '50%', transform: 'translateX(-50%)',
+          background: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 156,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 14px', zIndex: 1000,
         }}>
-          <div 
-            onClick={() => { setTab('home'); setScreen('home'); }}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px',
-              background: tab === 'home' ? '#F3F4F6' : 'transparent', borderRadius: 24, cursor: 'pointer',
-              transition: 'background 0.2s'
-            }}
-          >
-            <div style={{ fontSize: 20 }}>🏠</div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#191f28' }}>홈</div>
-          </div>
-          <div 
-            onClick={() => setTab('history')}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px',
-              background: tab === 'history' ? '#F3F4F6' : 'transparent', borderRadius: 24, cursor: 'pointer',
-              transition: 'background 0.2s'
-            }}
-          >
-            <div style={{ fontSize: 20 }}>🗂</div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div 
+              onClick={() => { setTab('home'); setScreen('home'); }}
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', minWidth: 46,
+                background: tab === 'home' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
+                justifyContent: 'center', transition: 'background 0.2s'
+              }}
+            >
+              <div style={{ fontSize: 20 }}>🏠</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>홈</div>
+            </div>
+            <div 
+              onClick={() => setTab('history')}
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', minWidth: 46,
+                background: tab === 'history' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
+                justifyContent: 'center', transition: 'background 0.2s'
+              }}
+            >
+              <div style={{ fontSize: 20, opacity: 0.7 }}>🗃️</div>
+            </div>
           </div>
         </div>
       )}
