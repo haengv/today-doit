@@ -686,9 +686,9 @@ export default function App() {
 
     const handleNext = () => {
       const fixedConfigs = [
-        { left: '68%', endX: '-20px', startRot: '-20deg', endRot: '-40deg', delay: '0s' },
-        { left: '75%', endX: '0px', startRot: '0deg', endRot: '15deg', delay: '0.05s' },
-        { left: '82%', endX: '20px', startRot: '20deg', endRot: '45deg', delay: '0.1s' }
+        { left: '64%', endX: '-20px', startRot: '-20deg', endRot: '-40deg', delay: '0s' },
+        { left: '70%', endX: '0px', startRot: '0deg', endRot: '15deg', delay: '0.05s' },
+        { left: '76%', endX: '20px', startRot: '20deg', endRot: '45deg', delay: '0.1s' }
       ];
       const newParticles = fixedConfigs.map((config, i) => ({
         id: Date.now() + i,
