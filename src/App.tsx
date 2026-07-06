@@ -65,6 +65,7 @@ export default function App() {
   const [showBreakdownToast, setShowBreakdownToast] = useState(false);
   const [breakdownToastMessage, setBreakdownToastMessage] = useState('');
   const [homeDate, setHomeDate] = useState<Date>(new Date());
+  const [checkParticles, setCheckParticles] = useState<any[]>([]);
 
   useEffect(() => {
     if (screen !== 'action') {
@@ -684,6 +685,19 @@ export default function App() {
       : '';
 
     const handleNext = () => {
+      const newParticles = Array.from({ length: 3 }).map((_, i) => ({
+        id: Date.now() + i,
+        left: 50 + (Math.random() * 40 - 20) + '%',
+        endX: (Math.random() * 100 - 50) + 'px',
+        startRot: (Math.random() * 60 - 30) + 'deg',
+        endRot: (Math.random() * 180 - 90) + 'deg',
+        delay: (Math.random() * 0.1) + 's'
+      }));
+      setCheckParticles(prev => [...prev, ...newParticles]);
+      setTimeout(() => {
+        setCheckParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
+      }, 1000);
+
       setIsAnimatingNext(true);
       setTimeout(() => {
         setIsAnimatingNext(false);
@@ -810,6 +824,26 @@ export default function App() {
           ) : (
             <div style={{ height: 44 }} /> /* Placeholder for alignment */
           )}
+        </div>
+
+        {/* Check Particles Container */}
+        <div style={{ position: 'absolute', bottom: 90, left: 0, right: 0, pointerEvents: 'none', zIndex: 20, height: 0 }}>
+          {checkParticles.map(p => (
+            <img 
+              key={p.id} 
+              src="/assets/icon-check.svg" 
+              className="check-particle"
+              style={{
+                left: p.left,
+                bottom: 0,
+                animationDelay: p.delay,
+                '--start-rot': p.startRot,
+                '--end-x': p.endX,
+                '--end-rot': p.endRot,
+              } as React.CSSProperties}
+              alt=""
+            />
+          ))}
         </div>
 
         {/* Bottom CTAs */}
