@@ -685,13 +685,14 @@ export default function App() {
       : '';
 
     const handleNext = () => {
-      const newParticles = Array.from({ length: 3 }).map((_, i) => ({
+      const fixedConfigs = [
+        { left: '42%', endX: '-20px', startRot: '-20deg', endRot: '-40deg', delay: '0s' },
+        { left: '50%', endX: '0px', startRot: '0deg', endRot: '15deg', delay: '0.05s' },
+        { left: '58%', endX: '20px', startRot: '20deg', endRot: '45deg', delay: '0.1s' }
+      ];
+      const newParticles = fixedConfigs.map((config, i) => ({
         id: Date.now() + i,
-        left: 50 + (Math.random() * 40 - 20) + '%',
-        endX: (Math.random() * 100 - 50) + 'px',
-        startRot: (Math.random() * 60 - 30) + 'deg',
-        endRot: (Math.random() * 180 - 90) + 'deg',
-        delay: (Math.random() * 0.1) + 's'
+        ...config
       }));
       setCheckParticles(prev => [...prev, ...newParticles]);
       setTimeout(() => {
