@@ -28,12 +28,20 @@ const simulateMicroBreakdown = (): Promise<string> => {
 
 export default function App() {
   const [tab, setTab] = useState<TabState>('home');
-  const [screen, setScreen] = useState<ScreenState>('onboarding');
+  const [screen, setScreen] = useState<ScreenState>(() => {
+    return localStorage.getItem('doit_goal') ? 'home' : 'onboarding';
+  });
   
-  const [goal, setGoal] = useState('');
-  const [steps, setSteps] = useState<Step[]>([]);
+  const [goal, setGoal] = useState(() => localStorage.getItem('doit_goal') || '');
+  const [steps, setSteps] = useState<Step[]>(() => {
+    const saved = localStorage.getItem('doit_steps');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [isMicroBreaking, setIsMicroBreaking] = useState(false);
-  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string}[]>([]);
+  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string}[]>(() => {
+    const saved = localStorage.getItem('doit_history');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [historyView, setHistoryView] = useState<'list' | 'calendar'>('list');
@@ -44,9 +52,18 @@ export default function App() {
   const [isAddStepSheetOpen, setIsAddStepSheetOpen] = useState(false);
   const [newStepText, setNewStepText] = useState('');
   const [newStepTime, setNewStepTime] = useState('1분');
-  const [postItColor, setPostItColor] = useState('#FAE588');
-  const [startWhen, setStartWhen] = useState('');
-  const [startWhere, setStartWhere] = useState('');
+  const [postItColor, setPostItColor] = useState(() => localStorage.getItem('doit_postItColor') || '#FAE588');
+  const [startWhen, setStartWhen] = useState(() => localStorage.getItem('doit_startWhen') || '');
+  const [startWhere, setStartWhere] = useState(() => localStorage.getItem('doit_startWhere') || '');
+
+  useEffect(() => {
+    localStorage.setItem('doit_goal', goal);
+    localStorage.setItem('doit_steps', JSON.stringify(steps));
+    localStorage.setItem('doit_history', JSON.stringify(history));
+    localStorage.setItem('doit_postItColor', postItColor);
+    localStorage.setItem('doit_startWhen', startWhen);
+    localStorage.setItem('doit_startWhere', startWhere);
+  }, [goal, steps, history, postItColor, startWhen, startWhere]);
   
   const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
   
