@@ -116,7 +116,7 @@ input:focus, textarea:focus {
   0% { transform: translate(0, 0) scale(0.5) rotate(var(--start-rot, 0deg)); opacity: 0; }
   20% { opacity: 1; }
   80% { opacity: 1; }
-  100% { transform: translate(var(--end-x, 0px), -90px) scale(1) rotate(var(--end-rot, 45deg)); opacity: 0; }
+  100% { transform: translate(var(--end-x, 0px), -40px) scale(1) rotate(var(--end-rot, 45deg)); opacity: 0; }
 }
 
 .check-particle {
