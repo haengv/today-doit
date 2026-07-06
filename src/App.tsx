@@ -110,7 +110,7 @@ export default function App() {
           </h1>
           <span style={{ fontSize: 50, fontWeight: 800, fontFamily: "'Lexend', sans-serif", color: '#191f28', transform: 'rotate(15deg)', display: 'inline-block', lineHeight: 1.2 }}>!</span>
         </div>
-        <p style={{ fontSize: 18, fontWeight: 500, color: 'rgba(3,18,40,0.7)', margin: 0, marginTop: 8 }}>
+        <p style={{ fontSize: 18, fontWeight: 500, color: 'rgba(3,18,40,0.7)', margin: 0, marginTop: 8, lineHeight: 1.5 }}>
           하루 한 가지만 시작하기
         </p>
       </div>
@@ -160,7 +160,7 @@ export default function App() {
           }}
           className="neo-btn"
         >
-          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>시작하기</span>
+          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537', lineHeight: 1.5 }}>시작하기</span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14"></path>
             <path d="M12 5l7 7-7 7"></path>
@@ -233,7 +233,7 @@ export default function App() {
               <p style={{ fontSize: 16, fontWeight: 600, color: 'rgba(0,12,30,0.8)', margin: 0, wordBreak: 'keep-all', lineHeight: 1.5 }}>
                 시작이 반이다.
               </p>
-              <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>아리스토텔레스</span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>아리스토텔레스</span>
             </div>
             <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 2, boxSizing: 'border-box' }}>
               <img src="/assets/img-character.png" alt="캐릭터" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
@@ -290,7 +290,7 @@ export default function App() {
               )}
               
               {isBottomSheetOpen && (
-                <div style={{ position: 'absolute', bottom: 12, right: 16, color: 'rgba(3,24,50,0.46)', fontSize: 11, fontWeight: 500 }}>
+                <div style={{ position: 'absolute', bottom: 12, right: 16, color: 'rgba(3,24,50,0.46)', fontSize: 12, fontWeight: 500, lineHeight: 1.5 }}>
                   최대 30글자
                 </div>
               )}
@@ -424,7 +424,7 @@ export default function App() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Post-it Color Section */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4 }}>포스트잇 색상</div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4, lineHeight: 1.5 }}>포스트잇 색상</div>
               <div style={{ display: 'flex', gap: 12 }}>
                 {['#FAE588', '#C8E2FA', '#C4B5FD', '#A7F3D0', '#FCA5A5', '#FCE7F3'].map(color => (
                   <div 
@@ -442,7 +442,7 @@ export default function App() {
 
             {/* Goal Input Section */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4 }}>오늘 할 일</div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4, lineHeight: 1.5 }}>오늘 할 일</div>
               
               <input
                 placeholder="오늘 꼭 할 일 한가지를 입력하세요"
@@ -451,12 +451,12 @@ export default function App() {
                 maxLength={30}
                 style={{ 
                   width: '100%', border: '1.5px solid #B0B8C1', borderRadius: 12, padding: '13.5px 17.5px',
-                  outline: 'none', fontSize: 16, fontWeight: 400, color: '#191f28', boxSizing: 'border-box'
+                  outline: 'none', fontSize: 16, fontWeight: 400, color: '#191f28', boxSizing: 'border-box', lineHeight: 1.5
                 }}
               />
               
               {goal.length > 0 && goal.trim().length < 5 && (
-                <div style={{ fontSize: 13, color: '#EF4444', marginLeft: 4, marginTop: -4 }}>
+                <div style={{ fontSize: 12, color: '#EF4444', marginLeft: 4, marginTop: -4, lineHeight: 1.5 }}>
                   5글자 이상 작성해주세요.
                 </div>
               )}
@@ -470,7 +470,7 @@ export default function App() {
                     style={{
                       backgroundColor: '#F2F4F6', borderRadius: 8, padding: '4px 12px', height: 36,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 13, fontWeight: 500, color: 'rgba(0,19,43,0.58)', cursor: 'pointer'
+                      fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', cursor: 'pointer', lineHeight: 1.5
                     }}
                   >
                     {chip}
@@ -509,7 +509,7 @@ export default function App() {
                   backgroundColor: goal.trim().length >= 5 ? '#c5e3ff' : '#E5E8EB',
                   border: goal.trim().length >= 5 ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid #8B95A1',
                   borderRadius: 12, padding: '13.5px 0',
-                  width: '100%', textAlign: 'center', fontSize: 18, fontWeight: 600,
+                  width: '100%', textAlign: 'center', fontSize: 18, fontWeight: 600, lineHeight: 1.5,
                   color: goal.trim().length >= 5 ? '#130537' : 'rgba(3,24,50,0.46)',
                   cursor: goal.trim().length >= 5 ? 'pointer' : 'not-allowed'
                 }}
@@ -546,8 +546,8 @@ export default function App() {
       <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 20px 40px' }}>
         {/* Title Area */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>오늘의 할 일</div>
-          <div style={{ fontSize: 20, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>{goal || "포트폴리오 수정 완료하기"}</div>
+          <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>오늘의 할 일</div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: 'rgba(0,12,30,0.8)', lineHeight: 1.5 }}>{goal || "포트폴리오 수정 완료하기"}</div>
         </div>
         
         {/* Illustration */}
@@ -557,11 +557,11 @@ export default function App() {
 
         {/* Steps Header */}
         <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>아래 단계별로 시작해봐요</div>
+          <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>아래 단계별로 시작해봐요</div>
           {!isGeneratingSteps && (
-            <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+            <button onClick={() => setScreen('bottomSheet')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
               <img src="/assets/icon-edit.svg" alt="수정" style={{ width: 16, height: 16 }} />
-              <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>직접 수정하기</span>
+              <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>직접 수정하기</span>
             </button>
           )}
         </div>
@@ -593,16 +593,15 @@ export default function App() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
-                        <span style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)' }}>{idx + 1}</span>
+                        <span style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>{idx + 1}</span>
                       </div>
-                      <div style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,12,30,0.8)' : 'rgba(0,19,43,0.58)' }}>
+                      <div style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,12,30,0.8)' : 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>
                         {step.text}
                       </div>
                     </div>
                     <div style={{ 
-                      backgroundColor: isFirst ? '#FFF2B7' : '#FFF', 
-                      padding: '2px 6px', borderRadius: 4, 
-                      fontSize: 12, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)' 
+                      padding: '4px 10px', borderRadius: 20, backgroundColor: isFirst ? '#E5E8EB' : '#F2F4F6', 
+                      fontSize: 12, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)', lineHeight: 1.5 
                     }}>
                       {step.timeEstimate}
                     </div>
@@ -637,9 +636,9 @@ export default function App() {
       {showBreakdownToast && (
         <div style={{
           position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFF', padding: '12px 20px', borderRadius: 24,
-          fontSize: 14, fontWeight: 500, zIndex: 1000, animation: 'toastEnter 0.3s ease-out',
-          whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8
+          padding: '16px 20px', backgroundColor: 'rgba(3,24,50,0.92)', color: '#FFF', borderRadius: 16,
+          fontSize: 14, fontWeight: 500, lineHeight: 1.5, zIndex: 1000, animation: 'toastEnter 0.3s ease-out',
+          boxShadow: '0 8px 16px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: 8
         }}>
           {isGeneratingSteps && (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
@@ -737,8 +736,8 @@ export default function App() {
           </div>
 
           <div style={{ backgroundColor: '#f2f4f6', padding: '2px 8px', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#6b7684' }}>{currentActionStepIndex + 1}</span>
-            <span style={{ fontSize: 14, fontWeight: 500, color: '#b0b8c1' }}>/{steps.length}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#6b7684', lineHeight: 1.5 }}>{currentActionStepIndex + 1}</span>
+            <span style={{ fontSize: 14, fontWeight: 500, color: '#b0b8c1', lineHeight: 1.5 }}>/{steps.length}</span>
           </div>
         </div>
 
@@ -771,15 +770,15 @@ export default function App() {
               transformOrigin: 'bottom center'
             }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11, marginBottom: 25, marginTop: 25 }}>
-                <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', letterSpacing: '-0.28px' }}>
+                <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', letterSpacing: '-0.28px', lineHeight: 1.5 }}>
                   지금 이것만 해볼까요?
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                  <div style={{ fontSize: 24, fontWeight: 600, color: '#191f28', letterSpacing: '-0.48px', wordBreak: 'keep-all', textAlign: 'center' }}>
+                  <div style={{ fontSize: 24, fontWeight: 600, color: '#191f28', letterSpacing: '-0.48px', wordBreak: 'keep-all', textAlign: 'center', lineHeight: 1.4 }}>
                     {currentStep?.text || '알 수 없는 작업'}
                   </div>
                   <div style={{ backgroundColor: '#f2f4f6', padding: '4px 6px', borderRadius: 4 }}>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>
                       {currentStep?.timeEstimate || '1분'}면 충분해요
                     </div>
                   </div>
@@ -801,11 +800,11 @@ export default function App() {
           {nextStep ? (
             <div style={{ width: 335, backgroundColor: '#f2f4f6', borderRadius: 8, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 16, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>다음</span>
-                <span style={{ fontSize: 16, fontWeight: 500, color: 'rgba(0,19,43,0.58)' }}>{nextStep.text}</span>
+                <span style={{ fontSize: 16, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>다음</span>
+                <span style={{ fontSize: 16, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>{nextStep.text}</span>
               </div>
               <div style={{ backgroundColor: '#FFF', padding: '1px 6px', borderRadius: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)' }}>{nextStep.timeEstimate}</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>{nextStep.timeEstimate}</span>
               </div>
             </div>
           ) : (
@@ -819,7 +818,7 @@ export default function App() {
             onClick={() => setIsStopPopupOpen(true)}
             style={{ 
               flex: 1, backgroundColor: '#FFF', border: '1.5px solid rgba(2,9,19,0.91)', borderRadius: 12,
-              padding: '13.5px 9.5px', fontSize: 18, fontWeight: 600, color: 'rgba(0,12,30,0.8)', cursor: 'pointer',
+              padding: '13.5px 9.5px', fontSize: 18, fontWeight: 600, color: 'rgba(0,12,30,0.8)', cursor: 'pointer', lineHeight: 1.5,
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}
           >
@@ -829,7 +828,7 @@ export default function App() {
             onClick={handleNext}
             style={{ 
               flex: 1, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
-              padding: '13.5px 9.5px', fontSize: 18, fontWeight: 600, color: '#130537', cursor: 'pointer',
+              padding: '13.5px 9.5px', fontSize: 18, fontWeight: 600, color: '#130537', cursor: 'pointer', lineHeight: 1.5,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4
             }}
           >
@@ -1000,14 +999,14 @@ export default function App() {
 
           {selectedDate && (
             <div style={{ marginTop: 20 }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 16, color: '#191f28' }}>{selectedDate}의 기록</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 16, color: '#191f28', lineHeight: 1.5 }}>{selectedDate}의 기록</h3>
               {selectedRecords.length === 0 ? (
                 <div style={{ color: '#4E5968', fontWeight: 700 }}>기록이 없습니다.</div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {selectedRecords.map(item => (
                     <div key={item.id} className="neo-card" style={{ padding: 16, border: '3px solid #191f28', backgroundColor: '#FEF08A' }}>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: '#191f28', wordBreak: 'keep-all' }}>{item.text}</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: '#191f28', wordBreak: 'keep-all', lineHeight: 1.5 }}>{item.text}</div>
                     </div>
                   ))}
                 </div>
@@ -1021,8 +1020,8 @@ export default function App() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
         <div style={{ textAlign: 'center', marginTop: 40, marginBottom: 20 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#191f28', margin: 0 }}>나의 시작 기록</h1>
-          <p style={{ fontSize: 16, color: '#4E5968', marginTop: 12 }}>지금까지 다짐했던 목표들이에요.</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#191f28', margin: 0, lineHeight: 1.4 }}>나의 시작 기록</h1>
+          <p style={{ fontSize: 16, color: '#4E5968', marginTop: 12, lineHeight: 1.5 }}>지금까지 다짐했던 목표들이에요.</p>
         </div>
 
         {/* View Toggle */}
@@ -1045,7 +1044,7 @@ export default function App() {
           history.length === 0 ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', opacity: 0.5, marginTop: 40 }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>🗂</div>
-              <p style={{ fontSize: 18, fontWeight: 700 }}>아직 기록된 목표가 없어요!</p>
+              <p style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.5 }}>아직 기록된 목표가 없어요!</p>
             </div>
           ) : (
             <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -1064,7 +1063,7 @@ export default function App() {
                       aspectRatio: '1', position: 'relative'
                     }}
                   >
-                    <div style={{ fontSize: 12, color: '#4E5968', fontWeight: 800, marginBottom: 12 }}>{item.date}</div>
+                    <div style={{ fontSize: 12, color: '#4E5968', fontWeight: 800, marginBottom: 12, lineHeight: 1.5 }}>{item.date}</div>
                     <div className="handwriting" style={{ fontSize: 24, fontWeight: 800, color: '#191f28', wordBreak: 'keep-all', lineHeight: 1.3 }}>
                       {item.text}
                     </div>
@@ -1149,27 +1148,27 @@ export default function App() {
             <div style={{ position: 'absolute', top: 227, left: 27, width: 157, display: 'flex', flexDirection: 'column', gap: 9 }}>
               {displaySteps.slice(0, 5).map((step, idx) => (
                 <div key={idx} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span style={{ fontSize: 14, color: 'rgba(0,19,43,0.58)', fontFamily: "'Pretendard', sans-serif" }}>{idx + 1}</span>
-                  <span style={{ fontSize: 14, color: 'rgba(3,18,40,0.7)', fontFamily: "'Pretendard', sans-serif", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step.text}</span>
+                  <span style={{ fontSize: 14, color: 'rgba(0,19,43,0.58)', fontFamily: "'Pretendard', sans-serif", lineHeight: 1.5 }}>{idx + 1}</span>
+                  <span style={{ fontSize: 14, color: 'rgba(3,18,40,0.7)', fontFamily: "'Pretendard', sans-serif", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.5 }}>{step.text}</span>
                 </div>
               ))}
               {displaySteps.length > 5 && (
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span style={{ fontSize: 14, color: 'rgba(0,19,43,0.58)', fontFamily: "'Pretendard', sans-serif" }}>...</span>
+                  <span style={{ fontSize: 14, color: 'rgba(0,19,43,0.58)', fontFamily: "'Pretendard', sans-serif", lineHeight: 1.5 }}>...</span>
                 </div>
               )}
             </div>
 
             {/* Duration text */}
             <div style={{ position: 'absolute', top: 434, left: 20, transform: 'translateY(-50%)' }}>
-              <p style={{ fontSize: 12, fontWeight: 500, color: 'rgba(0,19,43,0.58)', margin: 0, fontFamily: "'Pretendard', sans-serif" }}>
+              <p style={{ fontSize: 12, fontWeight: 500, color: 'rgba(0,19,43,0.58)', margin: 0, fontFamily: "'Pretendard', sans-serif", lineHeight: 1.5 }}>
                 {displaySteps.length}가지의 행동을 완료했어요
               </p>
             </div>
 
             {/* Done Badge */}
             <div style={{ position: 'absolute', top: 418, right: 20, padding: '4px 16px', height: 31, backgroundColor: '#191f28', borderRadius: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box' }}>
-              <span style={{ fontSize: 14, fontWeight: 500, color: '#FFF', fontFamily: "'Pretendard', sans-serif" }}>완료</span>
+              <span style={{ fontSize: 14, fontWeight: 500, color: '#FFF', fontFamily: "'Pretendard', sans-serif", lineHeight: 1.5 }}>완료</span>
             </div>
           </div>
         </div>
