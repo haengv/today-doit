@@ -1276,48 +1276,65 @@ export default function App() {
           style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)' }}
         />
         
-        <div style={{ position: 'relative', zIndex: 5001, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '85%' }}>
+        <div style={{ position: 'relative', zIndex: 5001, display: 'flex', flexDirection: 'column', alignItems: 'center', width: 311 }}>
           {/* Card */}
-          <div style={{ position: 'relative', width: '100%', backgroundColor: '#FFF', borderRadius: 20, padding: 24, border: '1.5px solid rgba(0,12,30,0.8)', boxShadow: '0px 6px 20px rgba(0,29,58,0.09)' }}>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#191f28', margin: '0 0 16px 0', lineHeight: 1.5, fontFamily: "'Pretendard', sans-serif", textAlign: 'center' }}>서비스 피드백</h3>
-            
-            {/* Rating */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 20 }}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <div 
-                  key={star} 
-                  onClick={() => setFeedbackRating(star)}
-                  style={{ 
-                    cursor: 'pointer', 
-                    fontSize: 32,
-                    lineHeight: 1,
-                    filter: feedbackRating >= star ? 'grayscale(0%)' : 'grayscale(100%) opacity(0.3)',
-                    transition: 'all 0.2s',
-                    transform: feedbackRating === star ? 'scale(1.1)' : 'scale(1)'
-                  }}
-                >
-                  ⭐
+          <div style={{ position: 'relative', width: '100%', backgroundColor: '#FFF', borderRadius: 16, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 20px 0 20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              {/* Top Row: Close Button */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                <div onClick={() => setIsFeedbackPopupOpen(false)} style={{ cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="rgba(0,12,30,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
-              ))}
-            </div>
+              </div>
+              
+              {/* Titles */}
+              <div style={{ marginTop: 14, width: '100%' }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: 'rgba(0,12,30,0.8)', margin: '0 0 2px 0', lineHeight: 1.35, fontFamily: "'Pretendard', sans-serif" }}>
+                  서비스 의견을 적어주세요!
+                </h3>
+                <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', margin: 0, lineHeight: 1.6, fontFamily: "'Pretendard', sans-serif" }}>
+                  더욱 발전하는 DO IT을 만드는데 도움이 돼요
+                </p>
+              </div>
 
-            <textarea
-              value={feedbackText}
-              onChange={(e) => setFeedbackText(e.target.value)}
-              placeholder="서비스를 사용하면서 느낀 점이나 개선할 점을 자유롭게 적어주세요!"
-              style={{
-                width: '100%', height: 120, padding: 16, borderRadius: 12, border: '1.5px solid rgba(0,12,30,0.8)',
-                fontSize: 16, fontFamily: "'Pretendard', sans-serif", backgroundColor: '#F8F9FA', resize: 'none',
-                outline: 'none', boxSizing: 'border-box', marginBottom: 16
-              }}
-            />
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button 
-                onClick={() => setIsFeedbackPopupOpen(false)}
-                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#E5E8EB', color: '#4E5968', fontSize: 16, fontWeight: 700, border: '1.5px solid transparent', cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" }}
-              >
-                취소
-              </button>
+              {/* Rating */}
+              <div style={{ display: 'flex', gap: 6, marginTop: 20, marginBottom: 20 }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <div 
+                    key={star} 
+                    onClick={() => setFeedbackRating(star)}
+                    style={{ 
+                      cursor: 'pointer', 
+                      width: 40,
+                      height: 40,
+                      transition: 'all 0.2s',
+                      transform: feedbackRating === star ? 'scale(1.1)' : 'scale(1)'
+                    }}
+                  >
+                    <svg width="100%" height="100%" viewBox="0 0 24 24" fill={feedbackRating >= star ? 'rgba(0,12,30,0.8)' : 'rgba(0,29,58,0.1)'} xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke={feedbackRating >= star ? 'rgba(0,12,30,0.8)' : 'rgba(0,29,58,0.1)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                ))}
+              </div>
+
+              {/* Textarea */}
+              <textarea
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                placeholder="느낀 점이나 개선되었으면 좋겠는 점을&#10;자유롭게 적어주세요!"
+                style={{
+                  width: '100%', height: 170, padding: 15.5, borderRadius: 12, border: '1.5px solid rgba(0,29,58,0.18)',
+                  fontSize: 14, fontWeight: 500, fontFamily: "'Pretendard', sans-serif", backgroundColor: '#F2F4F6', color: '#191f28', resize: 'none',
+                  outline: 'none', boxSizing: 'border-box'
+                }}
+              />
+            </div>
+            
+            {/* Submit Button Area */}
+            <div style={{ padding: '16px 20px 24px 20px', width: '100%', boxSizing: 'border-box' }}>
               <button 
                 onClick={() => {
                   alert('피드백이 전송되었습니다. 소중한 의견 감사합니다!');
@@ -1325,9 +1342,12 @@ export default function App() {
                   setFeedbackText('');
                   setFeedbackRating(0);
                 }}
-                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#c5e3ff', color: '#130537', fontSize: 16, fontWeight: 700, border: '1.5px solid rgba(0,12,30,0.8)', cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" }}
+                style={{ 
+                  width: '100%', padding: '13.5px 0', borderRadius: 12, backgroundColor: '#c5e3ff', color: '#130537', 
+                  fontSize: 18, fontWeight: 600, border: '1.5px solid rgba(0,12,30,0.8)', cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" 
+                }}
               >
-                보내기
+                의견 보내기
               </button>
             </div>
           </div>
