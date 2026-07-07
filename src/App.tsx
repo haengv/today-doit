@@ -57,6 +57,7 @@ export default function App() {
   const [startWhere, setStartWhere] = useState(() => localStorage.getItem('doit_startWhere') || '');
   const [isFeedbackPopupOpen, setIsFeedbackPopupOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackRating, setFeedbackRating] = useState(0);
 
   useEffect(() => {
     localStorage.setItem('doit_goal', goal);
@@ -1278,7 +1279,28 @@ export default function App() {
         <div style={{ position: 'relative', zIndex: 5001, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '85%' }}>
           {/* Card */}
           <div style={{ position: 'relative', width: '100%', backgroundColor: '#FFF', borderRadius: 20, padding: 24, border: '1.5px solid rgba(0,12,30,0.8)', boxShadow: '0px 6px 20px rgba(0,29,58,0.09)' }}>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#191f28', margin: '0 0 16px 0', lineHeight: 1.5, fontFamily: "'Pretendard', sans-serif" }}>서비스 피드백</h3>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#191f28', margin: '0 0 16px 0', lineHeight: 1.5, fontFamily: "'Pretendard', sans-serif", textAlign: 'center' }}>서비스 피드백</h3>
+            
+            {/* Rating */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 20 }}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <div 
+                  key={star} 
+                  onClick={() => setFeedbackRating(star)}
+                  style={{ 
+                    cursor: 'pointer', 
+                    fontSize: 32,
+                    lineHeight: 1,
+                    filter: feedbackRating >= star ? 'grayscale(0%)' : 'grayscale(100%) opacity(0.3)',
+                    transition: 'all 0.2s',
+                    transform: feedbackRating === star ? 'scale(1.1)' : 'scale(1)'
+                  }}
+                >
+                  ⭐
+                </div>
+              ))}
+            </div>
+
             <textarea
               value={feedbackText}
               onChange={(e) => setFeedbackText(e.target.value)}
@@ -1301,6 +1323,7 @@ export default function App() {
                   alert('피드백이 전송되었습니다. 소중한 의견 감사합니다!');
                   setIsFeedbackPopupOpen(false);
                   setFeedbackText('');
+                  setFeedbackRating(0);
                 }}
                 style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#c5e3ff', color: '#130537', fontSize: 16, fontWeight: 700, border: '1.5px solid rgba(0,12,30,0.8)', cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" }}
               >
