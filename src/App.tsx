@@ -1053,6 +1053,35 @@ export default function App() {
   };
 
   const renderHistory = () => {
+    // Compute Stats
+    const totalCompletedActions = history.reduce((acc, h) => acc + (h.steps ? h.steps.length : 0), 0);
+    const totalGoalCompletions = history.length;
+    
+    // Compute consecutive days
+    let consecutiveDays = 0;
+    if (history.length > 0) {
+      const dates = history.map(h => {
+        const parts = h.date.split('.');
+        if (parts.length >= 3) {
+          return new Date(h.date).getTime();
+        }
+        return new Date(h.date).getTime();
+      }).filter(d => !isNaN(d)).sort((a, b) => b - a);
+      
+      const uniqueDates = Array.from(new Set(dates.map(d => new Date(d).setHours(0,0,0,0)))).sort((a,b)=>b-a);
+      
+      if (uniqueDates.length > 0) {
+        consecutiveDays = 1;
+        for (let i = 0; i < uniqueDates.length - 1; i++) {
+          const diff = (uniqueDates[i] - uniqueDates[i+1]) / (1000 * 60 * 60 * 24);
+          if (diff === 1) {
+            consecutiveDays++;
+          } else {
+            break;
+          }
+        }
+      }
+    }
     const getDaysInMonth = () => {
       const date = new Date();
       const year = date.getFullYear();
@@ -1120,54 +1149,103 @@ export default function App() {
     };
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
-        <div style={{ textAlign: 'center', marginTop: 40, marginBottom: 20 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#191f28', margin: 0, lineHeight: 1.4 }}>나의 시작 기록</h1>
-          <p style={{ fontSize: 16, color: '#4E5968', marginTop: 12, lineHeight: 1.5 }}>지금까지 다짐했던 목표들이에요.</p>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#F2F4F6', paddingBottom: 100 }}>
+        
+        {/* View Toggle */}
+        <div style={{ display: 'flex', width: '100%', gap: 8, padding: 20, boxSizing: 'border-box' }}>
+          <div 
+            onClick={() => setHistoryView('list')}
+            style={{ flex: 1, backgroundColor: historyView === 'list' ? '#191f28' : '#FFF', border: historyView === 'list' ? '1.5px solid #191f28' : '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, padding: '11.5px 21.5px', textAlign: 'center', color: historyView === 'list' ? '#FFF' : 'rgba(0,12,30,0.8)', fontSize: 16, fontWeight: 600, cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" }}
+          >
+            보드
+          </div>
+          <div 
+            onClick={() => setHistoryView('calendar')}
+            style={{ flex: 1, backgroundColor: historyView === 'calendar' ? '#191f28' : '#FFF', border: historyView === 'calendar' ? '1.5px solid #191f28' : '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, padding: '11.5px 21.5px', textAlign: 'center', color: historyView === 'calendar' ? '#FFF' : 'rgba(0,12,30,0.8)', fontSize: 16, fontWeight: 600, cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" }}
+          >
+            캘린더
+          </div>
         </div>
 
-        {/* View Toggle */}
-        <div style={{ display: 'flex', width: '100%', border: '1.5px solid #4E5968', borderRadius: 24, overflow: 'hidden', marginBottom: 24 }}>
-          <button 
-            onClick={() => setHistoryView('list')}
-            style={{ flex: 1, padding: 12, fontSize: 15, fontWeight: 800, background: historyView === 'list' ? '#4E5968' : '#FFF', color: historyView === 'list' ? '#FFF' : '#4E5968', border: 'none', borderRight: '1.5px solid #4E5968', cursor: 'pointer' }}
-          >
-            📋 보드
-          </button>
-          <button 
-            onClick={() => setHistoryView('calendar')}
-            style={{ flex: 1, padding: 12, fontSize: 15, fontWeight: 800, background: historyView === 'calendar' ? '#4E5968' : '#FFF', color: historyView === 'calendar' ? '#FFF' : '#4E5968', border: 'none', cursor: 'pointer' }}
-          >
-            📅 캘린더
-          </button>
+        {/* Stats */}
+        <div style={{ display: 'flex', padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, borderTop: '1.5px solid rgba(0,12,30,0.8)', borderLeft: '1.5px solid rgba(0,12,30,0.8)', borderBottom: '1.5px solid rgba(0,12,30,0.8)', borderRadius: '12px 0 0 12px', padding: 16, backgroundColor: '#FFF', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ fontSize: 14, color: 'rgba(3,18,40,0.7)', fontWeight: 500, fontFamily: "'Pretendard', sans-serif", lineHeight: 1.5 }}>시작 행동</div>
+            <div style={{ fontSize: 26, color: 'rgba(0,12,30,0.8)', fontWeight: 600, fontFamily: "'Lexend', sans-serif", letterSpacing: -0.26, lineHeight: 1.2 }}>{totalCompletedActions}</div>
+          </div>
+          <div style={{ flex: 1, border: '1.5px solid rgba(0,12,30,0.8)', borderBottom: '1.5px solid rgba(0,12,30,0.8)', padding: 16, backgroundColor: '#FFF', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ fontSize: 14, color: 'rgba(3,18,40,0.7)', fontWeight: 500, fontFamily: "'Pretendard', sans-serif", lineHeight: 1.5 }}>할 일 완료</div>
+            <div style={{ fontSize: 26, color: 'rgba(0,12,30,0.8)', fontWeight: 600, fontFamily: "'Lexend', sans-serif", letterSpacing: -0.26, lineHeight: 1.2 }}>{totalGoalCompletions}</div>
+          </div>
+          <div style={{ flex: 1, borderTop: '1.5px solid rgba(0,12,30,0.8)', borderRight: '1.5px solid rgba(0,12,30,0.8)', borderBottom: '1.5px solid rgba(0,12,30,0.8)', borderRadius: '0 12px 12px 0', padding: 16, backgroundColor: '#FFF', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ fontSize: 14, color: 'rgba(3,18,40,0.7)', fontWeight: 500, fontFamily: "'Pretendard', sans-serif", lineHeight: 1.5 }}>연속 일수</div>
+            <div style={{ fontSize: 26, color: 'rgba(0,12,30,0.8)', fontWeight: 600, fontFamily: "'Lexend', sans-serif", letterSpacing: -0.26, lineHeight: 1.2 }}>{consecutiveDays}</div>
+          </div>
         </div>
         
-        {historyView === 'calendar' ? renderCalendar() : (
+        {historyView === 'calendar' ? (
+          <div style={{ padding: '30px 20px', width: '100%', boxSizing: 'border-box' }}>
+            {renderCalendar()}
+          </div>
+        ) : (
           history.length === 0 ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', opacity: 0.5, marginTop: 40 }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>🗂</div>
               <p style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.5 }}>아직 기록된 목표가 없어요!</p>
             </div>
           ) : (
-            <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div style={{ width: '100%', padding: '30px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, boxSizing: 'border-box' }}>
               {history.map((item, idx) => {
-                const colors = ['#FEF9C3', '#FBCFE8', '#BAE6FD', '#D1FAE5'];
+                const colors = ['#FAE588', '#BFBDFF', '#C5E3FF', '#F8DDE1'];
                 const bgColor = colors[idx % colors.length];
                 
+                // Date parsing
+                const dateObj = new Date(item.date);
+                const day = isNaN(dateObj.getTime()) ? item.date.slice(item.date.lastIndexOf(' ') + 1, item.date.lastIndexOf('.')) || item.date : dateObj.getDate();
+                const monthStr = isNaN(dateObj.getTime()) ? '' : dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                
+                // Calculate minutes
+                let totalMinutes = 0;
+                const totalSteps = item.steps?.length || 0;
+                item.steps?.forEach(st => {
+                  const m = parseInt(st.timeEstimate.replace(/[^0-9]/g, ''));
+                  if(!isNaN(m)) totalMinutes += m;
+                });
+
+                // Image mapping
+                const images = ['/assets/img-work.png', '/assets/img-study.png', '/assets/img-default.png', '/assets/img-habit.png'];
+                const imgUrl = images[idx % images.length];
+
                 return (
                   <div 
                     key={item.id} 
                     onClick={() => setSelectedHistoryItem(item)}
                     style={{ 
-                      padding: '20px 16px', backgroundColor: bgColor, 
-                      border: '1.5px solid #4E5968', cursor: 'pointer',
-                      display: 'flex', flexDirection: 'column', 
-                      aspectRatio: '1', position: 'relative'
+                      backgroundColor: bgColor, height: 200, position: 'relative', overflow: 'hidden', cursor: 'pointer',
+                      display: 'flex', flexDirection: 'column'
                     }}
                   >
-                    <div style={{ fontSize: 12, color: '#4E5968', fontWeight: 800, marginBottom: 12, lineHeight: 1.5 }}>{item.date}</div>
-                    <div className="handwriting" style={{ fontSize: 24, fontWeight: 800, color: '#191f28', wordBreak: 'keep-all', lineHeight: 1.3 }}>
-                      {item.text}
+                    {/* Image at Top Right */}
+                    <div style={{ position: 'absolute', top: 8, right: 8, width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={imgUrl} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                    </div>
+
+                    <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      {/* Date */}
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: 30, fontFamily: "'Lexend', sans-serif", fontWeight: 300, lineHeight: 1.2, color: 'rgba(0,12,30,0.8)' }}>{day}</span>
+                        <span style={{ fontSize: 10, fontFamily: "'Lexend', sans-serif", fontWeight: 400, lineHeight: 1.2, letterSpacing: -0.2, color: 'rgba(0,12,30,0.8)' }}>{monthStr || 'MON'}</span>
+                      </div>
+                      
+                      {/* Goal Title */}
+                      <div style={{ marginTop: 16, fontSize: 15, fontWeight: 600, fontFamily: "'Pretendard', sans-serif", color: 'rgba(0,12,30,0.8)', letterSpacing: -0.3, lineHeight: 1.4, wordBreak: 'keep-all', width: '70%' }}>
+                        {item.text}
+                      </div>
+                    </div>
+
+                    {/* Footer text */}
+                    <div style={{ padding: '0 16px 16px 16px', fontSize: 11, fontWeight: 500, fontFamily: "'Pretendard', sans-serif", color: 'rgba(0,19,43,0.58)', letterSpacing: -0.22 }}>
+                      {totalSteps}가지의 행동 총 {totalMinutes}분
                     </div>
                   </div>
                 );
