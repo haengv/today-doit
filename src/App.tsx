@@ -38,7 +38,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [isMicroBreaking, setIsMicroBreaking] = useState(false);
-  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string}[]>(() => {
+  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, status?: 'complete' | 'incomplete'}[]>(() => {
     const saved = localStorage.getItem('doit_history');
     return saved ? JSON.parse(saved) : [];
   });
@@ -1116,16 +1116,14 @@ export default function App() {
         return (
           <div 
             key={`day-${day}`}
-            onClick={() => {
-              if (hasRecord) setSelectedDate(dateStr);
-            }}
+            onClick={() => setSelectedDate(dateStr)}
             style={{
               backgroundColor: bgColor,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               height: 44,
-              cursor: hasRecord ? 'pointer' : 'default',
+              cursor: 'pointer',
               color: 'rgba(3,18,40,0.7)',
               fontFamily: "'Lexend', sans-serif",
               fontSize: 16
@@ -1193,42 +1191,64 @@ export default function App() {
           </div>
 
           {/* Selected Date Card */}
-          {selectedDate && selectedRecords.length > 0 && (
+          {selectedDate && (
             <div style={{ width: '100%', marginTop: 30 }}>
-              {selectedRecords.map((item, idx) => {
-                const images = ['/assets/img-work.png', '/assets/img-study.png', '/assets/img-default.png', '/assets/img-habit.png'];
-                const imgUrl = images[idx % images.length];
-                
-                return (
-                  <div key={item.id} style={{ 
-                    backgroundColor: '#FFF', 
-                    border: '1.5px solid #130537', 
-                    borderRadius: 12, 
-                    padding: '17.5px', 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 12
-                  }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 14, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(3,18,40,0.7)' }}>
-                          {new Date(item.date).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
-                        </span>
-                        <div style={{ backgroundColor: '#FAE588', borderRadius: 50, padding: '2px 8px', fontSize: 14, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(3,18,40,0.7)' }}>
-                          완료
+              {selectedRecords.length === 0 ? (
+                // State - No
+                <div style={{ 
+                  backgroundColor: '#FFF', 
+                  border: '1.5px solid #130537', 
+                  borderRadius: 12, 
+                  padding: '17.5px', 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  gap: 4,
+                  marginBottom: 12
+                }}>
+                  <div style={{ fontSize: 14, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(3,18,40,0.7)' }}>
+                    {new Date(selectedDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                  </div>
+                  <div style={{ fontSize: 16, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(0,12,30,0.8)' }}>
+                    이 날은 기록이 없어요
+                  </div>
+                </div>
+              ) : (
+                selectedRecords.map((item, idx) => {
+                  const images = ['/assets/img-work.png', '/assets/img-study.png', '/assets/img-default.png', '/assets/img-habit.png'];
+                  const imgUrl = images[idx % images.length];
+                  const isIncomplete = item.status === 'incomplete';
+                  
+                  return (
+                    <div key={item.id} style={{ 
+                      backgroundColor: '#FFF', 
+                      border: '1.5px solid #130537', 
+                      borderRadius: 12, 
+                      padding: '17.5px', 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 12
+                    }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: 14, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(3,18,40,0.7)' }}>
+                            {new Date(item.date).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                          </span>
+                          <div style={{ backgroundColor: isIncomplete ? '#D1D6DB' : '#FAE588', borderRadius: 50, padding: '2px 8px', fontSize: 14, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(3,18,40,0.7)' }}>
+                            {isIncomplete ? '미완료' : '완료'}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: 16, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(0,12,30,0.8)' }}>
+                          {item.text}
                         </div>
                       </div>
-                      <div style={{ fontSize: 16, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(0,12,30,0.8)' }}>
-                        {item.text}
+                      <div style={{ width: 50, height: 50 }}>
+                        <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                       </div>
                     </div>
-                    <div style={{ width: 50, height: 50 }}>
-                      <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           )}
         </div>
