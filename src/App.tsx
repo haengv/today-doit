@@ -46,6 +46,7 @@ export default function App() {
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [historyView, setHistoryView] = useState<'list' | 'calendar'>('list');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string} | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
@@ -1083,65 +1084,151 @@ export default function App() {
       }
     }
     const getDaysInMonth = () => {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month = date.getMonth();
+      const year = currentMonthDate.getFullYear();
+      const month = currentMonthDate.getMonth();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const firstDay = new Date(year, month, 1).getDay();
+      let firstDay = new Date(year, month, 1).getDay(); // 0 is Sunday
+      firstDay = firstDay === 0 ? 6 : firstDay - 1; // Convert to Monday start
       return { year, month, daysInMonth, firstDay };
     };
 
     const renderCalendar = () => {
       const { year, month, daysInMonth, firstDay } = getDaysInMonth();
-      const blanks = Array.from({ length: firstDay }).map((_, i) => <div key={`blank-${i}`} />);
+      
+      const handlePrevMonth = () => setCurrentMonthDate(new Date(year, month - 1, 1));
+      const handleNextMonth = () => setCurrentMonthDate(new Date(year, month + 1, 1));
+      
+      const monthName = currentMonthDate.toLocaleString('en-US', { month: 'long' }).toUpperCase();
+      
+      const blanks = Array.from({ length: firstDay }).map((_, i) => (
+        <div key={`blank-${i}`} style={{ backgroundColor: '#F2F4F6', height: 44 }} />
+      ));
+      
       const days = Array.from({ length: daysInMonth }).map((_, i) => {
         const day = i + 1;
         const dateStr = new Date(year, month, day).toLocaleDateString();
         const hasRecord = history.some(h => h.date === dateStr);
         const isSelected = selectedDate === dateStr;
         
+        const isCompleted = hasRecord;
+        const bgColor = isCompleted ? '#FAE588' : '#FFF';
+        
         return (
           <div 
-            key={`day-${day}`} 
-            onClick={() => setSelectedDate(dateStr)}
+            key={`day-${day}`}
+            onClick={() => {
+              if (hasRecord) setSelectedDate(dateStr);
+            }}
             style={{
-              border: '2px solid #191f28', aspectRatio: '1', display: 'flex', flexDirection: 'column', 
-              alignItems: 'center', justifyContent: 'center', background: isSelected ? '#3B82F6' : '#FFF',
-              color: isSelected ? '#FFF' : '#191f28', fontWeight: 800, cursor: 'pointer', position: 'relative'
+              backgroundColor: bgColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 44,
+              cursor: hasRecord ? 'pointer' : 'default',
+              color: 'rgba(3,18,40,0.7)',
+              fontFamily: "'Lexend', sans-serif",
+              fontSize: 16
             }}
           >
             {day}
-            {hasRecord && <div style={{ position: 'absolute', bottom: 4, fontSize: 16 }}>🔥</div>}
           </div>
         );
       });
+      
+      const totalCells = firstDay + daysInMonth;
+      const trailingBlanksCount = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      const trailingBlanks = Array.from({ length: trailingBlanksCount }).map((_, i) => (
+        <div key={`t-blank-${i}`} style={{ backgroundColor: '#F2F4F6', height: 44 }} />
+      ));
 
       const selectedRecords = selectedDate ? history.filter(h => h.date === selectedDate) : [];
 
       return (
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, width: '100%' }}>
-            {['일', '월', '화', '수', '목', '금', '토'].map(d => (
-              <div key={d} style={{ textAlign: 'center', fontWeight: 800, color: '#4E5968' }}>{d}</div>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Month Navigation */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+            <button onClick={handlePrevMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+              <img src="/assets/icon-arrow-back.svg" alt="prev" style={{ width: 18, height: 18 }} />
+            </button>
+            <div style={{ fontSize: 28, fontWeight: 600, fontFamily: "'Lexend', sans-serif", color: 'rgba(0,12,30,0.8)', minWidth: 120, textAlign: 'center' }}>
+              {monthName}
+            </div>
+            <button onClick={handleNextMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, transform: 'rotate(180deg)' }}>
+              <img src="/assets/icon-arrow-back.svg" alt="next" style={{ width: 18, height: 18 }} />
+            </button>
+          </div>
+
+          {/* Calendar Grid */}
+          <div style={{ 
+            width: '100%', 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(7, 1fr)', 
+            backgroundColor: '#333d4b', 
+            gap: '1.5px', 
+            border: '1.5px solid #333d4b', 
+            borderRadius: 8, 
+            overflow: 'hidden'
+          }}>
+            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => (
+              <div key={d} style={{ backgroundColor: '#FFF', height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Lexend', sans-serif", fontSize: 16, color: 'rgba(3,18,40,0.7)' }}>
+                {d}
+              </div>
             ))}
             {blanks}
             {days}
+            {trailingBlanks}
           </div>
 
-          {selectedDate && (
-            <div style={{ marginTop: 20 }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 16, color: '#191f28', lineHeight: 1.5 }}>{selectedDate}의 기록</h3>
-              {selectedRecords.length === 0 ? (
-                <div style={{ color: '#4E5968', fontWeight: 700 }}>기록이 없습니다.</div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {selectedRecords.map(item => (
-                    <div key={item.id} className="neo-card" style={{ padding: 16, border: '3px solid #191f28', backgroundColor: '#FEF08A' }}>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: '#191f28', wordBreak: 'keep-all', lineHeight: 1.5 }}>{item.text}</div>
+          {/* Legend */}
+          <div style={{ display: 'flex', width: '100%', gap: 16, marginTop: 18, padding: '0 4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 16, height: 16, backgroundColor: '#FAE588', borderRadius: 4 }} />
+              <span style={{ fontSize: 14, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(3,18,40,0.7)' }}>완료</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 16, height: 16, backgroundColor: '#D1D6DB', borderRadius: 4 }} />
+              <span style={{ fontSize: 14, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(3,18,40,0.7)' }}>미완료</span>
+            </div>
+          </div>
+
+          {/* Selected Date Card */}
+          {selectedDate && selectedRecords.length > 0 && (
+            <div style={{ width: '100%', marginTop: 30 }}>
+              {selectedRecords.map((item, idx) => {
+                const images = ['/assets/img-work.png', '/assets/img-study.png', '/assets/img-default.png', '/assets/img-habit.png'];
+                const imgUrl = images[idx % images.length];
+                
+                return (
+                  <div key={item.id} style={{ 
+                    backgroundColor: '#FFF', 
+                    border: '1.5px solid #130537', 
+                    borderRadius: 12, 
+                    padding: '17.5px', 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 12
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 14, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(3,18,40,0.7)' }}>
+                          {new Date(item.date).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                        </span>
+                        <div style={{ backgroundColor: '#FAE588', borderRadius: 50, padding: '2px 8px', fontSize: 14, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(3,18,40,0.7)' }}>
+                          완료
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 16, fontFamily: "'Pretendard', sans-serif", fontWeight: 500, color: 'rgba(0,12,30,0.8)' }}>
+                        {item.text}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                    <div style={{ width: 50, height: 50 }}>
+                      <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
