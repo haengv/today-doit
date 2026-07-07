@@ -220,18 +220,21 @@ export default function App() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
         {/* Feedback Floating Button */}
-        <div className="feedback-btn-container">
-          <button 
-            style={{ 
-              width: 56, height: 56, backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', 
-              borderRadius: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', padding: 0, boxShadow: '0px 6px 20px rgba(0,29,58,0.09)'
-            }}
-          >
-            <img src="/assets/icon-feedback.svg" alt="피드백" style={{ width: 24, height: 24 }} />
-          </button>
-          <div className="feedback-tooltip">
-            서비스 피드백하기
+        <div style={{ position: 'fixed', bottom: 30, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, pointerEvents: 'none', zIndex: 1000 }}>
+          <div className="feedback-btn-container">
+            <button 
+              style={{ 
+                width: 56, height: 56, backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', 
+                borderRadius: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', padding: 0, boxShadow: '0px 6px 20px rgba(0,29,58,0.09)',
+                pointerEvents: 'auto'
+              }}
+            >
+              <img src="/assets/icon-feedback.svg" alt="피드백" style={{ width: 24, height: 24 }} />
+            </button>
+            <div className="feedback-tooltip">
+              서비스 피드백하기
+            </div>
           </div>
         </div>
 

@@ -129,10 +129,9 @@ input:focus, textarea:focus {
 }
 
 .feedback-btn-container {
-  position: fixed;
-  bottom: 30px;
+  position: absolute;
+  bottom: 0;
   right: 20px;
-  z-index: 1000;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
