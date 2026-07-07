@@ -228,7 +228,7 @@ export default function App() {
               cursor: 'pointer', padding: 0, boxShadow: '0px 6px 20px rgba(0,29,58,0.09)'
             }}
           >
-            <img src="/assets/feedback.svg" alt="피드백" style={{ width: 24, height: 24 }} />
+            <img src="/assets/icon-feedback.svg" alt="피드백" style={{ width: 24, height: 24 }} />
           </button>
           <div className="feedback-tooltip">
             서비스 피드백하기

@@ -129,8 +129,8 @@ input:focus, textarea:focus {
 }
 
 .feedback-btn-container {
-  position: absolute;
-  top: 24px;
+  position: fixed;
+  bottom: 30px;
   right: 20px;
   z-index: 1000;
   display: flex;
@@ -151,7 +151,10 @@ input:focus, textarea:focus {
   line-height: 1.5;
   white-space: nowrap;
   transition: opacity 0.2s, visibility 0.2s;
-  margin-top: 8px;
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 8px;
+  right: 0;
 }
 
 .feedback-btn-container:hover .feedback-tooltip {
