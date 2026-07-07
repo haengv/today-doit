@@ -58,6 +58,18 @@ export default function App() {
   const [isFeedbackPopupOpen, setIsFeedbackPopupOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackRating, setFeedbackRating] = useState(0);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage('');
+    }, 3000);
+  };
 
   useEffect(() => {
     localStorage.setItem('doit_goal', goal);
@@ -1337,10 +1349,10 @@ export default function App() {
             <div style={{ padding: '16px 20px 24px 20px', width: '100%', boxSizing: 'border-box' }}>
               <button 
                 onClick={() => {
-                  alert('피드백이 전송되었습니다. 소중한 의견 감사합니다!');
                   setIsFeedbackPopupOpen(false);
                   setFeedbackText('');
                   setFeedbackRating(0);
+                  showToast('소중한 의견이 제출되었습니다!');
                 }}
                 style={{ 
                   width: '100%', padding: '13.5px 0', borderRadius: 12, backgroundColor: '#c5e3ff', color: '#130537', 
@@ -1480,6 +1492,19 @@ export default function App() {
       {tab === 'history' && renderHistory()}
 
       {renderFeedbackPopup()}
+
+      {/* Toast Message */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: 'rgba(0,12,30,0.8)', color: '#FFF', padding: '12px 24px',
+          borderRadius: 30, fontSize: 14, fontWeight: 500, fontFamily: "'Pretendard', sans-serif",
+          zIndex: 9999, whiteSpace: 'nowrap', boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
+          animation: 'fadeInOut 3s ease-in-out forwards'
+        }}>
+          {toastMessage}
+        </div>
+      )}
 
       {/* Bottom Navigation Tab Bar */}
       {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && screen !== 'action' && (
