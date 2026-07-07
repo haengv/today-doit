@@ -162,6 +162,9 @@ input:focus, textarea:focus {
 .neo-shadow {
   box-shadow: 0px 6px 20px rgba(0, 29, 58, 0.09);
 }
+:root {
+  --neo-border: 1.5px solid #4E5968;
+  --neo-shadow: none;
   --neo-shadow-hover: none;
   --neo-bg-color: #ffffff;
 }
