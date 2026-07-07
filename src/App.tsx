@@ -1367,7 +1367,9 @@ export default function App() {
               justifyContent: 'center', transition: 'all 0.2s'
             }}
           >
-            <img src="/assets/icon-home.svg" alt="" style={{ width: 18, height: 18 }} />
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10.417 3.73986L3.61144 9.18431V16.8056H8.47255V12.9167H12.3614V16.8056H17.2225V9.65194C17.2226 9.50614 17.1899 9.3622 17.1268 9.23076C17.0636 9.09932 16.9718 8.98377 16.858 8.89264L10.417 3.73986ZM10.417 1.25L18.0723 7.375C18.4136 7.64808 18.6893 7.9944 18.8788 8.38835C19.0682 8.78231 19.1667 9.21382 19.167 9.65097V16.8056C19.167 17.3213 18.9621 17.8158 18.5975 18.1805C18.2328 18.5451 17.7382 18.75 17.2225 18.75H3.61144C3.09574 18.75 2.60116 18.5451 2.23651 18.1805C1.87185 17.8158 1.66699 17.3213 1.66699 16.8056V9.18431C1.66703 8.89287 1.73258 8.60516 1.85879 8.34247C1.985 8.07978 2.16865 7.84882 2.39616 7.66667L10.417 1.25Z" fill={tab === 'home' ? 'rgba(0,12,30,0.8)' : '#B0B8C1'}/>
+            </svg>
             {tab === 'home' && <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>홈</div>}
           </div>
           <div 
@@ -1378,7 +1380,10 @@ export default function App() {
               justifyContent: 'center', transition: 'all 0.2s'
             }}
           >
-            <img src="/assets/icon-archieve.svg" alt="" style={{ width: 20, height: 20 }} />
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.8125 3.4375H2.1875V7.8125H17.8125V3.4375Z" stroke={tab === 'history' ? 'rgba(0,12,30,0.8)' : '#B0B8C1'} strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8.4375 11.5625H11.5625M3.4375 8.4375V17.8125H16.5625V8.4375" stroke={tab === 'history' ? 'rgba(0,12,30,0.8)' : '#B0B8C1'} strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             {tab === 'history' && <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>기록</div>}
           </div>
         </div>
