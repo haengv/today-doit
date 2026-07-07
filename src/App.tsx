@@ -209,11 +209,13 @@ export default function App() {
     const d = String(today.getDate()).padStart(2, '0');
     const dateString = `${y}/${m}/${d}`;
 
+    const hasActiveGoal = goal.trim().length > 0;
     const completedCount = steps.filter(s => s.completed).length;
     const totalCount = steps.length;
     const progress = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
-    const hasActiveGoal = goal.trim() !== '' && steps.length > 0;
-    const allCompleted = hasActiveGoal && completedCount === totalCount;
+    const allCompleted = totalCount > 0 && completedCount === totalCount;
+    const nextStepIndex = steps.findIndex(s => !s.completed);
+    const nextStep = nextStepIndex !== -1 ? steps[nextStepIndex] : null;
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
@@ -339,10 +341,10 @@ export default function App() {
           {!hasActiveGoal ? null : (
             <>
               {/* Progress Box */}
-              <div className="neo-card" style={{ padding: 20, backgroundColor: '#FFFFFF', border: '3px solid #191f28', marginBottom: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: '#4E5968' }}>진행도</span>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: '#3B82F6' }}>{completedCount} / {totalCount} 완료</span>
+              <div style={{ padding: 20, backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 16, marginBottom: 24, boxShadow: '0 4px 0 rgba(0,12,30,0.8)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(3,18,40,0.7)', lineHeight: 1.5 }}>진행도</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: 'rgba(0,12,30,0.8)', lineHeight: 1.5 }}>{completedCount} / {totalCount} 완료</span>
                 </div>
                 
                 {/* Running Character Animation */}
@@ -360,29 +362,41 @@ export default function App() {
                 </div>
                 <style>{`@keyframes bob { from { transform: translateY(0px); } to { transform: translateY(-4px); } }`}</style>
 
-                <div style={{ width: '100%', height: 12, backgroundColor: '#E5E7EB', borderRadius: 6, overflow: 'hidden', border: '2px solid #191f28' }}>
-                  <div style={{ width: `${progress}%`, height: '100%', backgroundColor: '#3B82F6', transition: 'width 0.3s ease' }} />
+                <div style={{ width: '100%', height: 12, backgroundColor: '#F8F9FA', borderRadius: 6, overflow: 'hidden', border: '1.5px solid rgba(0,12,30,0.8)' }}>
+                  <div style={{ width: `${progress}%`, height: '100%', backgroundColor: '#c5e3ff', transition: 'width 0.3s ease', borderRight: progress > 0 && progress < 100 ? '1.5px solid rgba(0,12,30,0.8)' : 'none' }} />
                 </div>
               </div>
 
-              {/* Checklist */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
-                {steps.map((step, idx) => (
-                  <div key={step.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', backgroundColor: step.completed ? '#F3F4F6' : '#FEF08A', border: '3px solid #191f28', borderRadius: 8, opacity: step.completed ? 0.6 : 1 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: step.completed ? '#10B981' : '#191f28', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, flexShrink: 0, fontSize: 12 }}>
-                      {step.completed ? '✓' : (idx + 1)}
+              {/* Next Action Box */}
+              {!allCompleted && nextStep && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(3,18,40,0.7)', lineHeight: 1.5 }}>
+                    다음으로 할 일
+                  </span>
+                  <div style={{ 
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '16px', 
+                    backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', 
+                    borderRadius: 16
+                  }}>
+                    <div style={{ 
+                      width: 28, height: 28, borderRadius: '50%', backgroundColor: '#c5e3ff', 
+                      border: '1.5px solid rgba(0,12,30,0.8)', color: '#130537', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      fontWeight: 700, flexShrink: 0, fontSize: 14 
+                    }}>
+                      {nextStepIndex + 1}
                     </div>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: '#191f28', textDecoration: step.completed ? 'line-through' : 'none', wordBreak: 'keep-all' }}>
-                        {step.text}
+                      <span style={{ fontSize: 16, fontWeight: 700, color: 'rgba(0,12,30,0.8)', wordBreak: 'keep-all', lineHeight: 1.5 }}>
+                        {nextStep.text}
                       </span>
                     </div>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: step.completed ? '#9CA3AF' : '#4E5968' }}>
-                      ⏱️ {step.timeEstimate}분
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(3,18,40,0.7)', lineHeight: 1.5 }}>
+                      {nextStep.timeEstimate}
                     </span>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
 
               {/* Action Button */}
               {allCompleted ? (
