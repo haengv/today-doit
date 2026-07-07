@@ -1364,21 +1364,22 @@ export default function App() {
             style={{ 
               flex: 1, display: 'flex', alignItems: 'center', gap: 6, height: 36,
               background: tab === 'home' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
-              justifyContent: 'center', transition: 'background 0.2s'
+              justifyContent: 'center', transition: 'all 0.2s'
             }}
           >
             <img src="/assets/icon-home.svg" alt="" style={{ width: 18, height: 18 }} />
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>홈</div>
+            {tab === 'home' && <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>홈</div>}
           </div>
           <div 
             onClick={() => setTab('history')}
             style={{ 
               flex: 1, display: 'flex', alignItems: 'center', gap: 6, height: 36,
               background: tab === 'history' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
-              justifyContent: 'center', transition: 'background 0.2s'
+              justifyContent: 'center', transition: 'all 0.2s'
             }}
           >
             <img src="/assets/icon-archieve.svg" alt="" style={{ width: 20, height: 20 }} />
+            {tab === 'history' && <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>기록</div>}
           </div>
         </div>
       )}
