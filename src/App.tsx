@@ -55,6 +55,8 @@ export default function App() {
   const [postItColor, setPostItColor] = useState(() => localStorage.getItem('doit_postItColor') || '#FAE588');
   const [startWhen, setStartWhen] = useState(() => localStorage.getItem('doit_startWhen') || '');
   const [startWhere, setStartWhere] = useState(() => localStorage.getItem('doit_startWhere') || '');
+  const [isFeedbackPopupOpen, setIsFeedbackPopupOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
 
   useEffect(() => {
     localStorage.setItem('doit_goal', goal);
@@ -223,6 +225,7 @@ export default function App() {
         <div style={{ position: 'fixed', bottom: 30, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, pointerEvents: 'none', zIndex: 1000 }}>
           <div className="feedback-btn-container">
             <button 
+              onClick={() => setIsFeedbackPopupOpen(true)}
               style={{ 
                 width: 56, height: 56, backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', 
                 borderRadius: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -338,6 +341,7 @@ export default function App() {
 
           {/* Plus FAB Button */}
           {!hasActiveGoal && (
+
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 20, marginBottom: 28 }}>
               <button
                 onClick={() => {
@@ -1261,6 +1265,54 @@ export default function App() {
     );
   };
 
+  const renderFeedbackPopup = () => {
+    if (!isFeedbackPopupOpen) return null;
+    return (
+      <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5000 }}>
+        {/* Dimming Overlay */}
+        <div 
+          onClick={() => setIsFeedbackPopupOpen(false)}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)' }}
+        />
+        
+        <div style={{ position: 'relative', zIndex: 5001, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '85%' }}>
+          {/* Card */}
+          <div style={{ position: 'relative', width: '100%', backgroundColor: '#FFF', borderRadius: 20, padding: 24, border: '1.5px solid rgba(0,12,30,0.8)', boxShadow: '0px 6px 20px rgba(0,29,58,0.09)' }}>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#191f28', margin: '0 0 16px 0', lineHeight: 1.5, fontFamily: "'Pretendard', sans-serif" }}>서비스 피드백</h3>
+            <textarea
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
+              placeholder="서비스를 사용하면서 느낀 점이나 개선할 점을 자유롭게 적어주세요!"
+              style={{
+                width: '100%', height: 120, padding: 16, borderRadius: 12, border: '1.5px solid rgba(0,12,30,0.8)',
+                fontSize: 16, fontFamily: "'Pretendard', sans-serif", backgroundColor: '#F8F9FA', resize: 'none',
+                outline: 'none', boxSizing: 'border-box', marginBottom: 16
+              }}
+            />
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button 
+                onClick={() => setIsFeedbackPopupOpen(false)}
+                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#E5E8EB', color: '#4E5968', fontSize: 16, fontWeight: 700, border: '1.5px solid transparent', cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" }}
+              >
+                취소
+              </button>
+              <button 
+                onClick={() => {
+                  alert('피드백이 전송되었습니다. 소중한 의견 감사합니다!');
+                  setIsFeedbackPopupOpen(false);
+                  setFeedbackText('');
+                }}
+                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#c5e3ff', color: '#130537', fontSize: 16, fontWeight: 700, border: '1.5px solid rgba(0,12,30,0.8)', cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" }}
+              >
+                보내기
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={{ fontFamily: 'inherit', position: 'relative' }}>
       {/* Screens Render Logic */}
@@ -1316,7 +1368,7 @@ export default function App() {
                     placeholder="예: 영단어 10개 외우기"
                     className="neo-input"
                     style={{
-                      paddingRight: 40,
+            paddingRight: 40,
                       backgroundColor: '#F3F4F6'
                     }}
                   />
@@ -1383,6 +1435,8 @@ export default function App() {
       )}
       
       {tab === 'history' && renderHistory()}
+
+      {renderFeedbackPopup()}
 
       {/* Bottom Navigation Tab Bar */}
       {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && screen !== 'action' && (
