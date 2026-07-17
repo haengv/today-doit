@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 type TabState = 'home' | 'history';
-type ScreenState = 'onboarding' | 'home' | 'breakdown' | 'action' | 'receipt';
+type ScreenState = 'onboarding' | 'home' | 'breakdown' | 'action' | 'receipt' | 'editSteps';
 
 type Step = {
   id: string;
@@ -10,15 +11,105 @@ type Step = {
   timeEstimate: string;
 };
 
-const simulateBreakdown = async (goal: string): Promise<Step[]> => {
-  return [
-    { id: '1', text: '노트북 전원 켜기', completed: false, timeEstimate: '30초' },
-    { id: '2', text: '폴더 열기', completed: false, timeEstimate: '1분' },
-    { id: '3', text: '수정할 화면 정하기', completed: false, timeEstimate: '1분' },
-    { id: '4', text: '첫번째 요소 수정하기', completed: false, timeEstimate: '1분' },
-    { id: '5', text: '나머지 요소 수정하기', completed: false, timeEstimate: '1분' },
-  ];
+const getGoalImage = (category: string) => {
+  switch(category) {
+    case 'life': return '/assets/img-life.png';
+    case 'work': return '/assets/img-work.png';
+    case 'habit': return '/assets/img-habit.png';
+    case 'study': return '/assets/img-study.png';
+    default: return '/assets/img-default.png';
+  }
 };
+
+const guessCategoryLocally = (text: string) => {
+  if (/(운동|산책|청소|정리|빨래|식사|약|물|휴식|일상|수면|잠|여행)/.test(text)) return 'life';
+  if (/(업무|메일|보고서|회의|기획|자료|코드|개발|디자인|작업|포트폴리오|수정|작성)/.test(text)) return 'work';
+  if (/(공부|학습|강의|책|독서|시험|과제|숙제|영어|단어|수학)/.test(text)) return 'study';
+  if (/(취미|명상|피아노|기타|그림|습관|일기|블로그|운동)/.test(text)) return 'habit';
+  return 'default';
+};
+
+const generateBreakdown = async (goal: string): Promise<{category: string, steps: Step[]}> => {
+  try {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("API Key not found");
+    }
+
+    const prompt = `
+사용자가 입력한 목표: "${goal}"
+
+이 목표를 이루기 위한 구체적인 행동 계획을 세워주세요. 다음 규칙을 반드시 지켜주세요:
+1. 할 일의 주제를 분석하여 다음 5가지 카테고리 중 하나로 분류해주세요: 'default'(기본), 'life'(일정 및 일상 생활), 'work'(업무 및 작업), 'habit'(취미 및 습관), 'study'(공부).
+2. 단계의 개수는 목표의 규모에 따라 유동적으로 정하되, 최소 4개 이상으로 쪼개주세요.
+3. 처음 1~2단계는 당장 1분 내외로 끝낼 수 있는 아주 가볍고 쉬운 행동(예: '책상 앞에 앉기', '노트북 켜기')으로 배치해서 시작의 허들을 낮춰주세요.
+4. 3~4번째 단계부터는 실제로 목표를 달성하기 위한 구체적이고 현실적인 행동(10분~30분 이상 소요)으로 길게 가져가 주세요. 너무 비현실적으로 짧은 행동만 반복하지 마세요.
+5. 반드시 JSON 형식으로 응답해주세요. 최상위는 'category' (문자열)와 'steps' (행동 객체 배열) 두 가지 속성을 가져야 합니다. 각 행동 객체는 'text'(행동 설명, 30자 이내), 'timeEstimate'(예상 소요 시간, 예: '1분', '20분') 두 가지 속성을 가져야 합니다.
+`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              category: { type: "STRING", enum: ["default", "life", "work", "habit", "study"], description: "할 일 유형" },
+              steps: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    text: { type: "STRING", description: "행동 설명 (20자 이내)" },
+                    timeEstimate: { type: "STRING", description: "예상 소요 시간 (예: '1분', '5분')" }
+                  },
+                  required: ["text", "timeEstimate"]
+                }
+              }
+            },
+            required: ["category", "steps"]
+          }
+        }
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error?.message || "API request failed");
+    }
+
+    if (data.candidates && data.candidates[0].content.parts[0].text) {
+      const jsonStr = data.candidates[0].content.parts[0].text;
+      const parsed = JSON.parse(jsonStr);
+      
+      const steps = parsed.steps.map((s: any, idx: number) => ({
+        id: String(idx + 1),
+        text: s.text || '다음 단계 진행하기',
+        timeEstimate: s.timeEstimate || '5분',
+        completed: false
+      }));
+      return { category: parsed.category || 'default', steps };
+    }
+    throw new Error("Invalid response format from AI");
+  } catch (error) {
+    console.error("AI Breakdown Error:", error);
+    return {
+      category: 'default',
+      steps: [
+        { id: "1", text: `[에러] ${error.message || '알 수 없는 오류'}`, timeEstimate: '1분', completed: false },
+        { id: "2", text: '관련 자료나 도구 눈앞에 두기', timeEstimate: '2분', completed: false },
+        { id: "3", text: '5분 타이머 맞추기', timeEstimate: '1분', completed: false },
+        { id: "4", text: '무작정 시작해보기', timeEstimate: '5분', completed: false },
+      ]
+    };
+  }
+};
+
 
 const simulateMicroBreakdown = (): Promise<string> => {
   return new Promise(resolve => {
@@ -38,7 +129,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [isMicroBreaking, setIsMicroBreaking] = useState(false);
-  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, status?: 'complete' | 'incomplete'}[]>(() => {
+  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, status?: 'complete' | 'incomplete', category?: string}[]>(() => {
     const saved = localStorage.getItem('doit_history');
     return saved ? JSON.parse(saved) : [];
   });
@@ -47,18 +138,23 @@ export default function App() {
   const [historyView, setHistoryView] = useState<'list' | 'calendar'>('list');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string} | null>(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, category?: string} | null>(null);
+  const [goalCategory, setGoalCategory] = useState<string>(() => {
+    return localStorage.getItem('doit_goalCategory') || 'default';
+  });
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isAddStepSheetOpen, setIsAddStepSheetOpen] = useState(false);
   const [newStepText, setNewStepText] = useState('');
-  const [newStepTime, setNewStepTime] = useState('1분');
+  const [newStepTime, setNewStepTime] = useState('5 min');
   const [postItColor, setPostItColor] = useState(() => localStorage.getItem('doit_postItColor') || '#FAE588');
   const [startWhen, setStartWhen] = useState(() => localStorage.getItem('doit_startWhen') || '');
   const [startWhere, setStartWhere] = useState(() => localStorage.getItem('doit_startWhere') || '');
   const [isFeedbackPopupOpen, setIsFeedbackPopupOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackRating, setFeedbackRating] = useState(0);
+  const [isHomeCalendarSheetOpen, setIsHomeCalendarSheetOpen] = useState(false);
+  const [homeCalendarSheetDate, setHomeCalendarSheetDate] = useState(new Date());
   const [toastMessage, setToastMessage] = useState('');
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -74,12 +170,13 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('doit_goal', goal);
+    localStorage.setItem('doit_goalCategory', goalCategory);
     localStorage.setItem('doit_steps', JSON.stringify(steps));
     localStorage.setItem('doit_history', JSON.stringify(history));
     localStorage.setItem('doit_postItColor', postItColor);
     localStorage.setItem('doit_startWhen', startWhen);
     localStorage.setItem('doit_startWhere', startWhere);
-  }, [goal, steps, history, postItColor, startWhen, startWhere]);
+  }, [goal, goalCategory, steps, history, postItColor, startWhen, startWhere]);
   
   const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
   
@@ -99,6 +196,17 @@ export default function App() {
   const [breakdownToastMessage, setBreakdownToastMessage] = useState('');
   const [homeDate, setHomeDate] = useState<Date>(new Date());
   const [checkParticles, setCheckParticles] = useState<any[]>([]);
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+  const [timePickerTarget, setTimePickerTarget] = useState<number | 'new' | null>(null);
+  const [pickerScrollValue, setPickerScrollValue] = useState<string>('5 min');
+
+  // editSteps hooks
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragStartY, setDragStartY] = useState<number>(0);
+  const [dragOffset, setDragOffset] = useState<number>(0);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const initialPointer = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (screen !== 'action') {
@@ -218,43 +326,60 @@ export default function App() {
     </button>
   );
 
+  const QUOTES = [
+    { text: "시작이 반이다.", author: "아리스토텔레스" },
+    { text: "행동은 모든 성공의 가장 기초적인 핵심이다.", author: "파블로 피카소" },
+    { text: "작은 일도 시작해야 위대한 일도 생긴다.", author: "마크 샌번" },
+    { text: "목표에 도달하는 유일한 방법은 첫걸음을 떼는 것이다.", author: "노자" },
+    { text: "아무것도 하지 않으면 아무 일도 일어나지 않는다.", author: "기시미 이치로" },
+    { text: "완벽주의는 행동의 적이다. 일단 시작하라.", author: "마크 트웨인" },
+    { text: "지금 적극적으로 실행되는 좋은 계획이 다음 주의 완벽한 계획보다 낫다.", author: "조지 S. 패튼" }
+  ];
+
   const renderHome = () => {
-    const today = homeDate;
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, '0');
-    const d = String(today.getDate()).padStart(2, '0');
+    const todayDate = new Date();
+    todayDate.setHours(0,0,0,0);
+    const y = homeDate.getFullYear();
+    const m = String(homeDate.getMonth() + 1).padStart(2, '0');
+    const d = String(homeDate.getDate()).padStart(2, '0');
     const dateString = `${y}/${m}/${d}`;
 
-    const hasActiveGoal = goal.trim().length > 0;
-    const completedCount = steps.filter(s => s.completed).length;
-    const totalCount = steps.length;
+    const startOfYear = new Date(homeDate.getFullYear(), 0, 0);
+    const diff = homeDate.getTime() - startOfYear.getTime();
+    const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const currentQuote = QUOTES[dayOfYear % QUOTES.length];
+
+    const isToday = homeDate.toLocaleDateString() === todayDate.toLocaleDateString();
+    const historyItem = history.find(h => h.date === homeDate.toLocaleDateString('en-US'));
+    const isFinishedDay = historyItem ? historyItem.status === 'complete' : false;
+
+    const displayGoal = historyItem ? historyItem.text : (isToday ? goal : '');
+    const displaySteps = historyItem ? (historyItem.steps || []) : (isToday ? steps : []);
+    const displayCategory = historyItem ? (historyItem.category || 'default') : (isToday ? goalCategory : 'default');
+
+    const hasActiveGoal = displayGoal.trim().length > 0;
+    const completedCount = displaySteps.filter(s => s.completed).length;
+    const totalCount = displaySteps.length;
     const progress = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
     const allCompleted = totalCount > 0 && completedCount === totalCount;
-    const nextStepIndex = steps.findIndex(s => !s.completed);
-    const nextStep = nextStepIndex !== -1 ? steps[nextStepIndex] : null;
+    const nextStepIndex = displaySteps.findIndex(s => !s.completed);
+    const nextStep = nextStepIndex !== -1 ? displaySteps[nextStepIndex] : null;
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
 
         {/* Date Header Wrapper */}
         <div style={{ width: '100%', maxWidth: 375, padding: '20px 20px 0 20px', display: 'flex', justifyContent: 'flex-start' }}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div 
+            style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+            onClick={() => {
+              setHomeCalendarSheetDate(homeDate);
+              setIsHomeCalendarSheetOpen(true);
+            }}
+          >
             <h1 style={{ fontSize: 16, fontWeight: 400, color: '#191f28', margin: 0, display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
               {dateString} <img src="/assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
             </h1>
-            <input 
-              type="date" 
-              value={`${y}-${m}-${d}`}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setHomeDate(new Date(e.target.value));
-                }
-              }}
-              style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                opacity: 0, cursor: 'pointer'
-              }}
-            />
           </div>
         </div>
 
@@ -266,13 +391,13 @@ export default function App() {
             borderRadius: '30px 30px 30px 6px', 
             padding: '12px 24px', backgroundColor: '#FFF' 
           }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <p style={{ fontSize: 16, fontWeight: 600, color: 'rgba(0,12,30,0.8)', margin: 0, wordBreak: 'keep-all', lineHeight: 1.5 }}>
-                시작이 반이다.
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, marginRight: 16 }}>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,12,30,0.8)', margin: 0, wordBreak: 'keep-all', lineHeight: 1.5 }}>
+                {currentQuote.text}
               </p>
-              <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>아리스토텔레스</span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>{currentQuote.author}</span>
             </div>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 2, boxSizing: 'border-box' }}>
+            <div style={{ width: 48, height: 48, flexShrink: 0, borderRadius: '50%', backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 2, boxSizing: 'border-box' }}>
               <img src="/assets/img-character.png" alt="캐릭터" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
           </div>
@@ -282,12 +407,13 @@ export default function App() {
           {/* Post-it UI Goal Card */}
           <div style={{ 
             position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center',
-            transform: isBottomSheetOpen ? 'translateY(-140px)' : 'translateY(0)',
-            transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+            transform: isBottomSheetOpen ? 'translateY(-130px) scale(0.85)' : 'translateY(0) scale(1)',
+            transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+            transformOrigin: 'top center'
           }}>
             <div 
               style={{ 
-                position: 'relative', width: 220, height: 260, backgroundColor: (hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588', 
+                position: 'relative', width: 220, height: 260, backgroundColor: isToday ? ((hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588') : (historyItem?.status === 'incomplete' ? '#D1D6DB' : '#FAE588'), 
                 border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 6,
                 boxShadow: '0px 8px 7.5px rgba(22,22,22,0.13)',
                 display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: 16
@@ -304,24 +430,30 @@ export default function App() {
               <div style={{ position: 'absolute', top: 16.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span style={{ fontSize: 38, fontWeight: 300, lineHeight: 1.2, color: 'rgba(0,12,30,0.8)', fontFamily: "'Lexend', sans-serif" }}>{d}</span>
                 <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(0,12,30,0.8)', fontFamily: "'Lexend', sans-serif" }}>
-                  {today.toLocaleString('en-US', { month: 'short' }).toUpperCase()}
+                  {todayDate.toLocaleString('en-US', { month: 'short' }).toUpperCase()}
                 </span>
               </div>
 
               {/* Top Right Illustration */}
               <div style={{ position: 'absolute', top: 10, right: 10, width: 70, height: 70 }}>
-                <img src="/assets/img-default.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <img src={getGoalImage(displayCategory)} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               
-              {!hasActiveGoal && !goal.trim() ? (
+              {!hasActiveGoal && !displayGoal.trim() ? (
                 <div style={{ position: 'absolute', top: 110.5, left: 16.5, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', color: 'rgba(3,24,50,0.46)' }}>
-                  <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>오늘 꼭 해야 할</span>
-                  <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한가지 일을 적어주세요</span>
+                  {isToday ? (
+                    <>
+                      <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>오늘 꼭 해야 할</span>
+                      <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>한가지 일을 적어주세요</span>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>이 날은 기록이 없어요</span>
+                  )}
                 </div>
               ) : (
                 <div style={{ position: 'absolute', top: 100.5, left: 16.5, width: 187, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <h1 style={{ fontSize: 20, fontWeight: 600, color: '#191f28', margin: 0, wordBreak: 'break-word', textAlign: 'left', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
-                    {goal}
+                    {displayGoal}
                   </h1>
                 </div>
               )}
@@ -331,11 +463,21 @@ export default function App() {
                   최대 30글자
                 </div>
               )}
+              
+              {historyItem?.status === 'complete' && (
+                <div style={{ 
+                  position: 'absolute', bottom: 16, right: 16, 
+                  backgroundColor: '#191f28', borderRadius: 30, padding: '4px 16px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <span style={{ fontFamily: 'Pretendard', fontWeight: 500, fontSize: 14, color: '#FFF', lineHeight: 1.5 }}>완료</span>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Plus FAB Button */}
-          {!hasActiveGoal && (
+          {!hasActiveGoal && isToday && !isFinishedDay && (
 
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 20, marginBottom: 28 }}>
               <button
@@ -358,89 +500,83 @@ export default function App() {
           {/* Dynamic Bottom Area */}
           {!hasActiveGoal ? null : (
             <>
-              {/* Progress Box */}
-              <div style={{ padding: 20, backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 16, marginBottom: 24, boxShadow: '0 4px 0 rgba(0,12,30,0.8)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(3,18,40,0.7)', lineHeight: 1.5 }}>진행도</span>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: 'rgba(0,12,30,0.8)', lineHeight: 1.5 }}>{completedCount} / {totalCount} 완료</span>
-                </div>
-                
-                {/* Running Character Animation */}
-                <div style={{ width: '100%', position: 'relative', height: 32, marginBottom: 4 }}>
+              {isFinishedDay ? (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 20, padding: '0 20px', boxSizing: 'border-box' }}>
                   <div style={{ 
-                    position: 'absolute', 
-                    bottom: 0, 
-                    left: `calc(${progress}% - 12px)`, 
-                    fontSize: 24,
-                    transition: 'left 0.3s ease',
-                    animation: progress < 100 ? 'bob 0.5s infinite alternate' : 'none'
+                    backgroundColor: '#FFF', border: '1.5px solid #130537', borderRadius: 12,
+                    padding: '13.5px 17.5px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: '100%', boxSizing: 'border-box'
                   }}>
-                    {progress === 100 ? '🎉' : '🏃‍♂️'}
-                  </div>
-                </div>
-                <style>{`@keyframes bob { from { transform: translateY(0px); } to { transform: translateY(-4px); } }`}</style>
-
-                <div style={{ width: '100%', height: 12, backgroundColor: '#F8F9FA', borderRadius: 6, overflow: 'hidden', border: '1.5px solid rgba(0,12,30,0.8)' }}>
-                  <div style={{ width: `${progress}%`, height: '100%', backgroundColor: '#c5e3ff', transition: 'width 0.3s ease', borderRight: progress > 0 && progress < 100 ? '1.5px solid rgba(0,12,30,0.8)' : 'none' }} />
-                </div>
-              </div>
-
-              {/* Next Action Box */}
-              {!allCompleted && nextStep && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(3,18,40,0.7)', lineHeight: 1.5 }}>
-                    다음으로 할 일
-                  </span>
-                  <div style={{ 
-                    display: 'flex', alignItems: 'center', gap: 12, padding: '16px', 
-                    backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', 
-                    borderRadius: 16
-                  }}>
-                    <div style={{ 
-                      width: 28, height: 28, borderRadius: '50%', backgroundColor: '#c5e3ff', 
-                      border: '1.5px solid rgba(0,12,30,0.8)', color: '#130537', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      fontWeight: 700, flexShrink: 0, fontSize: 14 
-                    }}>
-                      {nextStepIndex + 1}
-                    </div>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: 'rgba(0,12,30,0.8)', wordBreak: 'keep-all', lineHeight: 1.5 }}>
-                        {nextStep.text}
-                      </span>
-                    </div>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(3,18,40,0.7)', lineHeight: 1.5 }}>
-                      {nextStep.timeEstimate}
+                    <span style={{ fontFamily: 'Pretendard', fontWeight: 500, fontSize: 16, color: 'rgba(0,12,30,0.8)', lineHeight: 1.5 }}>
+                      오늘 할 일을 모두 완료했어요!
                     </span>
                   </div>
                 </div>
-              )}
-
-              {/* Action Button */}
-              {allCompleted ? (
-                <button 
-                  className="neo-btn" 
-                  style={{ backgroundColor: '#10B981', color: '#FFF', width: '100%' }}
-                  onClick={() => {
-                    setScreen('receipt');
-                  }}
-                >
-                  🧾 영수증 뽑기
-                </button>
               ) : (
-                <button 
-                  className="neo-btn" 
-                  style={{ backgroundColor: '#3B82F6', color: '#FFF', width: '100%' }}
-                  onClick={() => {
-                    setActionStartTime(new Date());
-                    setScreen('action');
-                  }}
-                >
-                  ▶ 다음 행동 이어서 시작하기
-                </button>
-              )}
-            </>
+                <>
+                  {/* Progress and Next Action Section */}
+                  <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+                    
+                    {/* Progress Bar Container */}
+                    <div style={{ width: '100%', marginBottom: 24, marginTop: 40, display: 'flex', alignItems: 'center', gap: 12 }}>
+                      
+                      {/* Track */}
+                      <div style={{ flex: 1, position: 'relative', height: 12, backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 20 }}>
+                        <div style={{ width: `${progress}%`, height: '100%', backgroundColor: '#c5e3ff', borderRadius: 20, borderRight: progress < 100 && progress > 0 ? '1.5px solid rgba(0,12,30,0.8)' : 'none', transition: 'width 0.3s ease' }} />
+                        
+                        {/* Tooltip */}
+                        <div style={{
+                          position: 'absolute', top: -38, left: `calc(${Math.max(15, Math.min(85, progress))}%)`, transform: 'translateX(-50%)',
+                          backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 20, padding: '4px 12px',
+                          fontSize: 12, fontWeight: 600, color: 'rgba(0,12,30,0.8)', whiteSpace: 'nowrap',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, fontFamily: "'Pretendard', sans-serif"
+                        }}>
+                          여기까지 했어요
+                          <div style={{
+                            position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)',
+                            width: 8, height: 8, backgroundColor: '#FFF', borderBottom: '1.5px solid rgba(0,12,30,0.8)', borderRight: '1.5px solid rgba(0,12,30,0.8)'
+                          }} />
+                        </div>
+                      </div>
+
+                      {/* Arrow Icon */}
+                      <svg onClick={() => setScreen('breakdown')} style={{ cursor: 'pointer', flexShrink: 0 }} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(0,12,30,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                      </svg>
+                    </div>
+
+                    {/* Next Action Box */}
+                    {!allCompleted && nextStep && (
+                      <div style={{ 
+                        width: '100%', padding: '14px 16px', backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, 
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, overflow: 'hidden', marginRight: 12 }}>
+                          <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,24,50,0.46)', whiteSpace: 'nowrap', fontFamily: "'Pretendard', sans-serif" }}>다음</span>
+                          <span style={{ fontSize: 16, fontWeight: 600, color: 'rgba(0,12,30,0.8)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: "'Pretendard', sans-serif" }}>{nextStep.text}</span>
+                        </div>
+                        <div 
+                          onClick={() => {
+                            if (completedCount === 0) setActionStartTime(new Date());
+                            setScreen('action');
+                          }}
+                          style={{ 
+                            backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 20, 
+                            padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', flexShrink: 0
+                          }}
+                        >
+                          <span style={{ fontSize: 14, fontWeight: 600, color: '#130537', fontFamily: "'Pretendard', sans-serif" }}>{completedCount > 0 ? '이어서 하기' : '시작하기'}</span>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
           )}
+        </>
+      )}
         </div>
       </div>
     );
@@ -451,7 +587,7 @@ export default function App() {
       <div 
         onClick={() => setIsBottomSheetOpen(false)}
         style={{
-          position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
           backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)', zIndex: 2000,
         }}
       />
@@ -460,7 +596,7 @@ export default function App() {
           position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
           width: '100%', maxWidth: 375,
           backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
-          padding: '16px 20px 40px', zIndex: 2002,
+          padding: '16px 20px 20px', zIndex: 2002,
           animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           display: 'flex', flexDirection: 'column',
           maxHeight: '90vh', overflowY: 'auto'
@@ -534,26 +670,30 @@ export default function App() {
               <div 
                 onClick={async () => {
                   if (goal.trim().length < 5) return;
-                  const historyId = Date.now();
-                  setHistory(prev => [{id: historyId, text: goal, date: new Date().toLocaleDateString(), when: '', where: ''}, ...prev]);
                   
                   setIsBottomSheetOpen(false);
                   setScreen('breakdown');
+                  setGoalCategory(guessCategoryLocally(goal)); // Guess category locally first so image updates immediately
                   setIsGeneratingSteps(true);
                   setBreakdownToastMessage('할 일을 단계별로 쪼개고 있어요.');
                   setShowBreakdownToast(true);
                   
-                  const newSteps = await simulateBreakdown(goal);
-                  
-                  // Artificial delay to show loading skeleton
-                  await new Promise(resolve => setTimeout(resolve, 2500));
-                  
-                  setSteps(newSteps);
-                  setHistory(prev => prev.map(h => h.id === historyId ? { ...h, steps: newSteps } : h));
-                  setIsGeneratingSteps(false);
-                  
-                  setBreakdownToastMessage('오늘의 할 일을 단계별로 정리했어요 ✨');
-                  setTimeout(() => setShowBreakdownToast(false), 3000);
+                  let toggle = false;
+                  const messageInterval = setInterval(() => {
+                    toggle = !toggle;
+                    setBreakdownToastMessage(toggle ? '잠시만 기다려주세요!' : '할 일을 단계별로 쪼개고 있어요.');
+                  }, 5500);
+
+                  try {
+                    const result = await generateBreakdown(goal);
+                    setSteps(result.steps);
+                    setGoalCategory(result.category);
+                  } finally {
+                    clearInterval(messageInterval);
+                    setIsGeneratingSteps(false);
+                    setBreakdownToastMessage('오늘의 할 일을 단계별로 정리했어요 ✨');
+                    setTimeout(() => setShowBreakdownToast(false), 3000);
+                  }
                 }}
                 style={{ 
                   backgroundColor: goal.trim().length >= 5 ? '#c5e3ff' : '#E5E8EB',
@@ -595,65 +735,83 @@ export default function App() {
 
       <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 20px 40px' }}>
         {/* Title Area */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, marginBottom: 20 }}>
           <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>오늘의 할 일</div>
           <div style={{ fontSize: 20, fontWeight: 600, color: 'rgba(0,12,30,0.8)', lineHeight: 1.5 }}>{goal || "포트폴리오 수정 완료하기"}</div>
         </div>
         
         {/* Illustration */}
-        <div style={{ width: 140, height: 140, marginBottom: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src="/assets/img-default.png" alt="노트북" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        <div style={{ width: 139, height: 139, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 30 }}>
+          <img src={getGoalImage(goalCategory)} alt="노트북" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
 
-        {/* Steps Header */}
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>아래 단계별로 시작해봐요</div>
-          {!isGeneratingSteps && (
-            <button onClick={() => setScreen('bottomSheet')} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
-              <img src="/assets/icon-edit.svg" alt="수정" style={{ width: 16, height: 16 }} />
-              <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>직접 수정하기</span>
-            </button>
-          )}
-        </div>
 
         {/* Steps List or Skeleton */}
         {isGeneratingSteps ? (
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[1, 2, 3].map(i => (
-              <div key={i} className="skeleton-shimmer" style={{ height: 44, borderRadius: 8, width: '100%' }} />
+              <div key={i} className="skeleton-shimmer" style={{ height: 61, borderRadius: 12, width: '100%' }} />
             ))}
           </div>
         ) : (
           <>
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {steps.map((step, idx) => {
-                const isFirst = idx === 0;
+                const isCurrentAction = idx === currentActionStepIndex;
                 return (
                   <div 
                     key={step.id} 
                     style={{ 
-                      backgroundColor: isFirst ? '#FAE588' : '#F2F4F6', 
-                      border: isFirst ? '1.5px solid #130537' : 'none',
-                      borderRadius: 8, padding: isFirst ? '11.5px 17.5px' : '10px 16px',
+                      position: 'relative',
+                      backgroundColor: isCurrentAction ? '#FAE588' : '#FFF', 
+                      border: isCurrentAction ? '1.5px solid #130537' : '1.5px solid rgba(0,25,54,0.31)',
+                      borderRadius: 12, 
+                      padding: '13.5px 17.5px',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       opacity: 0,
                       animation: 'fadeInUp 0.4s ease-out forwards',
                       animationDelay: `${idx * 0.15}s`
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
-                        <span style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>{idx + 1}</span>
+                    {/* Tooltip for the current action item */}
+                    {isCurrentAction && (
+                      <div style={{
+                        position: 'absolute', top: -18, left: 16,
+                        backgroundColor: '#FFF', border: '1.5px solid #130537', borderRadius: 14,
+                        padding: '4px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 10
+                      }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: '#191f28', lineHeight: 1.5 }}>
+                          {step.timeEstimate ? `${step.timeEstimate.replace(/[^0-9]/g, '')}분이면 돼요` : '2분이면 돼요'}
+                        </span>
                       </div>
-                      <div style={{ fontSize: 16, fontWeight: 500, color: isFirst ? 'rgba(0,12,30,0.8)' : 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>
+                    )}
+
+                    {/* Left part: Number and Text */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, overflow: 'hidden' }}>
+                      <div style={{ width: 18, height: 18, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>{idx + 1}</span>
+                      </div>
+                      <div style={{ 
+                        fontSize: 16, fontWeight: 500, color: isCurrentAction ? 'rgba(0,12,30,0.8)' : 'rgba(3,18,40,0.7)', 
+                        lineHeight: 1.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' 
+                      }}>
                         {step.text}
                       </div>
                     </div>
-                    <div style={{ 
-                      padding: '4px 10px', borderRadius: 20, backgroundColor: isFirst ? '#E5E8EB' : '#F2F4F6', 
-                      fontSize: 12, fontWeight: 500, color: isFirst ? 'rgba(0,19,43,0.58)' : 'rgba(3,24,50,0.46)', lineHeight: 1.5 
-                    }}>
-                      {step.timeEstimate}
+
+                    {/* Right part: Divider, Clock Icon, Time */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0, marginLeft: 16 }}>
+                      <div style={{ width: 1, height: 26, backgroundColor: isCurrentAction ? 'rgba(19,5,55,0.2)' : 'rgba(0,25,54,0.1)' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(3,24,50,0.46)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5, fontFamily: 'Lexend, sans-serif' }}>
+                          {step.timeEstimate.replace('분', ' min')}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );
@@ -669,11 +827,11 @@ export default function App() {
                   setIsAddStepSheetOpen(true);
                 }}
                 style={{ 
-                  width: 32, height: 32, borderRadius: 8, backgroundColor: '#191f28', color: '#FFF',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer'
+                  width: 37, height: 37, borderRadius: 8, backgroundColor: 'transparent', border: '1.5px solid rgba(0,25,54,0.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
                 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(0,12,30,0.8)" strokeWidth="2" strokeLinecap="round">
                   <path d="M12 5v14M5 12h14" />
                 </svg>
               </button>
@@ -685,10 +843,10 @@ export default function App() {
       {/* Breakdown Toast */}
       {showBreakdownToast && (
         <div style={{
-          position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+          position: 'fixed', bottom: 120, left: '50%', transform: 'translateX(-50%)',
           padding: '16px 20px', backgroundColor: 'rgba(3,24,50,0.92)', color: '#FFF', borderRadius: 16,
           fontSize: 14, fontWeight: 500, lineHeight: 1.5, zIndex: 1000, animation: 'toastEnter 0.3s ease-out',
-          boxShadow: '0 8px 16px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: 8
+          boxShadow: '0 8px 16px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap'
         }}>
           {isGeneratingSteps && (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
@@ -699,31 +857,253 @@ export default function App() {
         </div>
       )}
 
-      {/* Bottom CTA */}
+      {/* Bottom CTA (Start & Edit) */}
       {!isGeneratingSteps && (
         <div style={{ position: 'sticky', bottom: 0, width: '100%', padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box', marginTop: 'auto' }}>
-          <button 
-            onClick={handleStartAction}
-            style={{ 
-              background: '#c5e3ff',
-              border: '1.5px solid rgba(0,12,30,0.8)',
-              borderRadius: 16,
-              width: '100%', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              cursor: 'pointer',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-              WebkitTouchCallout: 'none'
-            }}
-          >
-            <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>첫 행동 시작하기</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </button>
+          <div style={{ width: '100%', maxWidth: 335, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button 
+              onClick={handleStartAction}
+              style={{ 
+                flex: 1,
+                background: '#c5e3ff',
+                border: '1.5px solid rgba(0,12,30,0.8)',
+                borderRadius: 12,
+                height: 54, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                cursor: 'pointer',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                WebkitTouchCallout: 'none'
+              }}
+            >
+              <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>
+                {currentActionStepIndex > 0 ? '이어서 하기' : '행동 시작하기'}
+              </span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+            <button 
+              onClick={() => setScreen('editSteps')}
+              style={{ 
+                width: 54, height: 54, flexShrink: 0,
+                background: '#2A303C', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 27,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+              }}
+            >
+              <img src="/assets/icon-edit.svg" alt="수정" style={{ width: 24, height: 24, filter: 'brightness(0) invert(1)' }} />
+            </button>
+          </div>
         </div>
       )}
     </div>
   );
+  const renderEditSteps = () => {
+
+    const handlePointerDown = (e: React.TouchEvent | React.MouseEvent, index: number) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName.toLowerCase() === 'input' || target.tagName.toLowerCase() === 'button' || target.closest('button')) {
+        return;
+      }
+      const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+      initialPointer.current = { x: clientX, y: clientY };
+
+      const timer = setTimeout(() => {
+        setDraggedIndex(index);
+        setDragStartY(clientY);
+        setDragOffset(0);
+        document.body.style.overflow = 'hidden';
+      }, 150); // 150ms long press
+      setLongPressTimer(timer);
+    };
+
+    const handlePointerMove = (e: React.TouchEvent | React.MouseEvent) => {
+      if (draggedIndex === null) {
+        if (longPressTimer) {
+          const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+          const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+          const dx = clientX - initialPointer.current.x;
+          const dy = clientY - initialPointer.current.y;
+          if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            clearTimeout(longPressTimer);
+            setLongPressTimer(null);
+          }
+        }
+        return;
+      }
+
+      if (e.cancelable) e.preventDefault();
+
+      const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+      const offset = clientY - dragStartY;
+      setDragOffset(offset);
+
+      const itemHeight = 90; // Approx height including gap
+      // Use Math.trunc so the user has to drag further (a full item height) to trigger a swap
+      const swapIndex = draggedIndex + Math.trunc(offset / itemHeight);
+      
+      if (swapIndex >= 0 && swapIndex < steps.length && swapIndex !== draggedIndex) {
+        const newSteps = [...steps];
+        const temp = newSteps[draggedIndex];
+        newSteps[draggedIndex] = newSteps[swapIndex];
+        newSteps[swapIndex] = temp;
+        setSteps(newSteps);
+        setDraggedIndex(swapIndex);
+        setDragStartY(clientY);
+        setDragOffset(0);
+      }
+    };
+
+    const handlePointerUp = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        setLongPressTimer(null);
+      }
+      setDraggedIndex(null);
+      setDragOffset(0);
+      document.body.style.overflow = 'auto';
+    };
+
+    const handleDelete = (index: number) => {
+      const newSteps = steps.filter((_, i) => i !== index);
+      setSteps(newSteps);
+    };
+
+    const handleTextChange = (index: number, value: string) => {
+      const newSteps = [...steps];
+      newSteps[index].text = value;
+      setSteps(newSteps);
+    };
+
+    const handleTimeChange = (index: number, value: string) => {
+      const newSteps = [...steps];
+      newSteps[index].timeEstimate = value;
+      setSteps(newSteps);
+    };
+
+    return (
+      <div 
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#FFFFFF', position: 'relative' }}
+        onMouseMove={handlePointerMove}
+        onMouseUp={handlePointerUp}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerUp}
+        onMouseLeave={handlePointerUp}
+      >
+        {/* Top Content */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 30, paddingLeft: 20, paddingRight: 20, width: '100%', boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ fontFamily: 'Pretendard', fontWeight: 500, fontSize: 14, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>
+                오늘의 할 일
+              </div>
+              <div style={{ fontFamily: 'Pretendard', fontWeight: 600, fontSize: 20, color: 'rgba(0,12,30,0.8)', lineHeight: 1.5 }}>
+                {goal}
+              </div>
+            </div>
+            <div style={{ width: 139, height: 139, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+              <img src={getGoalImage(goalCategory)} alt="pc" className="anim-float" style={{ width: '100%', objectFit: 'contain' }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Steps List */}
+        <div ref={listRef} style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', padding: '20px 20px 100px', boxSizing: 'border-box', touchAction: draggedIndex !== null ? 'none' : 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {steps.map((step, idx) => (
+              <div 
+                key={step.id} 
+                onMouseDown={(e) => handlePointerDown(e, idx)}
+                onTouchStart={(e) => handlePointerDown(e, idx)}
+                style={{ 
+                  display: 'flex', flexDirection: 'column', padding: '13.5px 17.5px', 
+                  backgroundColor: '#F9FAFB', borderRadius: 12, border: '1.5px solid rgba(0,25,54,0.31)',
+                  transform: draggedIndex === idx ? `translateY(${dragOffset}px) scale(1.02)` : 'none',
+                  zIndex: draggedIndex === idx ? 100 : 1,
+                  boxShadow: draggedIndex === idx ? '0px 8px 16px rgba(0,0,0,0.1)' : 'none',
+                  transition: draggedIndex === idx ? 'none' : 'transform 0.2s, box-shadow 0.2s',
+                  cursor: draggedIndex === idx ? 'grabbing' : 'grab',
+                  userSelect: 'none'
+                }}
+              >
+                {/* Top Row: Number, Input, Time */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center', flex: 1 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 8px', borderRadius: 53, width: 18, height: 18, boxSizing: 'border-box' }}>
+                      <span style={{ fontFamily: 'Pretendard', fontWeight: 500, fontSize: 14, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>
+                        {idx + 1}
+                      </span>
+                    </div>
+                    <div style={{ flex: 1, borderBottom: '1.5px solid #D1D6DB', padding: '6px 0', display: 'flex', alignItems: 'center' }}>
+                      <input 
+                        value={step.text} 
+                        onChange={(e) => handleTextChange(idx, e.target.value)}
+                        placeholder=""
+                        style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontFamily: 'Pretendard', fontWeight: 500, fontSize: 16, color: 'rgba(0,12,30,0.8)' }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 16, alignItems: 'center', paddingLeft: 12 }}>
+                    <div 
+                      onClick={() => {
+                        setTimePickerTarget(idx);
+                        setIsTimePickerOpen(true);
+                      }}
+                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                    >
+                      <img src="/assets/icon-clock.svg" alt="clock" style={{ width: 16, height: 16, opacity: 0.5 }} />
+                      <div style={{ width: '100%', borderBottom: '1px solid transparent' }}>
+                        <span style={{ fontFamily: 'Lexend', fontSize: 12, color: 'rgba(3,24,50,0.46)', textAlign: 'center' }}>
+                          {(step.timeEstimate || '25 min').replace('분', ' min')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Bottom Row: Delete */}
+                <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 8 }}>
+                  <button onClick={() => handleDelete(idx)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}>
+                    <span style={{ fontFamily: 'Pretendard', fontWeight: 500, fontSize: 16, color: '#F66570', lineHeight: 1.5 }}>삭제</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F66570" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom CTA */}
+        <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '30px 20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 27%)', zIndex: 100, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+            <button 
+              onClick={() => setScreen('breakdown')}
+              style={{ 
+                flex: 1, background: '#C5E3FF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
+                padding: '13.5px 9.5px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', fontFamily: 'Pretendard', fontSize: 18, fontWeight: 600, color: '#130537'
+              }}
+            >
+              완료
+            </button>
+            <button 
+              onClick={() => setIsAddStepSheetOpen(true)}
+              style={{ 
+                width: 54, height: 54, flexShrink: 0, background: '#333D4B', borderRadius: 72,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 'none'
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderAction = () => {
     const currentStep = steps[currentActionStepIndex];
@@ -748,25 +1128,21 @@ export default function App() {
         setCheckParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
       }, 1000);
 
-      setIsAnimatingNext(true);
-      setTimeout(() => {
-        setIsAnimatingNext(false);
-        // Mark current as completed
-        const newSteps = [...steps];
-        if (newSteps[currentActionStepIndex]) {
-          newSteps[currentActionStepIndex].completed = true;
-        }
-        setSteps(newSteps);
+      // Mark current as completed
+      const newSteps = [...steps];
+      if (newSteps[currentActionStepIndex]) {
+        newSteps[currentActionStepIndex].completed = true;
+      }
+      setSteps(newSteps);
 
-        if (currentActionStepIndex < steps.length - 1) {
-          // Move to next step
-          setCurrentActionStepIndex(currentActionStepIndex + 1);
-          setActionStartTime(new Date());
-        } else {
-          // Finished all steps
-          setShowActionPopup(true);
-        }
-      }, 350);
+      if (currentActionStepIndex < steps.length - 1) {
+        // Move to next step
+        setCurrentActionStepIndex(currentActionStepIndex + 1);
+        setActionStartTime(new Date());
+      } else {
+        // Finished all steps
+        setShowActionPopup(true);
+      }
     };
 
     return (
@@ -774,7 +1150,7 @@ export default function App() {
         {/* Top Navigation */}
         <div style={{ width: '100%', height: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', boxSizing: 'border-box' }}>
           <button 
-            onClick={() => setScreen('breakdown')}
+            onClick={() => setIsStopPopupOpen(true)}
             style={{ 
               width: 34, height: 34, borderRadius: '50%', background: '#FFF', border: '1.5px solid rgba(3,18,40,0.7)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
@@ -811,16 +1187,13 @@ export default function App() {
           <div 
             key={currentActionStepIndex}
             style={{ 
-              position: 'relative', width: 315, height: 257, marginBottom: 20
+              position: 'relative', width: 315, height: 257, marginBottom: 36
             }}
           >
             {/* Background Blue Card */}
             <div style={{ 
               position: 'absolute', top: 11, left: 7, width: 315, height: 257,
-              backgroundColor: '#c5e3ff', border: '1.5px solid #000', borderRadius: 14, zIndex: 1,
-              animation: isAnimatingNext 
-                ? 'cardMoveForward 0.35s forwards cubic-bezier(0.16, 1, 0.3, 1)' 
-                : 'cardFadeInBack 0.35s backwards cubic-bezier(0.16, 1, 0.3, 1)'
+              backgroundColor: '#c5e3ff', border: '1.5px solid #000', borderRadius: 14, zIndex: 1
             }} />
             
             {/* Foreground White Card */}
@@ -828,9 +1201,6 @@ export default function App() {
               position: 'absolute', top: 0, left: 0, width: 315, height: 257,
               backgroundColor: '#FFF', border: '1.5px solid #000', borderRadius: 14, zIndex: 2,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 20px',
-              animation: isAnimatingNext 
-                ? 'cardSwipeOut 0.35s forwards cubic-bezier(0.16, 1, 0.3, 1)' 
-                : 'none',
               transformOrigin: 'bottom center'
             }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11, marginBottom: 25, marginTop: 25 }}>
@@ -843,7 +1213,7 @@ export default function App() {
                   </div>
                   <div style={{ backgroundColor: '#f2f4f6', padding: '4px 6px', borderRadius: 4 }}>
                     <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>
-                      {currentStep?.timeEstimate || '1분'}면 충분해요
+                      {currentStep?.timeEstimate || '1분'}이면 충분해요
                     </div>
                   </div>
                 </div>
@@ -862,13 +1232,32 @@ export default function App() {
 
           {/* Next Step Preview */}
           {nextStep ? (
-            <div style={{ width: 335, backgroundColor: '#f2f4f6', borderRadius: 8, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 16, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>다음</span>
-                <span style={{ fontSize: 16, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>{nextStep.text}</span>
+            <div style={{ 
+              width: 335, backgroundColor: '#FFF', border: '1.5px solid #130537', borderRadius: 12, 
+              padding: '13.5px 17.5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box' 
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, overflow: 'hidden' }}>
+                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: 16, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>다음</span>
+                </div>
+                <div style={{ 
+                  fontSize: 16, fontWeight: 500, color: 'rgba(0,12,30,0.8)', 
+                  lineHeight: 1.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' 
+                }}>
+                  {nextStep.text}
+                </div>
               </div>
-              <div style={{ backgroundColor: '#FFF', padding: '1px 6px', borderRadius: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>{nextStep.timeEstimate}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0, marginLeft: 16 }}>
+                <div style={{ width: 1, height: 26, backgroundColor: 'rgba(0,25,54,0.1)' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(3,24,50,0.46)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5, fontFamily: 'Lexend, sans-serif' }}>
+                    {nextStep.timeEstimate.replace('분', ' min')}
+                  </span>
+                </div>
               </div>
             </div>
           ) : (
@@ -941,7 +1330,7 @@ export default function App() {
               </div>
               
               <div style={{ width: 140, height: 140, position: 'relative', overflow: 'hidden', flexShrink: 0, marginTop: 16 }}>
-                <img src="/assets/img-character-complete.png" alt="완료 그래픽" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <img src="/assets/img-sucess.png" alt="완료 그래픽" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               
               <div style={{ width: '100%', padding: '24px 16px 16px', display: 'flex', justifyContent: 'center', boxSizing: 'border-box' }}>
@@ -952,13 +1341,14 @@ export default function App() {
                     const newItem = {
                       id: Date.now(),
                       text: goal,
-                      date: new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }),
+                      date: new Date().toLocaleDateString('en-US'),
                       when: startWhen,
                       where: startWhere,
-                      steps: steps
+                      steps: steps,
+                      status: 'complete' as const,
+                      category: goalCategory
                     };
-                    setHistory([newItem, ...history]);
-                    setSelectedHistoryItem(newItem);
+                    setHistory(prev => [newItem, ...prev]);
                     
                     // Trigger confetti
                     const confettiDivs = Array.from({ length: 30 }).map((_, i) => {
@@ -974,11 +1364,9 @@ export default function App() {
                       confettiDivs.forEach(div => container.appendChild(div));
                       setTimeout(() => {
                         confettiDivs.forEach(div => div.remove());
-                        setScreen('receipt');
                       }, 2500);
-                    } else {
-                      setScreen('receipt');
                     }
+                    setScreen('receipt');
                   }}
                   style={{ 
                     flex: 1, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, 
@@ -995,14 +1383,7 @@ export default function App() {
           </>
         )}
 
-        {/* Confetti container */}
-        <div 
-          id="confetti-container" 
-          style={{ 
-            position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
-            pointerEvents: 'none', zIndex: 5000, overflow: 'hidden' 
-          }} 
-        />
+
 
         {/* Stop Popup Dialog */}
         {isStopPopupOpen && (
@@ -1021,7 +1402,21 @@ export default function App() {
                   <span style={{ fontSize: 18, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>더 할래요</span>
                 </button>
                 <button 
-                  onClick={() => { setIsStopPopupOpen(false); setScreen('home'); }}
+                  onClick={() => { 
+                    setIsStopPopupOpen(false);
+                    const newItem = {
+                      id: Date.now(),
+                      text: goal,
+                      date: new Date().toLocaleDateString('en-US'),
+                      when: startWhen,
+                      where: startWhere,
+                      steps: steps,
+                      status: 'incomplete' as const,
+                      category: goalCategory
+                    };
+                    setHistory(prev => [newItem, ...prev]);
+                    setScreen('home'); 
+                  }}
                   style={{ flex: 1, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, padding: '13.5px 9.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                 >
                   <span style={{ fontSize: 18, fontWeight: 600, color: '#130537' }}>네 멈출래요</span>
@@ -1036,8 +1431,8 @@ export default function App() {
 
   const renderHistory = () => {
     // Compute Stats
-    const totalCompletedActions = history.reduce((acc, h) => acc + (h.steps ? h.steps.length : 0), 0);
-    const totalGoalCompletions = history.length;
+    const totalCompletedActions = history.reduce((acc, h) => acc + (h.steps ? h.steps.filter(s => s.completed).length : 0), 0);
+    const totalGoalCompletions = history.filter(h => h.status === 'complete').length;
     
     // Compute consecutive days
     let consecutiveDays = 0;
@@ -1087,11 +1482,9 @@ export default function App() {
       
       const days = Array.from({ length: daysInMonth }).map((_, i) => {
         const day = i + 1;
-        const dateStr = new Date(year, month, day).toLocaleDateString();
-        const hasRecord = history.some(h => h.date === dateStr);
-        const isSelected = selectedDate === dateStr;
-        
-        const isCompleted = hasRecord;
+        const dateStr = new Date(year, month, day).toLocaleDateString('en-US');
+        const historyItem = history.find(h => h.date === dateStr);
+        const isCompleted = historyItem?.status === 'complete';
         const bgColor = isCompleted ? '#FAE588' : '#FFF';
         
         return (
@@ -1195,8 +1588,7 @@ export default function App() {
                 </div>
               ) : (
                 selectedRecords.map((item, idx) => {
-                  const images = ['/assets/img-work.png', '/assets/img-study.png', '/assets/img-default.png', '/assets/img-habit.png'];
-                  const imgUrl = images[idx % images.length];
+                  const imgUrl = getGoalImage(item.category || 'default');
                   const isIncomplete = item.status === 'incomplete';
                   
                   return (
@@ -1277,9 +1669,19 @@ export default function App() {
           </div>
         ) : (
           history.length === 0 ? (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', opacity: 0.5, marginTop: 40 }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>🗂</div>
-              <p style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.5 }}>아직 기록된 목표가 없어요!</p>
+            <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '130px 20px', flexShrink: 0, boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 13, alignItems: 'center', justifyContent: 'center', padding: '20px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ transform: 'scaleX(-1)' }}>
+                    <div style={{ position: 'relative', width: 90, height: 90 }}>
+                      <img src="/assets/img-default.png" alt="빈 기록" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                  </div>
+                </div>
+                <div style={{ color: 'rgba(3,24,50,0.46)', textAlign: 'center', fontSize: 16, fontWeight: 600, fontFamily: "'Pretendard', sans-serif", wordBreak: 'break-word', whiteSpace: 'nowrap', lineHeight: '28px' }}>
+                  아직 완료한 기록이 없어요!
+                </div>
+              </div>
             </div>
           ) : (
             <div style={{ width: '100%', padding: '30px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, boxSizing: 'border-box' }}>
@@ -1301,8 +1703,7 @@ export default function App() {
                 });
 
                 // Image mapping
-                const images = ['/assets/img-work.png', '/assets/img-study.png', '/assets/img-default.png', '/assets/img-habit.png'];
-                const imgUrl = images[idx % images.length];
+                const imgUrl = getGoalImage(item.category || 'default');
 
                 return (
                   <div 
@@ -1345,13 +1746,21 @@ export default function App() {
     );
   };
 
-  const renderReceipt = (historyItem?: {id: number, text: string, date: string, steps?: Step[], when?: string, where?: string}) => {
+  const renderReceipt = (historyItem?: {id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, category?: string}) => {
     const isHistoryView = !!historyItem;
     const displayGoal = isHistoryView ? historyItem.text : goal;
     const displaySteps = isHistoryView ? (historyItem.steps || []) : steps;
+    const displayCategory = isHistoryView ? (historyItem.category || 'default') : goalCategory;
 
     // Date parsing
-    const dateObj = isHistoryView && historyItem.date ? new Date(historyItem.date) : new Date();
+    let dateObj = new Date();
+    if (isHistoryView && historyItem.date) {
+      const cleaned = historyItem.date.replace(/년|월/g, '/').replace(/일/g, '').replace(/\s/g, '').replace(/\.$/, '').replace(/\./g, '/');
+      const parsed = new Date(cleaned);
+      if (!isNaN(parsed.getTime())) {
+        dateObj = parsed;
+      }
+    }
     const day = dateObj.getDate();
     const month = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
     
@@ -1409,7 +1818,7 @@ export default function App() {
 
             {/* Graphic Image */}
             <div style={{ position: 'absolute', top: 10, right: 10, width: 100, height: 100 }}>
-              <img src="/assets/img-default.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <img src={getGoalImage(displayCategory)} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
 
             {/* Steps */}
@@ -1444,93 +1853,224 @@ export default function App() {
     );
   };
 
-  const renderFeedbackPopup = () => {
-    if (!isFeedbackPopupOpen) return null;
-    return (
-      <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5000 }}>
-        {/* Dimming Overlay */}
-        <div 
-          onClick={() => setIsFeedbackPopupOpen(false)}
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)' }}
-        />
-        
-        <div style={{ position: 'relative', zIndex: 5001, display: 'flex', flexDirection: 'column', alignItems: 'center', width: 311 }}>
-          {/* Card */}
-          <div style={{ position: 'relative', width: '100%', backgroundColor: '#FFF', borderRadius: 16, overflow: 'hidden' }}>
-            <div style={{ padding: '20px 20px 0 20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              {/* Top Row: Close Button */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                <div onClick={() => setIsFeedbackPopupOpen(false)} style={{ cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18 6L6 18M6 6L18 18" stroke="rgba(0,12,30,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
-              
-              {/* Titles */}
-              <div style={{ marginTop: 14, width: '100%' }}>
-                <h3 style={{ fontSize: 20, fontWeight: 700, color: 'rgba(0,12,30,0.8)', margin: '0 0 2px 0', lineHeight: 1.35, fontFamily: "'Pretendard', sans-serif" }}>
-                  서비스 의견을 적어주세요!
-                </h3>
-                <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', margin: 0, lineHeight: 1.6, fontFamily: "'Pretendard', sans-serif" }}>
-                  더욱 발전하는 DO IT을 만드는데 도움이 돼요
-                </p>
-              </div>
 
-              {/* Rating */}
-              <div style={{ display: 'flex', gap: 6, marginTop: 20, marginBottom: 20 }}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <div 
-                    key={star} 
-                    onClick={() => setFeedbackRating(star)}
-                    style={{ 
-                      cursor: 'pointer', 
-                      width: 40,
-                      height: 40,
-                      transition: 'all 0.2s',
-                      transform: feedbackRating === star ? 'scale(1.1)' : 'scale(1)'
-                    }}
-                  >
-                    <svg width="100%" height="100%" viewBox="0 0 24 24" fill={feedbackRating >= star ? 'rgba(0,12,30,0.8)' : 'rgba(0,29,58,0.1)'} xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke={feedbackRating >= star ? 'rgba(0,12,30,0.8)' : 'rgba(0,29,58,0.1)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  const renderFeedbackPopup = () => {
+    return (
+      <>
+        {isFeedbackPopupOpen && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)',
+            zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <div style={{ width: 311, backgroundColor: '#FFF', borderRadius: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+              <div style={{ padding: '20px 20px 0 20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                  <div onClick={() => setIsFeedbackPopupOpen(false)} style={{ cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M18 6L6 18M6 6L18 18" stroke="rgba(0,12,30,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
-                ))}
+                </div>
+                
+                <div style={{ marginTop: 14, width: '100%' }}>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: 20, fontWeight: 700, color: 'rgba(0,12,30,0.8)', lineHeight: 1.5, fontFamily: "'Pretendard', sans-serif" }}>
+                    서비스 의견을 적어주세요!
+                  </h3>
+                  <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', lineHeight: 1.5, fontFamily: "'Pretendard', sans-serif" }}>
+                    더욱 발전하는 DO IT을 만드는데 도움이 돼요
+                  </p>
+                </div>
+                
+                <div style={{ display: 'flex', gap: 6, padding: '20px 0', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                  {[1, 2, 3, 4, 5].map(star => {
+                    const isActive = feedbackRating >= star;
+                    const starColor = isActive ? '#FAE588' : '#B0B8C1';
+                    return (
+                      <button
+                        key={star}
+                        onClick={() => setFeedbackRating(star)}
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                          width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'transform 0.2s',
+                          transform: isActive ? 'scale(1.1)' : 'scale(1)'
+                        }}
+                      >
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path 
+                            d="M14.3117 13.7269L18.6417 5.0069C18.7678 4.75454 18.9616 4.54228 19.2016 4.39393C19.4415 4.24557 19.718 4.16699 20.0001 4.16699C20.2822 4.16699 20.5587 4.24557 20.7986 4.39393C21.0385 4.54228 21.2324 4.75454 21.3584 5.0069L25.6884 13.7269L35.3684 15.1336C35.6476 15.1723 35.9103 15.2887 36.1265 15.4696C36.3427 15.6504 36.5037 15.8885 36.5911 16.1564C36.6786 16.4244 36.6889 16.7116 36.6209 16.9852C36.5529 17.2587 36.4094 17.5077 36.2067 17.7036L29.2034 24.4869L30.8567 34.0702C31.0684 35.3002 29.7684 36.2369 28.6567 35.6569L20.0001 31.1302L11.3417 35.6569C10.2317 36.2386 8.93174 35.3002 9.1434 34.0686L10.7967 24.4852L3.7934 17.7019C3.59171 17.5059 3.44907 17.2572 3.38168 16.9841C3.31429 16.711 3.32486 16.4245 3.41219 16.1571C3.49951 15.8898 3.6601 15.6523 3.87569 15.4716C4.09127 15.291 4.35321 15.1744 4.63174 15.1352L14.3117 13.7269Z" 
+                            fill={starColor} 
+                            stroke={starColor} 
+                            strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                            style={{ transition: 'all 0.2s' }}
+                          />
+                        </svg>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <textarea 
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  placeholder="느낀 점이나 개선되었으면 좋겠는 점을&#10;자유롭게 적어주세요!"
+                  style={{
+                    width: '100%', height: 170, padding: 15.5, borderRadius: 12, border: '1.5px solid rgba(0,29,58,0.18)',
+                    fontSize: 14, fontWeight: 500, fontFamily: "'Pretendard', sans-serif", backgroundColor: '#F2F4F6', color: '#191f28', resize: 'none',
+                    outline: 'none', boxSizing: 'border-box', lineHeight: 1.5
+                  }}
+                />
               </div>
 
-              {/* Textarea */}
-              <textarea
-                value={feedbackText}
-                onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder="느낀 점이나 개선되었으면 좋겠는 점을&#10;자유롭게 적어주세요!"
-                style={{
-                  width: '100%', height: 170, padding: 15.5, borderRadius: 12, border: '1.5px solid rgba(0,29,58,0.18)',
-                  fontSize: 14, fontWeight: 500, fontFamily: "'Pretendard', sans-serif", backgroundColor: '#F2F4F6', color: '#191f28', resize: 'none',
-                  outline: 'none', boxSizing: 'border-box'
-                }}
-              />
-            </div>
-            
-            {/* Submit Button Area */}
-            <div style={{ padding: '16px 20px 24px 20px', width: '100%', boxSizing: 'border-box' }}>
-              <button 
-                onClick={() => {
-                  setIsFeedbackPopupOpen(false);
-                  setFeedbackText('');
-                  setFeedbackRating(0);
-                  showToast('소중한 의견이 제출되었습니다!');
-                }}
-                style={{ 
-                  width: '100%', padding: '13.5px 0', borderRadius: 12, backgroundColor: '#c5e3ff', color: '#130537', 
-                  fontSize: 18, fontWeight: 600, border: '1.5px solid rgba(0,12,30,0.8)', cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" 
-                }}
-              >
-                의견 보내기
-              </button>
+              <div style={{ padding: '16px 20px 24px 20px', width: '100%', boxSizing: 'border-box', display: 'flex' }}>
+                <button 
+                  disabled={feedbackRating === 0}
+                  onClick={() => {
+                    setIsFeedbackPopupOpen(false);
+                    setFeedbackText('');
+                    setFeedbackRating(0);
+                    showToast('소중한 의견이 제출되었습니다!');
+                  }}
+                  style={{ 
+                    flex: 1, padding: '13.5px 0', borderRadius: 12, 
+                    backgroundColor: feedbackRating === 0 ? '#e5e8eb' : '#c5e3ff', 
+                    color: feedbackRating === 0 ? 'rgba(3,24,50,0.46)' : '#130537', 
+                    fontSize: 18, fontWeight: 600, 
+                    border: feedbackRating === 0 ? '1.5px solid #8b95a1' : '1.5px solid rgba(0,12,30,0.8)', 
+                    cursor: feedbackRating === 0 ? 'not-allowed' : 'pointer', 
+                    fontFamily: "'Pretendard', sans-serif", lineHeight: 1.5,
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  의견 보내기
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        )}
+
+        {isHomeCalendarSheetOpen && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, display: 'flex', justifyContent: 'center' }}>
+            <div 
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)' }} 
+              onClick={() => setIsHomeCalendarSheetOpen(false)}
+            />
+            <div style={{ 
+              position: 'absolute', bottom: 20, width: '100%', maxWidth: 355, 
+              backgroundColor: '#FFF', borderRadius: 28, 
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              paddingBottom: 30, overflow: 'hidden'
+            }}>
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 16, paddingBottom: 16 }}>
+                <div style={{ width: 48, height: 4, backgroundColor: '#e5e8eb', borderRadius: 40 }} />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                <button 
+                  onClick={() => setHomeCalendarSheetDate(new Date(homeCalendarSheetDate.getFullYear(), homeCalendarSheetDate.getMonth() - 1, 1))} 
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+                >
+                  <img src="/assets/icon-arrow-back.svg" alt="prev" style={{ width: 18, height: 18 }} />
+                </button>
+                <div style={{ fontSize: 20, fontWeight: 500, fontFamily: "'Lexend', sans-serif", color: 'rgba(3,18,40,0.7)', minWidth: 100, textAlign: 'center' }}>
+                  {`${homeCalendarSheetDate.getFullYear()}.${String(homeCalendarSheetDate.getMonth() + 1).padStart(2, '0')}`}
+                </div>
+                <button 
+                  onClick={() => setHomeCalendarSheetDate(new Date(homeCalendarSheetDate.getFullYear(), homeCalendarSheetDate.getMonth() + 1, 1))} 
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, transform: 'rotate(180deg)' }}
+                >
+                  <img src="/assets/icon-arrow-back.svg" alt="next" style={{ width: 18, height: 18 }} />
+                </button>
+              </div>
+
+              <div style={{ width: '100%', padding: '0 20px' }}>
+                <div style={{ 
+                  width: '100%', 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(7, 1fr)', 
+                  backgroundColor: '#333d4b', 
+                  gap: '1.5px', 
+                  border: '1.5px solid #333d4b', 
+                  borderRadius: 8, 
+                  overflow: 'hidden'
+                }}>
+                  {['월', '화', '수', '목', '금', '토', '일'].map(d => (
+                    <div key={d} style={{ backgroundColor: '#FFF', height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Lexend', sans-serif", fontSize: 16, color: 'rgba(3,24,50,0.46)' }}>
+                      {d}
+                    </div>
+                  ))}
+                  {Array.from({ length: (() => {
+                    let fd = new Date(homeCalendarSheetDate.getFullYear(), homeCalendarSheetDate.getMonth(), 1).getDay();
+                    return fd === 0 ? 6 : fd - 1;
+                  })() }).map((_, i) => (
+                    <div key={`blank-${i}`} style={{ backgroundColor: '#F2F4F6', height: 44 }} />
+                  ))}
+                  {Array.from({ length: new Date(homeCalendarSheetDate.getFullYear(), homeCalendarSheetDate.getMonth() + 1, 0).getDate() }).map((_, i) => {
+                    const day = i + 1;
+                    const cellDate = new Date(homeCalendarSheetDate.getFullYear(), homeCalendarSheetDate.getMonth(), day);
+                    const isSelected = homeDate.toLocaleDateString() === cellDate.toLocaleDateString();
+                    
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    const isFuture = cellDate > today;
+                    const isToday = cellDate.getTime() === today.getTime();
+
+                    return (
+                      <div 
+                        key={`day-${day}`}
+                        onClick={() => {
+                          if (isFuture) return;
+                          setHomeDate(cellDate);
+                          setIsHomeCalendarSheetOpen(false);
+                        }}
+                        style={{
+                          backgroundColor: '#FFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: 44,
+                          cursor: isFuture ? 'not-allowed' : 'pointer',
+                          position: 'relative'
+                        }}
+                      >
+                        {isSelected && (
+                          <div style={{ position: 'absolute', width: 34, height: 34, backgroundColor: '#191f28', borderRadius: '50%' }} />
+                        )}
+                        <span style={{ 
+                          position: 'relative', zIndex: 1, 
+                          color: isFuture ? 'rgba(3,24,50,0.2)' : (isSelected ? '#FFF' : 'rgba(3,18,40,0.7)'),
+                          fontFamily: "'Lexend', sans-serif",
+                          fontSize: 16
+                        }}>
+                          {day}
+                        </span>
+                        {isToday && (
+                          <div style={{ position: 'absolute', bottom: 36, zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <div style={{ padding: '3px 8px', backgroundColor: '#FFF', border: '1.5px solid #333d4b', borderRadius: 14, fontSize: 11, fontWeight: 700, color: '#333d4b', fontFamily: "'Pretendard', sans-serif", lineHeight: 1, position: 'relative', zIndex: 1 }}>
+                              오늘
+                            </div>
+                            <div style={{ position: 'absolute', bottom: -3.5, width: 7, height: 7, backgroundColor: '#FFF', borderBottom: '1.5px solid #333d4b', borderRight: '1.5px solid #333d4b', transform: 'rotate(45deg)', zIndex: 2, borderRadius: 1 }} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {Array.from({ length: (() => {
+                    const daysInMonth = new Date(homeCalendarSheetDate.getFullYear(), homeCalendarSheetDate.getMonth() + 1, 0).getDate();
+                    let fd = new Date(homeCalendarSheetDate.getFullYear(), homeCalendarSheetDate.getMonth(), 1).getDay();
+                    fd = fd === 0 ? 6 : fd - 1;
+                    const total = fd + daysInMonth;
+                    return total % 7 === 0 ? 0 : 7 - (total % 7);
+                  })() }).map((_, i) => (
+                    <div key={`t-blank-${i}`} style={{ backgroundColor: '#F2F4F6', height: 44 }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   };
 
@@ -1540,6 +2080,7 @@ export default function App() {
       {tab === 'home' && screen === 'onboarding' && renderOnboarding()}
       {tab === 'home' && screen === 'home' && renderHome()}
       {tab === 'home' && screen === 'breakdown' && renderBreakdown()}
+      {tab === 'home' && screen === 'editSteps' && renderEditSteps()}
       {tab === 'home' && screen === 'action' && renderAction()}
       {tab === 'home' && screen === 'receipt' && renderReceipt()}
       
@@ -1556,101 +2097,83 @@ export default function App() {
           <div 
             onClick={() => setIsAddStepSheetOpen(false)}
             style={{
-              position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
+              position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
               backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)', zIndex: 2000,
             }}
           />
           {/* Sheet */}
           <div 
             style={{
-              position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-              width: '100%', maxWidth: 375,
-              backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
-              padding: '16px 20px 40px', zIndex: 2002,
+              position: 'fixed', bottom: 10, left: '50%', transform: 'translateX(-50%)',
+              width: '100%', maxWidth: 355,
+              backgroundColor: '#FFF', borderRadius: 28,
+              paddingBottom: 30, zIndex: 2002,
               animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-              display: 'flex', flexDirection: 'column', gap: 24,
+              display: 'flex', flexDirection: 'column',
               boxSizing: 'border-box'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 16, paddingBottom: 16 }}>
               <div style={{ width: 48, height: 4, backgroundColor: '#E5E8EB', borderRadius: 40 }} />
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 38 }}>
-              {/* Input Section */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <label style={{ fontSize: 16, fontWeight: 800, color: '#191f28' }}>추가할 할 일</label>
-                <div style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
+                {/* Input Container */}
+                <div style={{ flex: 1, border: '1.5px solid #b0b8c1', borderRadius: 12, padding: '13.5px 17.5px', display: 'flex', alignItems: 'center' }}>
                   <input 
                     autoFocus
                     type="text"
                     value={newStepText}
                     onChange={(e) => setNewStepText(e.target.value)}
-                    placeholder="예: 영단어 10개 외우기"
-                    className="neo-input"
-                    style={{
-            paddingRight: 40,
-                      backgroundColor: '#F3F4F6'
-                    }}
+                    placeholder="새 단계 입력"
+                    style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontFamily: 'Pretendard', fontSize: 16, color: 'rgba(0,12,30,0.8)' }}
                   />
-                  {newStepText && (
-                    <button 
-                      onClick={() => setNewStepText('')}
-                      style={{
-                        position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-                        background: 'transparent', border: 'none', cursor: 'pointer', padding: 4,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                      }}
-                    >
-                      <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#D1D5DB', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 }}>✕</div>
-                    </button>
-                  )}
                 </div>
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <label style={{ fontSize: 16, fontWeight: 800, color: '#191f28' }}>소요 시간</label>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {['30초', '1분', '3분', '5분'].map(time => (
-                    <button
-                      key={time}
-                      onClick={() => setNewStepTime(time)}
-                      style={{
-                        flex: 1, padding: '10px 0', borderRadius: 12, fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                        border: newStepTime === time ? '1.5px solid #3B82F6' : '1.5px solid #E5E7EB',
-                        backgroundColor: newStepTime === time ? '#EFF6FF' : '#FFF',
-                        color: newStepTime === time ? '#1D4ED8' : '#4E5968'
-                      }}
-                    >
-                      {time}
-                    </button>
-                  ))}
+                
+                {/* Time Picker Container */}
+                <div 
+                  onClick={() => {
+                    setTimePickerTarget('new');
+                    setIsTimePickerOpen(true);
+                  }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 2px', borderRadius: 12, cursor: 'pointer' }}
+                >
+                  <img src="/assets/icon-clock.svg" alt="clock" style={{ width: 20, height: 20, opacity: 0.5 }} />
+                  <span style={{ fontFamily: 'Lexend', fontSize: 16, color: 'rgba(3,24,50,0.46)', marginTop: 2 }}>
+                    {newStepTime || '5 min'}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <button 
-              onClick={() => {
-                if (!newStepText.trim()) return;
-                const newStep: Step = {
-                  id: Date.now().toString(),
-                  text: newStepText,
-                  completed: false,
-                  timeEstimate: newStepTime
-                };
-                setSteps([...steps, newStep]);
-                setIsAddStepSheetOpen(false);
-              }}
-              style={{ 
-                backgroundColor: newStepText.trim() ? '#c5e3ff' : '#E5E8EB',
-                border: newStepText.trim() ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid transparent',
-                color: newStepText.trim() ? '#130537' : '#9CA3AF',
-                padding: '16px', borderRadius: 16, fontSize: 16, fontWeight: 700,
-                cursor: 'pointer', transition: 'all 0.2s', marginTop: 10
-              }}
-            >
-              추가 완료
-            </button>
+            {/* CTA Button */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 20px 0', width: '100%', boxSizing: 'border-box' }}>
+              <button 
+                onClick={() => {
+                  if (!newStepText.trim()) return;
+                  const newStep: Step = {
+                    id: Date.now().toString(),
+                    text: newStepText,
+                    completed: false,
+                    timeEstimate: newStepTime || '5 min'
+                  };
+                  setSteps([...steps, newStep]);
+                  setNewStepText('');
+                  setIsAddStepSheetOpen(false);
+                }}
+                style={{ 
+                  width: '100%',
+                  backgroundColor: newStepText.trim() ? '#c5e3ff' : '#E5E8EB',
+                  border: newStepText.trim() ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid #8b95a1',
+                  color: newStepText.trim() ? '#130537' : 'rgba(3,24,50,0.46)',
+                  padding: '13.5px 9.5px', borderRadius: 12, fontFamily: 'Pretendard', fontSize: 18, fontWeight: 600,
+                  cursor: newStepText.trim() ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}
+              >
+                완료
+              </button>
+            </div>
           </div>
         </>
       )}
@@ -1672,8 +2195,94 @@ export default function App() {
         </div>
       )}
 
+      {/* Time Picker Bottom Sheet */}
+      {isTimePickerOpen && (
+        <>
+          <div 
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 3000 }} 
+            onClick={() => setIsTimePickerOpen(false)}
+          />
+          <div style={{
+            position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+            width: '100%', maxWidth: 375, backgroundColor: '#FFF',
+            borderTopLeftRadius: 24, borderTopRightRadius: 24,
+            padding: '16px 0 32px', boxSizing: 'border-box', zIndex: 3001,
+            animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards', display: 'flex', flexDirection: 'column', alignItems: 'center'
+          }}>
+            <div style={{ width: 40, height: 4, backgroundColor: '#E5E8EB', borderRadius: 4, marginBottom: 24 }} />
+            <div style={{ fontSize: 18, fontWeight: 600, color: '#191f28', marginBottom: 20, width: '100%', padding: '0 20px', boxSizing: 'border-box' }}>시간 선택</div>
+            
+            <div style={{ position: 'relative', width: '100%', height: 150, overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 110, height: 46, backgroundColor: '#F2F4F6', borderRadius: 12, pointerEvents: 'none', zIndex: 1 }} />
+              
+              <div 
+                className="hide-scrollbar"
+                style={{ 
+                  height: '100%', overflowY: 'scroll', scrollSnapType: 'y mandatory', 
+                  position: 'relative', zIndex: 2, padding: '52px 0', boxSizing: 'border-box'
+                }}
+                onScroll={(e) => {
+                  const index = Math.round(e.currentTarget.scrollTop / 46);
+                  const times = [
+                    '1 min', '5 min', '10 min', '15 min', '20 min', '25 min', '30 min', '35 min', '40 min', '45 min', '50 min', '55 min', '60 min',
+                    '70 min', '80 min', '90 min', '100 min', '110 min', '120 min',
+                    '150 min', '180 min', '210 min', '240 min', '270 min', '300 min', '330 min', '360 min'
+                  ];
+                  if (times[index]) {
+                    setPickerScrollValue(times[index]);
+                  }
+                }}
+              >
+                {[
+                  '1 min', '5 min', '10 min', '15 min', '20 min', '25 min', '30 min', '35 min', '40 min', '45 min', '50 min', '55 min', '60 min',
+                  '70 min', '80 min', '90 min', '100 min', '110 min', '120 min',
+                  '150 min', '180 min', '210 min', '240 min', '270 min', '300 min', '330 min', '360 min'
+                ].map((time) => (
+                  <div key={time} style={{ height: 46, display: 'flex', alignItems: 'center', justifyContent: 'center', scrollSnapAlign: 'center', fontSize: 20, fontWeight: 600, color: time === pickerScrollValue ? '#191f28' : '#B0B8C1', fontFamily: 'Lexend', transition: 'color 0.2s' }}>
+                    {time.replace(' min', '')}
+                    <span style={{ fontSize: 14, marginLeft: 4, fontWeight: 500, opacity: time === pickerScrollValue ? 1 : 0.6 }}>MIN</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ width: '100%', padding: '24px 20px 0', boxSizing: 'border-box' }}>
+              <button
+                onClick={() => {
+                  if (timePickerTarget === 'new') {
+                    setNewStepTime(pickerScrollValue);
+                  } else if (typeof timePickerTarget === 'number') {
+                    const newSteps = [...steps];
+                    newSteps[timePickerTarget].timeEstimate = pickerScrollValue;
+                    setSteps(newSteps);
+                  }
+                  setIsTimePickerOpen(false);
+                }}
+                style={{
+                  width: '100%',
+                  backgroundColor: '#c5e3ff',
+                  border: '1.5px solid rgba(0,12,30,0.8)',
+                  color: '#130537',
+                  padding: '13.5px 9.5px', 
+                  borderRadius: 12, 
+                  fontFamily: 'Pretendard', 
+                  fontSize: 18, 
+                  fontWeight: 600, 
+                  cursor: 'pointer', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center'
+                }}
+              >
+                완료
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Bottom Navigation & Floating Button Container */}
-      {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && screen !== 'action' && (
+      {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && screen !== 'action' && screen !== 'editSteps' && (
         <div style={{
           position: 'fixed', bottom: 30, left: '50%', transform: 'translateX(-50%)',
           width: '100%', maxWidth: 375, height: 51, pointerEvents: 'none', zIndex: 1000
@@ -1732,6 +2341,15 @@ export default function App() {
           </div>
         </div>
       )}
+      
+      {/* Global Confetti container */}
+      <div 
+        id="confetti-container" 
+        style={{ 
+          position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
+          pointerEvents: 'none', zIndex: 6000, overflow: 'hidden' 
+        }} 
+      />
     </div>
   );
 }
