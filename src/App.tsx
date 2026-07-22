@@ -48,7 +48,7 @@ const generateBreakdown = async (goal: string): Promise<{category: string, steps
 5. 반드시 JSON 형식으로 응답해주세요. 최상위는 'category' (문자열)와 'steps' (행동 객체 배열) 두 가지 속성을 가져야 합니다. 각 행동 객체는 'text'(행동 설명, 30자 이내), 'timeEstimate'(예상 소요 시간, 예: '1분', '20분') 두 가지 속성을 가져야 합니다.
 `;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
