@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import mixpanel from 'mixpanel-browser';
 
 type TabState = 'home' | 'history';
 type ScreenState = 'onboarding' | 'home' | 'breakdown' | 'action' | 'receipt' | 'editSteps';
@@ -167,8 +168,6 @@ export default function App() {
       setToastMessage('');
     }, 3000);
   };
-
-import mixpanel from 'mixpanel-browser';
 
   useEffect(() => {
     // TODO: Replace YOUR_MIXPANEL_TOKEN with actual project token
