@@ -666,6 +666,7 @@ export default function App() {
               <div 
                 onClick={async () => {
                   if (goal.trim().length < 5) return;
+                  mixpanel.track('Clicked Submit Goal', { goalText: goal });
                   
                   setIsBottomSheetOpen(false);
                   setScreen('breakdown');
