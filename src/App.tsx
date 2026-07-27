@@ -860,7 +860,14 @@ export default function App() {
         <div style={{ position: 'sticky', bottom: 0, width: '100%', padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box', marginTop: 'auto' }}>
           <div style={{ width: '100%', maxWidth: 335, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             <button 
-              onClick={() => { mixpanel.track('Started Action', { goal, totalSteps: steps.length }); handleStartAction(); }}
+              onClick={() => { 
+                if (currentActionStepIndex > 0) {
+                  mixpanel.track('Continued Action', { goal, totalSteps: steps.length });
+                } else {
+                  mixpanel.track('Started Action', { goal, totalSteps: steps.length });
+                }
+                handleStartAction(); 
+              }}
               style={{ 
                 flex: 1,
                 background: '#c5e3ff',
