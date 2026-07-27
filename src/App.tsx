@@ -177,6 +177,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (screen === 'home') {
+      mixpanel.track('Viewed Home Screen');
+    }
+  }, [screen]);
+
+  useEffect(() => {
     localStorage.setItem('doit_goal', goal);
     localStorage.setItem('doit_goalCategory', goalCategory);
     localStorage.setItem('doit_steps', JSON.stringify(steps));
@@ -685,7 +691,8 @@ export default function App() {
                     const result = await generateBreakdown(goal);
                     setSteps(result.steps);
                     setGoalCategory(result.category);
-                    mixpanel.track('Set Goal', { goal: goal, category: result.category, stepsCount: result.steps.length });
+                    const totalEst = result.steps.reduce((acc: number, step: any) => acc + parseInt(step.timeEstimate.replace(/[^0-9]/g, '') || '0', 10), 0);
+                    mixpanel.track('Set Goal', { goal: goal, category: result.category, stepsCount: result.steps.length, totalEstimatedTime: totalEst });
                   } finally {
                     clearInterval(messageInterval);
                     setIsGeneratingSteps(false);
