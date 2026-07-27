@@ -170,8 +170,10 @@ export default function App() {
   };
 
   useEffect(() => {
-    // TODO: Replace YOUR_MIXPANEL_TOKEN with actual project token
-    mixpanel.init("YOUR_MIXPANEL_TOKEN", { debug: true, track_pageview: true, persistence: 'localStorage' });
+    const mixpanelToken = import.meta.env.VITE_MIXPANEL_TOKEN;
+    if (mixpanelToken) {
+      mixpanel.init(mixpanelToken, { debug: true, track_pageview: true, persistence: 'localStorage' });
+    }
   }, []);
 
   useEffect(() => {
