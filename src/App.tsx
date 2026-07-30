@@ -1957,6 +1957,18 @@ export default function App() {
                   disabled={feedbackRating === 0}
                   onClick={() => {
                     mixpanel.track('Submitted Feedback', { rating: feedbackRating, content: feedbackText });
+                    
+                    const webhookUrl = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
+                    if (webhookUrl) {
+                      fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          content: `📢 **새로운 피드백 도착!**\n⭐ 별점: ${feedbackRating}점\n📝 내용: ${feedbackText}`
+                        })
+                      }).catch(console.error);
+                    }
+
                     setIsFeedbackPopupOpen(false);
                     setFeedbackText('');
                     setFeedbackRating(0);
