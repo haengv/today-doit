@@ -1449,17 +1449,6 @@ export default function App() {
                   onClick={() => { 
                     mixpanel.track('Canceled Action', { quitAtStep: currentActionStepIndex });
                     setIsStopPopupOpen(false);
-                    const newItem = {
-                      id: Date.now(),
-                      text: goal,
-                      date: new Date().toLocaleDateString('en-US'),
-                      when: startWhen,
-                      where: startWhere,
-                      steps: steps,
-                      status: 'incomplete' as const,
-                      category: goalCategory
-                    };
-                    setHistory(prev => [newItem, ...prev]);
                     setScreen('home'); 
                   }}
                   style={{ flex: 1, backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, padding: '13.5px 9.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
