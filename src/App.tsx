@@ -146,7 +146,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [isMicroBreaking, setIsMicroBreaking] = useState(false);
-  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, status?: 'complete' | 'incomplete', category?: string}[]>(() => {
+  const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, status?: 'complete' | 'incomplete', category?: string, color?: string}[]>(() => {
     const saved = localStorage.getItem('doit_history');
     return saved ? JSON.parse(saved) : [];
   });
@@ -155,7 +155,7 @@ export default function App() {
   const [historyView, setHistoryView] = useState<'list' | 'calendar'>('list');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, category?: string} | null>(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, category?: string, color?: string} | null>(null);
   const [goalCategory, setGoalCategory] = useState<string>(() => {
     return localStorage.getItem('doit_goalCategory') || 'default';
   });
@@ -440,7 +440,7 @@ export default function App() {
           }}>
             <div 
               style={{ 
-                position: 'relative', width: 220, height: 260, backgroundColor: isToday ? ((hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588') : (historyItem?.status === 'incomplete' ? '#D1D6DB' : '#FAE588'), 
+                position: 'relative', width: 220, height: 260, backgroundColor: isToday ? ((hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588') : (historyItem?.status === 'incomplete' ? '#D1D6DB' : (historyItem?.color || '#FAE588')), 
                 border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 6,
                 boxShadow: '0px 8px 7.5px rgba(22,22,22,0.13)',
                 display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: 16
@@ -1390,7 +1390,8 @@ export default function App() {
                       where: startWhere,
                       steps: steps,
                       status: 'complete' as const,
-                      category: goalCategory
+                      category: goalCategory,
+                      color: postItColor
                     };
                     setHistory(prev => [newItem, ...prev]);
                     
@@ -1721,7 +1722,7 @@ export default function App() {
             <div style={{ width: '100%', padding: '30px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, boxSizing: 'border-box' }}>
               {history.map((item, idx) => {
                 const colors = ['#FAE588', '#BFBDFF', '#C5E3FF', '#F8DDE1'];
-                const bgColor = colors[idx % colors.length];
+                const bgColor = item.color || colors[idx % colors.length];
                 
                 // Date parsing
                 const dateObj = new Date(item.date);
@@ -1798,7 +1799,7 @@ export default function App() {
     const day = dateObj.getDate();
     const month = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
     
-    const bgColor = isHistoryView ? '#fae588' : (postItColor || '#fae588');
+    const bgColor = isHistoryView ? (selectedHistoryItem?.color || '#FAE588') : (postItColor || '#FAE588');
 
     const handleClose = () => {
       if (isHistoryView) {
