@@ -48,55 +48,66 @@ const generateBreakdown = async (goal: string): Promise<{category: string, steps
 5. 반드시 JSON 형식으로 응답해주세요. 최상위는 'category' (문자열)와 'steps' (행동 객체 배열) 두 가지 속성을 가져야 합니다. 각 행동 객체는 'text'(행동 설명, 30자 이내), 'timeEstimate'(예상 소요 시간, 예: '1분', '20분') 두 가지 속성을 가져야 합니다.
 `;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: "OBJECT",
-            properties: {
-              category: { type: "STRING", enum: ["default", "life", "work", "habit", "study"], description: "할 일 유형" },
-              steps: {
-                type: "ARRAY",
-                items: {
-                  type: "OBJECT",
-                  properties: {
-                    text: { type: "STRING", description: "행동 설명 (20자 이내)" },
-                    timeEstimate: { type: "STRING", description: "예상 소요 시간 (예: '1분', '5분')" }
-                  },
-                  required: ["text", "timeEstimate"]
-                }
+    let lastError = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: "OBJECT",
+                properties: {
+                  category: { type: "STRING", enum: ["default", "life", "work", "habit", "study"], description: "할 일 유형" },
+                  steps: {
+                    type: "ARRAY",
+                    items: {
+                      type: "OBJECT",
+                      properties: {
+                        text: { type: "STRING", description: "행동 설명 (20자 이내)" },
+                        timeEstimate: { type: "STRING", description: "예상 소요 시간 (예: '1분', '5분')" }
+                      },
+                      required: ["text", "timeEstimate"]
+                    }
+                  }
+                },
+                required: ["category", "steps"]
               }
-            },
-            required: ["category", "steps"]
-          }
+            }
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error?.message || "API request failed");
         }
-      })
-    });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error?.message || "API request failed");
+        if (data.candidates && data.candidates[0].content.parts[0].text) {
+          const jsonStr = data.candidates[0].content.parts[0].text;
+          const parsed = JSON.parse(jsonStr);
+          const steps = parsed.steps.map((s: any, idx: number) => ({
+            id: String(idx + 1),
+            text: s.text || '다음 단계 진행하기',
+            timeEstimate: s.timeEstimate || '5분',
+            completed: false
+          }));
+          return { category: parsed.category || 'default', steps };
+        }
+        throw new Error("Invalid response format from AI");
+      } catch (err: any) {
+        lastError = err;
+        if (attempt < 3) {
+          // Wait 1 second before retrying
+          await new Promise(res => setTimeout(res, 1000));
+        }
+      }
     }
+    
+    throw lastError;
 
-    if (data.candidates && data.candidates[0].content.parts[0].text) {
-      const jsonStr = data.candidates[0].content.parts[0].text;
-      const parsed = JSON.parse(jsonStr);
-      
-      const steps = parsed.steps.map((s: any, idx: number) => ({
-        id: String(idx + 1),
-        text: s.text || '다음 단계 진행하기',
-        timeEstimate: s.timeEstimate || '5분',
-        completed: false
-      }));
-      return { category: parsed.category || 'default', steps };
-    }
-    throw new Error("Invalid response format from AI");
   } catch (error: any) {
     console.error("AI Breakdown Error:", error);
     
@@ -107,7 +118,7 @@ const generateBreakdown = async (goal: string): Promise<{category: string, steps
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🚨 **AI 쪼개기 오류 발생!**\n목표: "${goal}"\n오류 내용: ${error.message || '알 수 없는 오류'}`
+            content: `🚨 **AI 쪼개기 3회 재시도 실패! (대체 플랜 제공됨)**\n목표: "${goal}"\n최종 오류 내용: ${error.message || '알 수 없는 오류'}`
           })
         }).catch(e => console.error("Webhook Error:", e));
       }
@@ -118,10 +129,10 @@ const generateBreakdown = async (goal: string): Promise<{category: string, steps
     return {
       category: 'default',
       steps: [
-        { id: "1", text: `[에러] ${error.message || '알 수 없는 오류'}`, timeEstimate: '1분', completed: false },
+        { id: "1", text: '마음 가다듬고 심호흡하기', timeEstimate: '1분', completed: false },
         { id: "2", text: '관련 자료나 도구 눈앞에 두기', timeEstimate: '2분', completed: false },
         { id: "3", text: '5분 타이머 맞추기', timeEstimate: '1분', completed: false },
-        { id: "4", text: '무작정 시작해보기', timeEstimate: '5분', completed: false },
+        { id: "4", text: '무작정 일단 시작해보기', timeEstimate: '5분', completed: false },
       ]
     };
   }
