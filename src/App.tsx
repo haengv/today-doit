@@ -97,8 +97,24 @@ const generateBreakdown = async (goal: string): Promise<{category: string, steps
       return { category: parsed.category || 'default', steps };
     }
     throw new Error("Invalid response format from AI");
-  } catch (error) {
+  } catch (error: any) {
     console.error("AI Breakdown Error:", error);
+    
+    try {
+      const webhookUrl = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
+      if (webhookUrl) {
+        fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `🚨 **AI 쪼개기 오류 발생!**\n목표: "${goal}"\n오류 내용: ${error.message || '알 수 없는 오류'}`
+          })
+        }).catch(e => console.error("Webhook Error:", e));
+      }
+    } catch (e) {
+      // ignore webhook errors
+    }
+
     return {
       category: 'default',
       steps: [
