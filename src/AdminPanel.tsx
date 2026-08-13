@@ -110,6 +110,52 @@ export default function AdminPanel() {
     }
   };
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+
+  if (!isAuthenticated) {
+    return (
+      <div style={{ padding: '40px 20px', maxWidth: 400, margin: '100px auto', fontFamily: "'Pretendard', sans-serif", textAlign: 'center' }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>🔒 관리자 로그인</h1>
+        <p style={{ color: '#666', marginBottom: 24 }}>접근 권한이 필요합니다.</p>
+        <input 
+          type="password" 
+          value={passwordInput}
+          onChange={(e) => setPasswordInput(e.target.value)}
+          placeholder="비밀번호를 입력하세요"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && passwordInput === 'doitmaker!') {
+              setIsAuthenticated(true);
+            }
+          }}
+          style={{
+            width: '100%', padding: 16, borderRadius: 8, border: '1px solid #CCC',
+            fontSize: 16, marginBottom: 16, boxSizing: 'border-box'
+          }}
+        />
+        <button 
+          onClick={() => {
+            if (passwordInput === 'doitmaker!') {
+              setIsAuthenticated(true);
+            } else {
+              alert('비밀번호가 틀렸습니다.');
+              setPasswordInput('');
+            }
+          }}
+          style={{
+            width: '100%', padding: 16, backgroundColor: '#130537', color: '#FFF',
+            borderRadius: 8, fontSize: 16, fontWeight: 600, border: 'none', cursor: 'pointer'
+          }}
+        >
+          입장하기
+        </button>
+        <div style={{ marginTop: 24 }}>
+          <a href="/" style={{ color: '#666', textDecoration: 'underline' }}>← 홈으로 돌아가기</a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: '40px 20px', maxWidth: 600, margin: '0 auto', fontFamily: "'Pretendard', sans-serif" }}>
       <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>🤖 DO IT Auto Poster</h1>
