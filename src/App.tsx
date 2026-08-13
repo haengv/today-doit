@@ -145,7 +145,13 @@ const simulateMicroBreakdown = (): Promise<string> => {
   });
 };
 
+import AdminPanel from './AdminPanel';
+
 export default function App() {
+  if (window.location.pathname === '/admin') {
+    return <AdminPanel />;
+  }
+
   const [tab, setTab] = useState<TabState>('home');
   const [screen, setScreen] = useState<ScreenState>(() => {
     return localStorage.getItem('doit_goal') ? 'home' : 'onboarding';
