@@ -5,6 +5,7 @@ export default function AdminPanel() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [message, setMessage] = useState('');
+  const [category, setCategory] = useState('empathy');
 
   const generateDraft = async () => {
     setIsGenerating(true);
@@ -14,17 +15,24 @@ export default function AdminPanel() {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) throw new Error("Gemini API Key missing");
 
+      let topicInstruction = '';
+      if (category === 'empathy') {
+        topicInstruction = '주제: 회피형 인간이나 할 일을 미루는 사람들의 뼈를 때리거나 깊은 공감을 유도하는 내용';
+      } else if (category === 'service') {
+        topicInstruction = '주제: 할 일을 작게 쪼개는 두잇(DO IT) 서비스의 핵심 기능과 장점을 매력적으로 소개하는 내용';
+      } else {
+        topicInstruction = '주제: 일단 무작정 작게라도 시작해보자는 행동 촉구 및 동기부여 내용';
+      }
+
       const prompt = `
 당신은 '두잇(DO IT)' 이라는 생산성/할 일 관리 웹 서비스를 직접 만든 1인 메이커입니다.
 두잇은 "목표를 아주 작게 쪼개어, 하나씩 완수하도록 돕는" 서비스이며, 회피형 인간이나 미루는 습관이 있는 사람들에게 유용합니다.
 
 매일 스레드(Threads)에 올릴 짧고 매력적인 포스팅 초안을 작성해주세요.
-내용에는 다음 중 하나를 자연스럽게 포함하세요:
-1. 행동을 잘게 쪼개는 것의 중요성
-2. 미루는 습관과 싸우는 공감대 형성
-3. 일단 작게라도 시작해보자는 동기부여
+${topicInstruction}
 
 [필수 규칙 - 메이커의 말투를 완벽하게 따라할 것]
+- 글자 수는 공백 포함 최대 200자를 절대 넘지 않게 아주 짧게 작성하세요!!
 - 반드시 100% 반말로 작성하세요. (예: ~어, ~야, ~지?, ~사람!!, ~해봤어) 존댓말은 절대 금지입니다.
 - 가르치려 들지 말고, 겪었던 고민을 털어놓으며 공감대를 형성하는 친구 같은 말투를 쓰세요. ("이거 나만 그런거 아니지?")
 - 딱딱한 AI 느낌을 빼고 사람 냄새나는 이모티콘이나 특수문자(예: ꒰ • ̫ - ꒱⊹˚. 등)를 가끔 섞어주세요.
@@ -165,6 +173,31 @@ export default function AdminPanel() {
       <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>🤖 DO IT Auto Poster</h1>
       <p style={{ color: '#666', marginBottom: 24 }}>AI가 스레드 포스팅 초안을 작성하고, 검수 후 원클릭으로 발행합니다.</p>
       
+      <div style={{ marginBottom: 20 }}>
+        <p style={{ fontWeight: 600, marginBottom: 8, fontSize: 15 }}>📝 오늘의 포스팅 카테고리 선택</p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[
+            { id: 'empathy', label: '🫂 공감 유도' },
+            { id: 'service', label: '✨ 서비스 홍보' },
+            { id: 'motivation', label: '🔥 동기부여' }
+          ].map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setCategory(cat.id)}
+              style={{
+                flex: 1, padding: '10px 0', borderRadius: 8, cursor: 'pointer',
+                fontWeight: 600, fontSize: 14,
+                backgroundColor: category === cat.id ? '#130537' : '#F2F3F5',
+                color: category === cat.id ? '#FFF' : '#666',
+                border: 'none', transition: 'all 0.2s'
+              }}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <button 
         onClick={generateDraft} 
         disabled={isGenerating}
