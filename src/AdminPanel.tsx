@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function AdminPanel() {
-  const [draft, setDraft] = useState('');
+  // Pre-fill draft from URL query param (used when clicking the Discord deep-link)
+  const urlParams = new URLSearchParams(window.location.search);
+  const draftFromUrl = urlParams.get('draft') || '';
+
+  const [draft, setDraft] = useState(draftFromUrl);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [message, setMessage] = useState('');
