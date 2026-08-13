@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   // Cron jobs are triggered as GET requests by Vercel
 
   const geminiApiKey = process.env.VITE_GEMINI_API_KEY;
-  const discordWebhookUrl = process.env.VITE_DISCORD_WEBHOOK_URL;
+  const discordWebhookUrl = process.env.DISCORD_DRAFT_WEBHOOK_URL;
   const appUrl = process.env.VITE_APP_URL || 'https://today-doit.vercel.app';
 
   if (!geminiApiKey || !discordWebhookUrl) {
