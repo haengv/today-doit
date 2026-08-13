@@ -200,6 +200,14 @@ ${topicInstruction}
         </div>
       </div>
 
+      {/* 🔧 임시 디버그 패널 - 확인 후 삭제 */}
+      <div style={{ marginBottom: 20, padding: 12, borderRadius: 8, backgroundColor: '#F9FAFB', border: '1px dashed #CCC', fontSize: 13 }}>
+        <p style={{ fontWeight: 700, marginBottom: 6 }}>🔧 환경변수 로드 확인 (임시)</p>
+        <p>GEMINI_KEY: {import.meta.env.VITE_GEMINI_API_KEY ? '✅ 있음' : '❌ 없음'}</p>
+        <p>THREADS_USER_ID: {import.meta.env.VITE_THREADS_USER_ID ? '✅ 있음' : '❌ 없음'}</p>
+        <p>THREADS_ACCESS_TOKEN: {import.meta.env.VITE_THREADS_ACCESS_TOKEN ? '✅ 있음' : '❌ 없음'}</p>
+      </div>
+
       <button 
         onClick={generateDraft} 
         disabled={isGenerating}
