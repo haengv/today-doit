@@ -88,17 +88,16 @@ ${topicInstruction}
       }
 
       // Step 1: Create media container
-      const createRes = await fetch(`https://graph.threads.net/v1.0/${userId}/threads`, {
+      const createParams = new URLSearchParams({
+        media_type: 'TEXT',
+        text: draft,
+        access_token: accessToken
+      });
+      const createRes = await fetch(`https://graph.threads.net/v1.0/${userId}/threads?${createParams.toString()}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          media_type: 'TEXT',
-          text: draft,
-          access_token: accessToken
-        })
       });
       const createData = await createRes.json();
-      if (!createRes.ok) throw new Error(createData.error?.message || "Failed to create container");
+      if (!createRes.ok) throw new Error(JSON.stringify(createData.error) || "Failed to create container");
 
       const creationId = createData.id;
 
@@ -106,16 +105,15 @@ ${topicInstruction}
       await new Promise(res => setTimeout(res, 3000));
 
       // Step 2: Publish container
-      const publishRes = await fetch(`https://graph.threads.net/v1.0/${userId}/threads_publish`, {
+      const publishParams = new URLSearchParams({
+        creation_id: creationId,
+        access_token: accessToken
+      });
+      const publishRes = await fetch(`https://graph.threads.net/v1.0/${userId}/threads_publish?${publishParams.toString()}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          creation_id: creationId,
-          access_token: accessToken
-        })
       });
       const publishData = await publishRes.json();
-      if (!publishRes.ok) throw new Error(publishData.error?.message || "Failed to publish");
+      if (!publishRes.ok) throw new Error(JSON.stringify(publishData.error) || "Failed to publish");
 
       setMessage('🎉 스레드 자동 발행 성공!');
       setDraft(''); // Clear draft after successful publish
