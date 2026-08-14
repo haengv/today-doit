@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
 
+interface Reply {
+  id: string;
+  text: string;
+  timestamp: string;
+}
+
+interface Thread {
+  id: string;
+  text: string;
+}
+
 export default function AdminPanel() {
   // Pre-fill draft from URL query param (used when clicking the Discord deep-link)
   const urlParams = new URLSearchParams(window.location.search);
@@ -10,6 +21,13 @@ export default function AdminPanel() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [message, setMessage] = useState('');
   const [category, setCategory] = useState('empathy');
+
+  // Replies states
+  const [recentThread, setRecentThread] = useState<Thread | null>(null);
+  const [replies, setReplies] = useState<Reply[]>([]);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [isFetchingReplies, setIsFetchingReplies] = useState(false);
+  const [replyMessage, setReplyMessage] = useState('');
 
   const generateDraft = async () => {
     setIsGenerating(true);
@@ -121,6 +139,128 @@ ${topicInstruction}
       setMessage(`에러: ${err.message}`);
     } finally {
       setIsPublishing(false);
+    }
+  };
+
+  const fetchRecentReplies = async () => {
+    setIsFetchingReplies(true);
+    setReplyMessage('');
+    try {
+      const userId = import.meta.env.VITE_THREADS_USER_ID;
+      const accessToken = import.meta.env.VITE_THREADS_ACCESS_TOKEN;
+      if (!userId || !accessToken) throw new Error("Threads API credentials missing");
+
+      // 1. Fetch user's recent threads
+      const threadsRes = await fetch(`https://graph.threads.net/v1.0/${userId}/threads?access_token=${accessToken}`);
+      const threadsData = await threadsRes.json();
+      if (!threadsRes.ok) throw new Error(JSON.stringify(threadsData.error));
+
+      if (!threadsData.data || threadsData.data.length === 0) {
+        setReplyMessage('작성된 스레드 포스팅이 없습니다.');
+        return;
+      }
+      
+      const latestThread = threadsData.data[0];
+      setRecentThread(latestThread);
+
+      // 2. Fetch replies for the latest thread
+      const repliesRes = await fetch(`https://graph.threads.net/v1.0/${latestThread.id}/replies?access_token=${accessToken}`);
+      const repliesData = await repliesRes.json();
+      if (!repliesRes.ok) throw new Error(JSON.stringify(repliesData.error));
+
+      setReplies(repliesData.data || []);
+      if (!repliesData.data || repliesData.data.length === 0) {
+        setReplyMessage('최근 포스팅에 아직 댓글이 없습니다.');
+      } else {
+        setReplyMessage('댓글을 성공적으로 불러왔습니다.');
+      }
+    } catch (err: any) {
+      setReplyMessage(`댓글 불러오기 에러: ${err.message}`);
+    } finally {
+      setIsFetchingReplies(false);
+    }
+  };
+
+  const generateReplyDraft = async (replyId: string, replyText: string) => {
+    try {
+      setReplyMessage('답글 초안 생성 중...');
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) throw new Error("Gemini API Key missing");
+
+      const prompt = `
+당신은 '두잇(DO IT)' 이라는 생산성/할 일 관리 서비스를 만든 1인 메이커입니다.
+당신이 스레드에 올린 포스팅에 누군가 다음과 같은 댓글을 달았습니다:
+"${replyText}"
+
+이 댓글에 대한 친절하고 센스 있는 반말 답글을 150자 이내로 작성해주세요.
+- 필수 규칙: 100% 반말, 가르치려 들지 않는 친구 같은 공감형 말투, 귀여운 이모티콘 사용 (예: ꒰ • ̫ - ꒱⊹˚. 등)
+- 절대 존댓말 쓰지 마세요.
+`;
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || "Failed to generate");
+
+      const generatedText = data.candidates[0].content.parts[0].text;
+      
+      setReplyDrafts(prev => ({ ...prev, [replyId]: generatedText }));
+      setReplyMessage('답글 초안 생성 완료!');
+    } catch (err: any) {
+      setReplyMessage(`AI 초안 생성 에러: ${err.message}`);
+    }
+  };
+
+  const publishReply = async (replyId: string) => {
+    const draftText = replyDrafts[replyId];
+    if (!draftText) return;
+
+    try {
+      setReplyMessage('답글 발행 중...');
+      const userId = import.meta.env.VITE_THREADS_USER_ID;
+      const accessToken = import.meta.env.VITE_THREADS_ACCESS_TOKEN;
+
+      // 1. Create media container for reply
+      const createParams = new URLSearchParams({
+        media_type: 'TEXT',
+        text: draftText,
+        reply_to_id: replyId,
+        access_token: accessToken
+      });
+      const createRes = await fetch(`https://graph.threads.net/v1.0/${userId}/threads?${createParams.toString()}`, { method: 'POST' });
+      const createData = await createRes.json();
+      if (!createRes.ok) throw new Error(JSON.stringify(createData.error));
+
+      const creationId = createData.id;
+      
+      // Wait a moment for Meta to process the container
+      await new Promise(res => setTimeout(res, 3000));
+
+      // 2. Publish
+      const publishParams = new URLSearchParams({
+        creation_id: creationId,
+        access_token: accessToken
+      });
+      const publishRes = await fetch(`https://graph.threads.net/v1.0/${userId}/threads_publish?${publishParams.toString()}`, { method: 'POST' });
+      const publishData = await publishRes.json();
+      if (!publishRes.ok) throw new Error(JSON.stringify(publishData.error));
+
+      setReplyMessage('🎉 답글 발행 성공!');
+      
+      // Clear draft for this reply
+      setReplyDrafts(prev => {
+        const newDrafts = { ...prev };
+        delete newDrafts[replyId];
+        return newDrafts;
+      });
+      
+      // Re-fetch replies to show updated state (wait a bit for propagation)
+      setTimeout(fetchRecentReplies, 2000);
+      
+    } catch (err: any) {
+      setReplyMessage(`답글 발행 에러: ${err.message}`);
     }
   };
 
@@ -251,6 +391,86 @@ ${topicInstruction}
           fontWeight: 600, textAlign: 'center'
         }}>
           {message}
+        </div>
+      )}
+
+      {/* --- Replies Section --- */}
+      <hr style={{ margin: '40px 0', border: 'none', borderTop: '1px solid #E5E7EB' }} />
+      
+      <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>💬 스레드 댓글(답글) 관리</h2>
+      <p style={{ color: '#666', marginBottom: 20, fontSize: 14 }}>최근 작성한 스레드에 달린 댓글을 불러오고 AI 답글을 달 수 있습니다.</p>
+      
+      <button 
+        onClick={fetchRecentReplies} 
+        disabled={isFetchingReplies}
+        style={{
+          width: '100%', padding: 14, backgroundColor: '#F3F4F6', color: '#374151',
+          borderRadius: 8, fontSize: 15, fontWeight: 600, border: '1px solid #D1D5DB', cursor: 'pointer',
+          marginBottom: 20
+        }}
+      >
+        {isFetchingReplies ? '불러오는 중...' : '🔄 최근 포스팅 댓글 불러오기'}
+      </button>
+
+      {recentThread && (
+        <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#F9FAFB', borderRadius: 8, fontSize: 13, color: '#4B5563' }}>
+          <strong>최근 포스팅:</strong> {recentThread.text.substring(0, 50)}...
+        </div>
+      )}
+
+      {replies.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {replies.map(reply => (
+            <div key={reply.id} style={{ padding: 16, border: '1px solid #E5E7EB', borderRadius: 8 }}>
+              <p style={{ fontWeight: 600, marginBottom: 8, fontSize: 14 }}>👤 댓글: "{reply.text}"</p>
+              
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                <button
+                  onClick={() => generateReplyDraft(reply.id, reply.text)}
+                  style={{
+                    padding: '8px 12px', backgroundColor: '#E0E7FF', color: '#4338CA',
+                    border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer'
+                  }}
+                >
+                  ✨ AI 답글 초안 생성
+                </button>
+              </div>
+
+              {replyDrafts[reply.id] !== undefined && (
+                <>
+                  <textarea
+                    value={replyDrafts[reply.id]}
+                    onChange={(e) => setReplyDrafts(prev => ({ ...prev, [reply.id]: e.target.value }))}
+                    style={{
+                      width: '100%', height: 100, padding: 12, borderRadius: 6,
+                      border: '1px solid #D1D5DB', fontSize: 14, lineHeight: 1.5,
+                      boxSizing: 'border-box', marginBottom: 12, resize: 'vertical'
+                    }}
+                  />
+                  <button
+                    onClick={() => publishReply(reply.id)}
+                    style={{
+                      width: '100%', padding: 12, backgroundColor: '#130537', color: '#FFF',
+                      border: 'none', borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: 'pointer'
+                    }}
+                  >
+                    🚀 이 답글 발행하기
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {replyMessage && (
+        <div style={{
+          marginTop: 16, padding: 12, borderRadius: 8,
+          backgroundColor: replyMessage.includes('에러') ? '#FEE2E2' : '#EFF6FF',
+          color: replyMessage.includes('에러') ? '#991B1B' : '#1E40AF',
+          fontSize: 14, fontWeight: 600, textAlign: 'center'
+        }}>
+          {replyMessage}
         </div>
       )}
       
