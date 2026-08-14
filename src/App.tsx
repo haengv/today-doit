@@ -206,6 +206,13 @@ export default function App() {
     const mixpanelToken = import.meta.env.VITE_MIXPANEL_TOKEN;
     if (mixpanelToken) {
       mixpanel.init(mixpanelToken, { debug: true, track_pageview: true, persistence: 'localStorage' });
+      
+      // 토스 미니앱 감지 및 기본 속성(Super Property) 등록
+      const isTossApp = navigator.userAgent.toLowerCase().includes('toss');
+      mixpanel.register({
+        'Platform': isTossApp ? 'Toss Mini App' : 'Web Browser',
+        'is_toss': isTossApp
+      });
     }
 
     const clarityId = import.meta.env.VITE_CLARITY_PROJECT_ID;
