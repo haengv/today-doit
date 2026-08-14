@@ -1,10 +1,10 @@
 import { defineConfig } from "@apps-in-toss/web-framework/config";
 
 export default defineConfig({
-  appName: "today-pudding",
+  appName: "todaydoit",
   brand: {
-    displayName: "오늘의 푸딩",
-    primaryColor: "#F4A23A",
+    displayName: "두잇",
+    primaryColor: "#130537",
     icon: "",
   },
   web: {

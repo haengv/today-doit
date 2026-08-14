@@ -298,7 +298,7 @@ export default function App() {
   // --- Screens ---
 
   const renderOnboarding = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', minHeight: '100vh', background: '#FFF', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', minHeight: '100dvh', background: '#FFF', position: 'relative', overflow: 'hidden' }}>
       <style>{`
         @keyframes flutter {
           0% { transform: translateY(0px) rotate(-4deg); box-shadow: 2px 8px 15px rgba(0,0,0,0.1); }
@@ -343,7 +343,7 @@ export default function App() {
       </div>
 
       {/* Bottom CTA Area */}
-      <div style={{ position: 'absolute', bottom: 50, left: 20, right: 20, display: 'flex', justifyContent: 'center' }}>
+      <div style={{ position: 'absolute', bottom: 'max(50px, calc(env(safe-area-inset-bottom) + 20px))', left: 20, right: 20, display: 'flex', justifyContent: 'center' }}>
         <button 
           onClick={() => setScreen('home')}
           style={{ 
@@ -417,7 +417,7 @@ export default function App() {
     const nextStep = nextStepIndex !== -1 ? displaySteps[nextStepIndex] : null;
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#F8F9FA', paddingBottom: 100 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100dvh', background: '#F8F9FA', paddingBottom: 100 }}>
 
         {/* Date Header Wrapper */}
         <div style={{ width: '100%', maxWidth: 375, padding: '20px 20px 0 20px', display: 'flex', justifyContent: 'flex-start' }}>
@@ -638,7 +638,7 @@ export default function App() {
       <div 
         onClick={() => setIsBottomSheetOpen(false)}
         style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
           backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)', zIndex: 2000,
         }}
       />
@@ -773,7 +773,7 @@ export default function App() {
   );
 
   const renderBreakdown = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#FFF' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100dvh', background: '#FFF' }}>
       {/* Top Navigation */}
       <div style={{ width: '100%', display: 'flex', alignItems: 'center', padding: '10px 20px', boxSizing: 'border-box' }}>
         <button 
@@ -1044,7 +1044,7 @@ export default function App() {
 
     return (
       <div 
-        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#FFFFFF', position: 'relative' }}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100dvh', background: '#FFFFFF', position: 'relative' }}
         onMouseMove={handlePointerMove}
         onMouseUp={handlePointerUp}
         onTouchMove={handlePointerMove}
@@ -1214,7 +1214,7 @@ export default function App() {
     };
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#FFF', position: 'relative' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100dvh', background: '#FFF', position: 'relative' }}>
         {/* Top Navigation */}
         <div style={{ width: '100%', height: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', boxSizing: 'border-box' }}>
           <button 
@@ -1688,7 +1688,7 @@ export default function App() {
     };
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', background: '#F2F4F6', paddingBottom: 100 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100dvh', background: '#F2F4F6', paddingBottom: 100 }}>
         
         {/* View Toggle */}
         <div style={{ display: 'flex', width: '100%', gap: 8, padding: 20, boxSizing: 'border-box' }}>
@@ -1838,7 +1838,7 @@ export default function App() {
     };
 
     return (
-      <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5000 }}>
+      <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5000 }}>
         {/* Dimming Overlay */}
         <div 
           onClick={handleClose}
@@ -2169,7 +2169,7 @@ export default function App() {
           <div 
             onClick={() => setIsAddStepSheetOpen(false)}
             style={{
-              position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+              position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
               backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)', zIndex: 2000,
             }}
           />
@@ -2419,7 +2419,7 @@ export default function App() {
       <div 
         id="confetti-container" 
         style={{ 
-          position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100vh',
+          position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100dvh',
           pointerEvents: 'none', zIndex: 6000, overflow: 'hidden' 
         }} 
       />
