@@ -343,7 +343,7 @@ export default function App() {
       </div>
 
       {/* Bottom CTA Area */}
-      <div style={{ position: 'absolute', bottom: 'max(50px, calc(env(safe-area-inset-bottom) + 20px))', left: 20, right: 20, display: 'flex', justifyContent: 'center' }}>
+      <div style={{ position: 'absolute', bottom: 'max(80px, calc(env(safe-area-inset-bottom) + 60px))', left: 20, right: 20, display: 'flex', justifyContent: 'center' }}>
         <button 
           onClick={() => setScreen('home')}
           style={{ 
