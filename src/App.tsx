@@ -404,16 +404,16 @@ export default function App() {
     const historyItem = history.find(h => h.date === homeDate.toLocaleDateString('en-US'));
     const isFinishedDay = historyItem ? historyItem.status === 'complete' : false;
 
-    const displayGoal = historyItem ? historyItem.text : (isToday ? goal : '');
-    const displaySteps = historyItem ? (historyItem.steps || []) : (isToday ? steps : []);
-    const displayCategory = historyItem ? (historyItem.category || 'default') : (isToday ? goalCategory : 'default');
+    const displayGoal = (historyItem ? historyItem.text : (isToday ? goal : '')) || '';
+    const displaySteps = (historyItem ? historyItem.steps : (isToday ? steps : [])) || [];
+    const displayCategory = (historyItem ? historyItem.category : (isToday ? goalCategory : 'default')) || 'default';
 
     const hasActiveGoal = displayGoal.trim().length > 0;
-    const completedCount = displaySteps.filter(s => s.completed).length;
+    const completedCount = displaySteps.filter(s => s?.completed).length;
     const totalCount = displaySteps.length;
     const progress = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
     const allCompleted = totalCount > 0 && completedCount === totalCount;
-    const nextStepIndex = displaySteps.findIndex(s => !s.completed);
+    const nextStepIndex = displaySteps.findIndex(s => !s?.completed);
     const nextStep = nextStepIndex !== -1 ? displaySteps[nextStepIndex] : null;
 
     return (
