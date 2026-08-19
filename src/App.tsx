@@ -203,6 +203,47 @@ export default function App() {
   };
 
   useEffect(() => {
+    const todayStr = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' });
+    const lastActiveDate = localStorage.getItem('doit_lastActiveDate');
+
+    if (lastActiveDate && lastActiveDate !== todayStr) {
+      if (goal) {
+        setHistory(prev => {
+          const newHistory = [{
+            id: Date.now(),
+            text: goal,
+            date: lastActiveDate,
+            steps: steps,
+            category: goalCategory,
+            color: postItColor,
+            status: 'incomplete' as const
+          }, ...prev];
+          return newHistory;
+        });
+      }
+      setGoal('');
+      setSteps([]);
+      setGoalCategory('default');
+      setStartWhen('');
+      setStartWhere('');
+      setScreen('onboarding');
+      localStorage.removeItem('doit_goal');
+      localStorage.removeItem('doit_steps');
+    }
+    
+    localStorage.setItem('doit_lastActiveDate', todayStr);
+    
+    const interval = setInterval(() => {
+      const currentStr = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' });
+      if (currentStr !== todayStr) {
+         window.location.reload();
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     const mixpanelToken = import.meta.env.VITE_MIXPANEL_TOKEN;
     if (mixpanelToken) {
       mixpanel.init(mixpanelToken, { debug: true, track_pageview: true, persistence: 'localStorage' });
