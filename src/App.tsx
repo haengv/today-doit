@@ -188,6 +188,11 @@ export default function App() {
     setBottomSheetStep(1);
   };
   
+  const [screen, setScreen] = useState<string>(() => {
+    const savedGoal = localStorage.getItem('doit_goal');
+    return savedGoal ? 'home' : 'onboarding';
+  });
+  const [tab, setTab] = useState<'home' | 'history'>('home');
   const [goal, setGoal] = useState(() => localStorage.getItem('doit_goal') || '');
   const [steps, setSteps] = useState<Step[]>(() => {
     try {
@@ -2264,12 +2269,14 @@ export default function App() {
   return (
     <div style={{ fontFamily: 'inherit', position: 'relative' }}>
       {/* Screens Render Logic */}
-      {tab === 'home' && screen === 'onboarding' && renderOnboarding()}
-      {tab === 'home' && screen === 'home' && renderHome()}
-      {tab === 'home' && screen === 'breakdown' && renderBreakdown()}
-      {tab === 'home' && screen === 'editSteps' && renderEditSteps()}
-      {tab === 'home' && screen === 'action' && renderAction()}
-      {tab === 'home' && screen === 'receipt' && renderReceipt()}
+      {tab === 'home' && (
+        screen === 'onboarding' ? renderOnboarding() :
+        screen === 'breakdown' ? renderBreakdown() :
+        screen === 'editSteps' ? renderEditSteps() :
+        screen === 'action' ? renderAction() :
+        screen === 'receipt' ? renderReceipt() :
+        renderHome()
+      )}
       
       {/* Detail Overlay */}
       {selectedHistoryItem && renderReceipt(selectedHistoryItem)}
