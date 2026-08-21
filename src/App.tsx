@@ -160,6 +160,7 @@ import { appLogin } from '@apps-in-toss/web-framework';
 
 export default function App() {
   if (typeof window !== 'undefined' && (window.location.search.includes('reset=true') || window.location.search.includes('clear=true'))) {
+    localStorage.removeItem('doit_jwtToken');
     localStorage.removeItem('doit_tossUserKey');
     localStorage.removeItem('doit_goal');
     localStorage.removeItem('doit_steps');
@@ -179,6 +180,10 @@ export default function App() {
   }
 
   const [tossUserKey, setTossUserKey] = useState<string | null>(() => localStorage.getItem('doit_tossUserKey'));
+  const [jwtToken, setJwtToken] = useState<string | null>(() => localStorage.getItem('doit_jwtToken'));
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
   const isTossApp = typeof window !== 'undefined' && (
     navigator.userAgent.toLowerCase().includes('toss') || 
     window.location.search.includes('is_toss=true') || 
@@ -187,30 +192,60 @@ export default function App() {
 
   const handleStartOnboarding = async () => {
     if (isTossApp) {
+      setIsLoggingIn(true);
+      setLoginError(null);
       try {
-        console.log('[Toss Login] Calling appLogin()...');
+        console.log('[Toss Login] Initiating appLogin()...');
         const loginResult = await appLogin();
-        const key = loginResult?.authorizationCode || ('toss_' + Date.now().toString(36));
         
-        localStorage.setItem('doit_tossUserKey', key);
-        setTossUserKey(key);
-        trackEvent('Toss Auth Completed', { userKey: key, method: 'appLogin' });
-      } catch (e) {
-        console.warn('[Toss Auth Bridge Error, falling back to simulated key]', e);
-        
-        // Safe fallback if bridge is unavailable
-        let key = localStorage.getItem('doit_tossUserKey');
-        if (!key) {
-          key = 'toss_simulated_' + Date.now().toString(36);
-          localStorage.setItem('doit_tossUserKey', key);
+        const authorizationCode = loginResult?.authorizationCode;
+        const referrer = loginResult?.referrer || 'deeplink';
+
+        if (!authorizationCode) {
+          throw new Error('인가 코드를 받아오지 못했습니다.');
         }
-        setTossUserKey(key);
-        trackEvent('Toss Auth Completed', { userKey: key, method: 'fallback' });
+
+        console.log('[Toss Login] Exchanging code with backend server...');
+        const authRes = await fetch('/api/auth/toss', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ authorizationCode, referrer })
+        });
+
+        const authData = await authRes.json();
+
+        if (!authRes.ok) {
+          throw new Error(authData.error || '토스 인증 처리 중 오류가 발생했습니다.');
+        }
+
+        console.log('[Toss Login] Login successful! Token received.');
+        
+        // Save own JWT token and user identifier
+        localStorage.setItem('doit_jwtToken', authData.accessToken);
+        localStorage.setItem('doit_tossUserKey', authData.user.userKey);
+        
+        setJwtToken(authData.accessToken);
+        setTossUserKey(authData.user.userKey);
+        
+        trackEvent('Toss Auth Completed', { userKey: authData.user.userKey, method: 'appLogin_fullstack' });
+
+        setScreen('home');
+        setIsBottomSheetOpen(true);
+        setBottomSheetStep(1);
+      } catch (err: any) {
+        console.error('[Toss Onboarding Auth Error]', err);
+        const errMsg = err?.message || '로그인에 실패했습니다. 다시 시도해 주세요.';
+        setLoginError(errMsg);
+        showToast(`❌ ${errMsg}`);
+      } finally {
+        setIsLoggingIn(false);
       }
+    } else {
+      // Normal browser onboarding (not Toss environment)
+      setScreen('home');
+      setIsBottomSheetOpen(true);
+      setBottomSheetStep(1);
     }
-    setScreen('home');
-    setIsBottomSheetOpen(true);
-    setBottomSheetStep(1);
   };
   
   const [screen, setScreen] = useState<string>(() => {
@@ -275,6 +310,7 @@ export default function App() {
   const handleDevClick = () => {
     devClicksRef.current += 1;
     if (devClicksRef.current >= 5) {
+      localStorage.removeItem('doit_jwtToken');
       localStorage.removeItem('doit_tossUserKey');
       localStorage.removeItem('doit_goal');
       localStorage.removeItem('doit_steps');
@@ -2313,6 +2349,27 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: 'inherit', position: 'relative' }}>
+      {/* Fullscreen Loading Overlay for Toss Login */}
+      {isLoggingIn && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          zIndex: 99999, gap: 16
+        }}>
+          <div style={{
+            width: 40, height: 40,
+            border: '4px solid #F2F4F6',
+            borderTop: '4px solid #3182F6',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <span style={{ fontSize: 16, fontWeight: 600, color: '#333D4B', fontFamily: "'Pretendard', sans-serif" }}>
+            토스로 안전하게 로그인하는 중...
+          </span>
+        </div>
+      )}
+
       {/* Screens Render Logic */}
       {tab === 'home' && (
         screen === 'onboarding' ? renderOnboarding() :
