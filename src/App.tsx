@@ -2,6 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import mixpanel from 'mixpanel-browser';
 
+const trackEvent = (eventName: string, properties?: Record<string, any>) => {
+  try {
+    if (import.meta.env.VITE_MIXPANEL_TOKEN) {
+      mixpanel.track(eventName, properties);
+    }
+  } catch (err) {
+    console.warn('[Analytics] Track error ignored:', err);
+  }
+};
+
 type TabState = 'home' | 'history';
 type ScreenState = 'onboarding' | 'home' | 'breakdown' | 'action' | 'receipt' | 'editSteps';
 
@@ -268,7 +278,7 @@ export default function App() {
 
   useEffect(() => {
     if (screen === 'home') {
-      mixpanel.track('Viewed Home Screen');
+      trackEvent('Viewed Home Screen');
     }
   }, [screen]);
 
@@ -410,7 +420,7 @@ export default function App() {
 
   const renderBackButton = (onBack: () => void) => (
     <button 
-      onClick={() => { mixpanel.track('Clicked Back', { fromScreen: screen }); onBack(); }}
+      onClick={() => { trackEvent('Clicked Back', { fromScreen: screen }); onBack(); }}
       style={{ 
         background: 'transparent', border: 'none', 
         width: 40, height: 40, fontSize: 24, cursor: 'pointer', 
@@ -711,7 +721,7 @@ export default function App() {
                 {['#FAE588', '#C8E2FA', '#C4B5FD', '#A7F3D0', '#FCA5A5', '#FCE7F3'].map(color => (
                   <div 
                     key={color}
-                    onClick={() => { setPostItColor(color); mixpanel.track('Selected PostIt Color', { color }); }}
+                    onClick={() => { setPostItColor(color); trackEvent('Selected PostIt Color', { color }); }}
                     style={{
                       width: 32, height: 32, borderRadius: '50%', backgroundColor: color,
                       border: postItColor === color ? '2px solid #000' : 'none',
@@ -748,7 +758,7 @@ export default function App() {
                 {["포트폴리오 완성하기", "시험 공부하기", "방 청소하기", "발표 자료 만들기", "면접 준비하기"].map(chip => (
                   <div
                     key={chip}
-                    onClick={() => { setGoal(chip); mixpanel.track('Clicked Preset Goal', { goalText: chip }); }}
+                    onClick={() => { setGoal(chip); trackEvent('Clicked Preset Goal', { goalText: chip }); }}
                     style={{
                       backgroundColor: '#F2F4F6', borderRadius: 8, padding: '4px 12px', height: 36,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -766,7 +776,7 @@ export default function App() {
               <div 
                 onClick={async () => {
                   if (goal.trim().length < 5) return;
-                  mixpanel.track('Clicked Submit Goal', { goalText: goal });
+                  trackEvent('Clicked Submit Goal', { goalText: goal });
                   
                   setIsBottomSheetOpen(false);
                   setScreen('breakdown');
@@ -786,7 +796,7 @@ export default function App() {
                     setSteps(result.steps);
                     setGoalCategory(result.category);
                     const totalEst = result.steps.reduce((acc: number, step: any) => acc + parseInt(step.timeEstimate.replace(/[^0-9]/g, '') || '0', 10), 0);
-                    mixpanel.track('Set Goal', { goal: goal, category: result.category, stepsCount: result.steps.length, totalEstimatedTime: totalEst });
+                    trackEvent('Set Goal', { goal: goal, category: result.category, stepsCount: result.steps.length, totalEstimatedTime: totalEst });
                   } finally {
                     clearInterval(messageInterval);
                     setIsGeneratingSteps(false);
@@ -963,9 +973,9 @@ export default function App() {
             <button 
               onClick={() => { 
                 if (currentActionStepIndex > 0) {
-                  mixpanel.track('Continued Action', { goal, totalSteps: steps.length });
+                  trackEvent('Continued Action', { goal, totalSteps: steps.length });
                 } else {
-                  mixpanel.track('Started Action', { goal, totalSteps: steps.length });
+                  trackEvent('Started Action', { goal, totalSteps: steps.length });
                 }
                 handleStartAction(); 
               }}
@@ -989,7 +999,7 @@ export default function App() {
               </svg>
             </button>
             <button 
-              onClick={() => { setScreen('editSteps'); mixpanel.track('Clicked Edit Steps'); }}
+              onClick={() => { setScreen('editSteps'); trackEvent('Clicked Edit Steps'); }}
               style={{ 
                 width: 54, height: 54, flexShrink: 0,
                 background: '#2A303C', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 27,
@@ -1168,7 +1178,7 @@ export default function App() {
                 </div>
                 {/* Bottom Row: Delete */}
                 <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 8 }}>
-                  <button onClick={() => { handleDelete(idx); mixpanel.track('Deleted Step', { stepIndex: idx }); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}>
+                  <button onClick={() => { handleDelete(idx); trackEvent('Deleted Step', { stepIndex: idx }); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}>
                     <span style={{ fontFamily: 'Pretendard', fontWeight: 500, fontSize: 16, color: '#F66570', lineHeight: 1.5 }}>삭제</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F66570" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
@@ -1241,7 +1251,7 @@ export default function App() {
       }
       setSteps(newSteps);
       
-      mixpanel.track('Complete Step', { 
+      trackEvent('Complete Step', { 
         stepIndex: currentActionStepIndex, 
         stepText: newSteps[currentActionStepIndex]?.text,
         goal: goal
@@ -1253,7 +1263,7 @@ export default function App() {
         setActionStartTime(new Date());
       } else {
         // Finished all steps
-        mixpanel.track('Finish All Steps', { goal: goal, totalSteps: steps.length });
+        trackEvent('Finish All Steps', { goal: goal, totalSteps: steps.length });
         setShowActionPopup(true);
       }
     };
@@ -1263,7 +1273,7 @@ export default function App() {
         {/* Top Navigation */}
         <div style={{ width: '100%', height: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', boxSizing: 'border-box' }}>
           <button 
-            onClick={() => { setIsStopPopupOpen(true); mixpanel.track('Clicked Stop Action'); }}
+            onClick={() => { setIsStopPopupOpen(true); trackEvent('Clicked Stop Action'); }}
             style={{ 
               width: 34, height: 34, borderRadius: '50%', background: '#FFF', border: '1.5px solid rgba(3,18,40,0.7)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
@@ -1401,7 +1411,7 @@ export default function App() {
         {/* Bottom CTAs */}
         <div style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '0 20px', display: 'flex', gap: 8, boxSizing: 'border-box', zIndex: 10 }}>
           <button 
-            onClick={() => { setIsStopPopupOpen(true); mixpanel.track('Clicked Stop Action'); }}
+            onClick={() => { setIsStopPopupOpen(true); trackEvent('Clicked Stop Action'); }}
             style={{ 
               flex: 1, backgroundColor: '#FFF', border: '1.5px solid rgba(2,9,19,0.91)', borderRadius: 12,
               padding: '13.5px 9.5px', fontSize: 18, fontWeight: 600, color: 'rgba(0,12,30,0.8)', cursor: 'pointer', lineHeight: 1.5,
@@ -1510,14 +1520,14 @@ export default function App() {
               </div>
               <div style={{ width: '100%', display: 'flex', gap: 8, padding: '24px 16px 16px', boxSizing: 'border-box' }}>
                 <button 
-                  onClick={() => { setIsStopPopupOpen(false); mixpanel.track('Resumed Action'); }}
+                  onClick={() => { setIsStopPopupOpen(false); trackEvent('Resumed Action'); }}
                   style={{ flex: 1, backgroundColor: '#FFF', border: '1.5px solid rgba(2,9,19,0.91)', borderRadius: 12, padding: '13.5px 9.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                 >
                   <span style={{ fontSize: 18, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>더 할래요</span>
                 </button>
                 <button 
                   onClick={() => { 
-                    mixpanel.track('Canceled Action', { quitAtStep: currentActionStepIndex });
+                    trackEvent('Canceled Action', { quitAtStep: currentActionStepIndex });
                     setIsStopPopupOpen(false);
                     setScreen('home'); 
                   }}
@@ -1738,13 +1748,13 @@ export default function App() {
         {/* View Toggle */}
         <div style={{ display: 'flex', width: '100%', gap: 8, padding: 20, boxSizing: 'border-box' }}>
           <div 
-            onClick={() => { setHistoryView('list'); mixpanel.track('Changed History View', { viewType: 'list' }); }}
+            onClick={() => { setHistoryView('list'); trackEvent('Changed History View', { viewType: 'list' }); }}
             style={{ flex: 1, backgroundColor: historyView === 'list' ? '#191f28' : '#FFF', border: historyView === 'list' ? '1.5px solid #191f28' : '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, padding: '11.5px 21.5px', textAlign: 'center', color: historyView === 'list' ? '#FFF' : 'rgba(0,12,30,0.8)', fontSize: 16, fontWeight: 600, cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" }}
           >
             보드
           </div>
           <div 
-            onClick={() => { setHistoryView('calendar'); mixpanel.track('Changed History View', { viewType: 'calendar' }); }}
+            onClick={() => { setHistoryView('calendar'); trackEvent('Changed History View', { viewType: 'calendar' }); }}
             style={{ flex: 1, backgroundColor: historyView === 'calendar' ? '#191f28' : '#FFF', border: historyView === 'calendar' ? '1.5px solid #191f28' : '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, padding: '11.5px 21.5px', textAlign: 'center', color: historyView === 'calendar' ? '#FFF' : 'rgba(0,12,30,0.8)', fontSize: 16, fontWeight: 600, cursor: 'pointer', fontFamily: "'Pretendard', sans-serif" }}
           >
             캘린더
@@ -1812,7 +1822,7 @@ export default function App() {
                 return (
                   <div 
                     key={item.id} 
-                    onClick={() => { setSelectedHistoryItem(item); mixpanel.track('Viewed History Detail', { goal: item.text }); }}
+                    onClick={() => { setSelectedHistoryItem(item); trackEvent('Viewed History Detail', { goal: item.text }); }}
                     style={{ 
                       backgroundColor: bgColor, height: 200, position: 'relative', overflow: 'hidden', cursor: 'pointer',
                       display: 'flex', flexDirection: 'column'
@@ -2031,7 +2041,7 @@ export default function App() {
                 <button 
                   disabled={feedbackRating === 0}
                   onClick={() => {
-                    mixpanel.track('Submitted Feedback', { rating: feedbackRating, content: feedbackText });
+                    trackEvent('Submitted Feedback', { rating: feedbackRating, content: feedbackText });
                     
                     const webhookUrl = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
                     if (webhookUrl) {
@@ -2275,7 +2285,7 @@ export default function App() {
                     completed: false,
                     timeEstimate: newStepTime || '5 min'
                   };
-                  mixpanel.track('Added Step', { stepText: newStepText, timeEstimate: newStepTime || '5 min' });
+                  trackEvent('Added Step', { stepText: newStepText, timeEstimate: newStepTime || '5 min' });
                   setSteps([...steps, newStep]);
                   setNewStepText('');
                   setIsAddStepSheetOpen(false);
@@ -2413,7 +2423,7 @@ export default function App() {
             width: 156, height: 51, boxSizing: 'border-box', boxShadow: '0px 6px 20px rgba(0,29,58,0.09)'
           }}>
             <div 
-              onClick={() => { setTab('home'); setScreen('home'); mixpanel.track('Clicked Tab', { tabName: 'home' }); }}
+              onClick={() => { setTab('home'); setScreen('home'); trackEvent('Clicked Tab', { tabName: 'home' }); }}
               style={{ 
                 flex: 1, display: 'flex', alignItems: 'center', gap: 6, height: 36,
                 background: tab === 'home' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
@@ -2426,7 +2436,7 @@ export default function App() {
               {tab === 'home' && <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,12,30,0.8)' }}>홈</div>}
             </div>
             <div 
-              onClick={() => { setTab('history'); mixpanel.track('Clicked Tab', { tabName: 'history' }); }}
+              onClick={() => { setTab('history'); trackEvent('Clicked Tab', { tabName: 'history' }); }}
               style={{ 
                 flex: 1, display: 'flex', alignItems: 'center', gap: 6, height: 36,
                 background: tab === 'history' ? 'rgba(7,25,76,0.05)' : 'transparent', borderRadius: 114, cursor: 'pointer',
