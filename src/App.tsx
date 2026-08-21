@@ -190,13 +190,21 @@ export default function App() {
   
   const [goal, setGoal] = useState(() => localStorage.getItem('doit_goal') || '');
   const [steps, setSteps] = useState<Step[]>(() => {
-    const saved = localStorage.getItem('doit_steps');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('doit_steps');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
   });
   const [isMicroBreaking, setIsMicroBreaking] = useState(false);
   const [history, setHistory] = useState<{id: number, text: string, date: string, steps?: Step[], when?: string, where?: string, status?: 'complete' | 'incomplete', category?: string, color?: string}[]>(() => {
-    const saved = localStorage.getItem('doit_history');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('doit_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
   });
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
