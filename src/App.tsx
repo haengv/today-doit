@@ -162,10 +162,31 @@ export default function App() {
     return <AdminPanel />;
   }
 
-  const [tab, setTab] = useState<TabState>('home');
-  const [screen, setScreen] = useState<ScreenState>(() => {
-    return localStorage.getItem('doit_goal') ? 'home' : 'onboarding';
-  });
+  const [tossUserKey, setTossUserKey] = useState<string | null>(() => localStorage.getItem('doit_tossUserKey'));
+  const isTossApp = typeof window !== 'undefined' && (
+    navigator.userAgent.toLowerCase().includes('toss') || 
+    window.location.search.includes('is_toss=true') || 
+    window.location.search.includes('ait=true')
+  );
+
+  const handleStartOnboarding = async () => {
+    if (isTossApp) {
+      try {
+        let key = localStorage.getItem('doit_tossUserKey');
+        if (!key) {
+          key = 'toss_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+          localStorage.setItem('doit_tossUserKey', key);
+        }
+        setTossUserKey(key);
+        trackEvent('Toss Auth Completed', { userKey: key });
+      } catch (e) {
+        console.warn('[Toss Auth Error]', e);
+      }
+    }
+    setScreen('home');
+    setIsBottomSheetOpen(true);
+    setBottomSheetStep(1);
+  };
   
   const [goal, setGoal] = useState(() => localStorage.getItem('doit_goal') || '');
   const [steps, setSteps] = useState<Step[]>(() => {
@@ -395,25 +416,36 @@ export default function App() {
 
       {/* Bottom CTA Area */}
       <div style={{ position: 'absolute', bottom: 'max(80px, calc(env(safe-area-inset-bottom) + 60px))', left: 20, right: 20, display: 'flex', justifyContent: 'center' }}>
-        <button 
-          onClick={() => {
-            setScreen('home');
-            setIsBottomSheetOpen(true);
-            setBottomSheetStep(1);
-          }}
-          style={{ 
-            backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
-            width: '100%', maxWidth: 335, padding: '13.5px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            cursor: 'pointer', transition: 'transform 0.1s'
-          }}
-          className="neo-btn"
-        >
-          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537', lineHeight: 1.5 }}>시작하기</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14"></path>
-            <path d="M12 5l7 7-7 7"></path>
-          </svg>
-        </button>
+        {isTossApp ? (
+          <button 
+            onClick={handleStartOnboarding}
+            style={{ 
+              backgroundColor: '#3182F6', border: 'none', borderRadius: 14,
+              width: '100%', maxWidth: 335, padding: '15px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              cursor: 'pointer', transition: 'transform 0.1s', boxShadow: '0 4px 12px rgba(49, 130, 246, 0.3)'
+            }}
+          >
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.5, fontFamily: "'Pretendard', sans-serif" }}>
+              토스로 3초 만에 시작하기 💙
+            </span>
+          </button>
+        ) : (
+          <button 
+            onClick={handleStartOnboarding}
+            style={{ 
+              backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
+              width: '100%', maxWidth: 335, padding: '13.5px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              cursor: 'pointer', transition: 'transform 0.1s'
+            }}
+            className="neo-btn"
+          >
+            <span style={{ fontSize: 18, fontWeight: 600, color: '#130537', lineHeight: 1.5 }}>시작하기</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14"></path>
+              <path d="M12 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -475,7 +507,7 @@ export default function App() {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100dvh', background: '#F8F9FA', paddingBottom: 100 }}>
 
         {/* Date Header Wrapper */}
-        <div style={{ width: '100%', maxWidth: 375, padding: '20px 20px 0 20px', display: 'flex', justifyContent: 'flex-start' }}>
+        <div style={{ width: '100%', maxWidth: 375, padding: '20px 20px 0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box' }}>
           <div 
             style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
             onClick={() => {
@@ -487,6 +519,11 @@ export default function App() {
               {dateString} <img src="assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
             </h1>
           </div>
+          {isTossApp && (
+            <div style={{ backgroundColor: '#E8F3FF', border: '1px solid #BCE0FD', padding: '3px 10px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: '#1B64DA', fontFamily: "'Pretendard', sans-serif" }}>💙 토스 회원</span>
+            </div>
+          )}
         </div>
 
         {/* Main Content Area */}
