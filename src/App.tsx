@@ -13,12 +13,12 @@ type Step = {
 };
 
 const getGoalImage = (category: string) => {
-  switch(category) {
-    case 'life': return '/assets/img-life.png';
-    case 'work': return '/assets/img-work.png';
-    case 'habit': return '/assets/img-habit.png';
-    case 'study': return '/assets/img-study.png';
-    default: return '/assets/img-default.png';
+  switch (category) {
+    case 'life': return 'assets/img-life.png';
+    case 'work': return 'assets/img-work.png';
+    case 'habit': return 'assets/img-habit.png';
+    case 'study': return 'assets/img-study.png';
+    default: return 'assets/img-default.png';
   }
 };
 
@@ -386,7 +386,11 @@ export default function App() {
       {/* Bottom CTA Area */}
       <div style={{ position: 'absolute', bottom: 'max(80px, calc(env(safe-area-inset-bottom) + 60px))', left: 20, right: 20, display: 'flex', justifyContent: 'center' }}>
         <button 
-          onClick={() => setScreen('home')}
+          onClick={() => {
+            setScreen('home');
+            setIsBottomSheetOpen(true);
+            setBottomSheetStep(1);
+          }}
           style={{ 
             backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
             width: '100%', maxWidth: 335, padding: '13.5px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -414,7 +418,7 @@ export default function App() {
         marginBottom: 10, padding: 0
       }}
     >
-      <img src="/assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 24, height: 24 }} />
+      <img src="assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 24, height: 24 }} />
     </button>
   );
 
@@ -470,7 +474,7 @@ export default function App() {
             }}
           >
             <h1 style={{ fontSize: 16, fontWeight: 400, color: '#191f28', margin: 0, display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Lexend', sans-serif" }}>
-              {dateString} <img src="/assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
+              {dateString} <img src="assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
             </h1>
           </div>
         </div>
@@ -490,7 +494,7 @@ export default function App() {
               <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>{currentQuote.author}</span>
             </div>
             <div style={{ width: 48, height: 48, flexShrink: 0, borderRadius: '50%', backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: 2, boxSizing: 'border-box' }}>
-              <img src="/assets/img-character.png" alt="캐릭터" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <img src="assets/img-character.png" alt="캐릭터" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
           </div>
         </div>
@@ -583,7 +587,7 @@ export default function App() {
                   cursor: 'pointer', padding: 0
                 }}
               >
-                <img src="/assets/icon-plus.svg" alt="" style={{ width: 20, height: 20 }} />
+                <img src="assets/icon-plus.svg" alt="" style={{ width: 20, height: 20 }} />
               </button>
             </div>
           )}
@@ -824,7 +828,7 @@ export default function App() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
           }}
         >
-          <img src="/assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 20, height: 20, marginRight: 2 }} />
+          <img src="assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 20, height: 20, marginRight: 2 }} />
         </button>
       </div>
 
@@ -992,7 +996,7 @@ export default function App() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
               }}
             >
-              <img src="/assets/icon-edit.svg" alt="수정" style={{ width: 24, height: 24, filter: 'brightness(0) invert(1)' }} />
+              <img src="assets/icon-edit.svg" alt="수정" style={{ width: 24, height: 24, filter: 'brightness(0) invert(1)' }} />
             </button>
           </div>
         </div>
@@ -1153,7 +1157,7 @@ export default function App() {
                       }}
                       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                     >
-                      <img src="/assets/icon-clock.svg" alt="clock" style={{ width: 16, height: 16, opacity: 0.5 }} />
+                      <img src="assets/icon-clock.svg" alt="clock" style={{ width: 16, height: 16, opacity: 0.5 }} />
                       <div style={{ width: '100%', borderBottom: '1px solid transparent' }}>
                         <span style={{ fontFamily: 'Lexend', fontSize: 12, color: 'rgba(3,24,50,0.46)', textAlign: 'center' }}>
                           {(step.timeEstimate || '25 min').replace('분', ' min')}
@@ -1265,7 +1269,7 @@ export default function App() {
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0
             }}
           >
-            <img src="/assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 20, height: 20, marginRight: 2 }} />
+            <img src="assets/icon-arrow-back.svg" alt="뒤로가기" style={{ width: 20, height: 20, marginRight: 2 }} />
           </button>
 
           {/* Dots */}
@@ -1379,7 +1383,7 @@ export default function App() {
           {checkParticles.map(p => (
             <img 
               key={p.id} 
-              src="/assets/icon-check.svg" 
+              src="assets/icon-check.svg" 
               className="check-particle"
               style={{
                 left: p.left,
@@ -1439,7 +1443,7 @@ export default function App() {
               </div>
               
               <div style={{ width: 140, height: 140, position: 'relative', overflow: 'hidden', flexShrink: 0, marginTop: 16 }}>
-                <img src="/assets/img-sucess.png" alt="완료 그래픽" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <img src="assets/img-sucess.png" alt="완료 그래픽" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               
               <div style={{ width: '100%', padding: '24px 16px 16px', display: 'flex', justifyContent: 'center', boxSizing: 'border-box' }}>
@@ -1621,13 +1625,13 @@ export default function App() {
           {/* Month Navigation */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
             <button onClick={handlePrevMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
-              <img src="/assets/icon-arrow-back.svg" alt="prev" style={{ width: 18, height: 18 }} />
+              <img src="assets/icon-arrow-back.svg" alt="prev" style={{ width: 18, height: 18 }} />
             </button>
             <div style={{ fontSize: 28, fontWeight: 600, fontFamily: "'Lexend', sans-serif", color: 'rgba(0,12,30,0.8)', minWidth: 120, textAlign: 'center' }}>
               {monthName}
             </div>
             <button onClick={handleNextMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, transform: 'rotate(180deg)' }}>
-              <img src="/assets/icon-arrow-back.svg" alt="next" style={{ width: 18, height: 18 }} />
+              <img src="assets/icon-arrow-back.svg" alt="next" style={{ width: 18, height: 18 }} />
             </button>
           </div>
 
@@ -1774,7 +1778,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ transform: 'scaleX(-1)' }}>
                     <div style={{ position: 'relative', width: 90, height: 90 }}>
-                      <img src="/assets/img-default.png" alt="빈 기록" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      <img src="assets/img-default.png" alt="빈 기록" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                   </div>
                 </div>
@@ -2084,7 +2088,7 @@ export default function App() {
                   onClick={() => setHomeCalendarSheetDate(new Date(homeCalendarSheetDate.getFullYear(), homeCalendarSheetDate.getMonth() - 1, 1))} 
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
                 >
-                  <img src="/assets/icon-arrow-back.svg" alt="prev" style={{ width: 18, height: 18 }} />
+                  <img src="assets/icon-arrow-back.svg" alt="prev" style={{ width: 18, height: 18 }} />
                 </button>
                 <div style={{ fontSize: 20, fontWeight: 500, fontFamily: "'Lexend', sans-serif", color: 'rgba(3,18,40,0.7)', minWidth: 100, textAlign: 'center' }}>
                   {`${homeCalendarSheetDate.getFullYear()}.${String(homeCalendarSheetDate.getMonth() + 1).padStart(2, '0')}`}
@@ -2093,7 +2097,7 @@ export default function App() {
                   onClick={() => setHomeCalendarSheetDate(new Date(homeCalendarSheetDate.getFullYear(), homeCalendarSheetDate.getMonth() + 1, 1))} 
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, transform: 'rotate(180deg)' }}
                 >
-                  <img src="/assets/icon-arrow-back.svg" alt="next" style={{ width: 18, height: 18 }} />
+                  <img src="assets/icon-arrow-back.svg" alt="next" style={{ width: 18, height: 18 }} />
                 </button>
               </div>
 
@@ -2252,7 +2256,7 @@ export default function App() {
                   }}
                   style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 2px', borderRadius: 12, cursor: 'pointer' }}
                 >
-                  <img src="/assets/icon-clock.svg" alt="clock" style={{ width: 20, height: 20, opacity: 0.5 }} />
+                  <img src="assets/icon-clock.svg" alt="clock" style={{ width: 20, height: 20, opacity: 0.5 }} />
                   <span style={{ fontFamily: 'Lexend', fontSize: 16, color: 'rgba(3,24,50,0.46)', marginTop: 2 }}>
                     {newStepTime || '5 min'}
                   </span>
@@ -2447,7 +2451,7 @@ export default function App() {
                 cursor: 'pointer', padding: 0, boxShadow: '0px 6px 20px rgba(0,29,58,0.09)'
               }}
             >
-              <img src="/assets/icon-feedback.svg" alt="피드백" style={{ width: 22, height: 22 }} />
+              <img src="assets/icon-feedback.svg" alt="피드백" style={{ width: 22, height: 22 }} />
             </button>
             <div className="feedback-tooltip">
               서비스 피드백하기
