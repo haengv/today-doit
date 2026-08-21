@@ -156,6 +156,7 @@ const simulateMicroBreakdown = (): Promise<string> => {
 };
 
 import AdminPanel from './AdminPanel';
+import { appLogin } from '@apps-in-toss/web-framework';
 
 export default function App() {
   if (window.location.pathname === '/admin') {
@@ -172,15 +173,24 @@ export default function App() {
   const handleStartOnboarding = async () => {
     if (isTossApp) {
       try {
+        console.log('[Toss Login] Calling appLogin()...');
+        const loginResult = await appLogin();
+        const key = loginResult?.authorizationCode || ('toss_' + Date.now().toString(36));
+        
+        localStorage.setItem('doit_tossUserKey', key);
+        setTossUserKey(key);
+        trackEvent('Toss Auth Completed', { userKey: key, method: 'appLogin' });
+      } catch (e) {
+        console.warn('[Toss Auth Bridge Error, falling back to simulated key]', e);
+        
+        // Safe fallback if bridge is unavailable
         let key = localStorage.getItem('doit_tossUserKey');
         if (!key) {
-          key = 'toss_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+          key = 'toss_simulated_' + Date.now().toString(36);
           localStorage.setItem('doit_tossUserKey', key);
         }
         setTossUserKey(key);
-        trackEvent('Toss Auth Completed', { userKey: key });
-      } catch (e) {
-        console.warn('[Toss Auth Error]', e);
+        trackEvent('Toss Auth Completed', { userKey: key, method: 'fallback' });
       }
     }
     setScreen('home');
