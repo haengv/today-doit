@@ -159,6 +159,21 @@ import AdminPanel from './AdminPanel';
 import { appLogin } from '@apps-in-toss/web-framework';
 
 export default function App() {
+  if (typeof window !== 'undefined' && (window.location.search.includes('reset=true') || window.location.search.includes('clear=true'))) {
+    localStorage.removeItem('doit_tossUserKey');
+    localStorage.removeItem('doit_goal');
+    localStorage.removeItem('doit_steps');
+    localStorage.removeItem('doit_history');
+    localStorage.removeItem('doit_goalCategory');
+    localStorage.removeItem('doit_startWhen');
+    localStorage.removeItem('doit_startWhere');
+    localStorage.removeItem('doit_postItColor');
+    const url = new URL(window.location.href);
+    url.searchParams.delete('reset');
+    url.searchParams.delete('clear');
+    window.location.href = url.pathname + url.search;
+  }
+
   if (window.location.pathname === '/admin') {
     return <AdminPanel />;
   }
@@ -254,6 +269,27 @@ export default function App() {
     toastTimeoutRef.current = setTimeout(() => {
       setToastMessage('');
     }, 3000);
+  };
+
+  const devClicksRef = useRef(0);
+  const handleDevClick = () => {
+    devClicksRef.current += 1;
+    if (devClicksRef.current >= 5) {
+      localStorage.removeItem('doit_tossUserKey');
+      localStorage.removeItem('doit_goal');
+      localStorage.removeItem('doit_steps');
+      localStorage.removeItem('doit_history');
+      localStorage.removeItem('doit_goalCategory');
+      localStorage.removeItem('doit_startWhen');
+      localStorage.removeItem('doit_startWhere');
+      localStorage.removeItem('doit_postItColor');
+      showToast('🛠️ 데이터가 초기화되었습니다! 앱을 재시작합니다.');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } else {
+      showToast(`초기화하려면 ${5 - devClicksRef.current}번 더 누르세요.`);
+    }
   };
 
   useEffect(() => {
@@ -542,21 +578,20 @@ export default function App() {
               {dateString} <img src="assets/icon-bottom.svg" alt="" style={{ width: 14, height: 14, marginLeft: 2 }} />
             </h1>
           </div>
-          {isTossApp && (
-            <div style={{ backgroundColor: '#E8F3FF', border: '1px solid #BCE0FD', padding: '3px 10px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#1B64DA', fontFamily: "'Pretendard', sans-serif" }}>💙 토스 회원</span>
-            </div>
-          )}
         </div>
 
         {/* Main Content Area */}
         <div style={{ width: '100%', maxWidth: 335, textAlign: 'left', marginBottom: 32, marginTop: 16 }}>
-          <div style={{ 
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-            border: '1.5px solid rgba(0,12,30,0.8)', 
-            borderRadius: '30px 30px 30px 6px', 
-            padding: '12px 24px', backgroundColor: '#FFF' 
-          }}>
+          <div 
+            onClick={handleDevClick}
+            style={{ 
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+              border: '1.5px solid rgba(0,12,30,0.8)', 
+              borderRadius: '30px 30px 30px 6px', 
+              padding: '12px 24px', backgroundColor: '#FFF',
+              cursor: 'pointer'
+            }}
+          >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, marginRight: 16 }}>
               <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,12,30,0.8)', margin: 0, wordBreak: 'keep-all', lineHeight: 1.5 }}>
                 {currentQuote.text}
