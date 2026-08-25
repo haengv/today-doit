@@ -1456,26 +1456,28 @@ export default function App() {
               position: 'relative', width: 315, minHeight: 257, marginBottom: 36,
               backgroundColor: '#FFF', border: '1.5px solid #000', borderRadius: 14,
               boxShadow: '7px 11px 0px #c5e3ff, 7px 11px 0px 1.5px #000',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '24px 20px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 20px',
               boxSizing: 'border-box'
             }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11, marginBottom: 20 }}>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', letterSpacing: '-0.28px', lineHeight: 1.5 }}>
-                지금 이것만 해볼까요?
+            {/* Top Subtitle */}
+            <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', letterSpacing: '-0.28px', lineHeight: 1.5, marginBottom: 4 }}>
+              지금 이것만 해볼까요?
+            </div>
+
+            {/* Center Content (Vertically Centered) */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', margin: '8px 0' }}>
+              <div style={{ fontSize: 22, fontWeight: 600, color: '#191f28', letterSpacing: '-0.44px', wordBreak: 'keep-all', textAlign: 'center', lineHeight: 1.4 }}>
+                {currentStep?.text || '알 수 없는 작업'}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                <div style={{ fontSize: 22, fontWeight: 600, color: '#191f28', letterSpacing: '-0.44px', wordBreak: 'keep-all', textAlign: 'center', lineHeight: 1.4 }}>
-                  {currentStep?.text || '알 수 없는 작업'}
-                </div>
-                <div style={{ backgroundColor: '#f2f4f6', padding: '4px 6px', borderRadius: 4 }}>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5, textAlign: 'center' }}>
-                    {currentStep?.timeEstimate || '1분'}이면 충분해요
-                  </div>
+              <div style={{ backgroundColor: '#f2f4f6', padding: '4px 6px', borderRadius: 4 }}>
+                <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5, textAlign: 'center' }}>
+                  {currentStep?.timeEstimate || '1분'}이면 충분해요
                 </div>
               </div>
             </div>
 
+            {/* Bottom Timer Info */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto' }}>
               <div style={{ fontSize: 11, fontWeight: 400, color: 'rgba(3,24,50,0.46)', letterSpacing: '-0.11px', fontFamily: 'Lexend, sans-serif' }}>
                 STARTED
@@ -2026,14 +2028,14 @@ export default function App() {
     };
 
     return (
-      <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, height: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5000 }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5000 }}>
         {/* Dimming Overlay */}
         <div 
           onClick={handleClose}
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)' }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)' }}
         />
         
-        <div style={{ position: 'relative', zIndex: 5001, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+        <div style={{ position: 'relative', zIndex: 5001, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '100%', maxWidth: 375, boxSizing: 'border-box', padding: '0 20px' }}>
           {/* Close Button */}
           <div 
             onClick={handleClose}
@@ -2380,22 +2382,22 @@ export default function App() {
 
       {/* Add Step Bottom Sheet Overlay */}
       {isAddStepSheetOpen && (
-        <>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, display: 'flex', justifyContent: 'center' }}>
           {/* Backdrop */}
           <div 
             onClick={() => setIsAddStepSheetOpen(false)}
             style={{
-              position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-              backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)', zIndex: 2000,
+              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)'
             }}
           />
           {/* Sheet */}
           <div 
             style={{
-              position: 'fixed', bottom: 10, left: '50%', transform: 'translateX(-50%)',
+              position: 'absolute', bottom: 20,
               width: '100%', maxWidth: 355,
               backgroundColor: '#FFF', borderRadius: 28,
-              paddingBottom: 30, zIndex: 2002,
+              paddingBottom: 30,
               animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
               display: 'flex', flexDirection: 'column',
               boxSizing: 'border-box'
@@ -2464,7 +2466,7 @@ export default function App() {
               </button>
             </div>
           </div>
-        </>
+        </div>
       )}
       
       {tab === 'history' && renderHistory()}
