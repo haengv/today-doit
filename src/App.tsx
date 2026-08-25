@@ -511,36 +511,21 @@ export default function App() {
 
       {/* Bottom CTA Area */}
       <div style={{ position: 'absolute', bottom: 'max(80px, calc(env(safe-area-inset-bottom) + 60px))', left: 20, right: 20, display: 'flex', justifyContent: 'center' }}>
-        {isTossApp ? (
-          <button 
-            onClick={handleStartOnboarding}
-            style={{ 
-              backgroundColor: '#3182F6', border: 'none', borderRadius: 14,
-              width: '100%', maxWidth: 335, padding: '15px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              cursor: 'pointer', transition: 'transform 0.1s', boxShadow: '0 4px 12px rgba(49, 130, 246, 0.3)'
-            }}
-          >
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.5, fontFamily: "'Pretendard', sans-serif" }}>
-              토스로 3초 만에 시작하기 💙
-            </span>
-          </button>
-        ) : (
-          <button 
-            onClick={handleStartOnboarding}
-            style={{ 
-              backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
-              width: '100%', maxWidth: 335, padding: '13.5px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              cursor: 'pointer', transition: 'transform 0.1s'
-            }}
-            className="neo-btn"
-          >
-            <span style={{ fontSize: 18, fontWeight: 600, color: '#130537', lineHeight: 1.5 }}>시작하기</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14"></path>
-              <path d="M12 5l7 7-7 7"></path>
-            </svg>
-          </button>
-        )}
+        <button 
+          onClick={handleStartOnboarding}
+          style={{ 
+            backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
+            width: '100%', maxWidth: 335, padding: '13.5px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            cursor: 'pointer', transition: 'transform 0.1s'
+          }}
+          className="neo-btn"
+        >
+          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537', lineHeight: 1.5 }}>시작하기</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14"></path>
+            <path d="M12 5l7 7-7 7"></path>
+          </svg>
+        </button>
       </div>
     </div>
   );
