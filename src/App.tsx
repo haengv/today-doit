@@ -2370,7 +2370,12 @@ export default function App() {
         screen === 'breakdown' ? renderBreakdown() :
         screen === 'editSteps' ? renderEditSteps() :
         screen === 'action' ? renderAction() :
-        screen === 'receipt' ? renderReceipt() :
+        screen === 'receipt' ? (
+          <>
+            {renderHome()}
+            {renderReceipt()}
+          </>
+        ) :
         renderHome()
       )}
       
