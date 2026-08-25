@@ -842,7 +842,7 @@ export default function App() {
           position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
           width: '100%', maxWidth: 375,
           backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
-          padding: '16px 20px 20px', zIndex: 2002,
+          padding: '16px 20px calc(24px + env(safe-area-inset-bottom))', zIndex: 2002,
           animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           display: 'flex', flexDirection: 'column',
           maxHeight: '90vh', overflowY: 'auto'
@@ -2497,7 +2497,7 @@ export default function App() {
             position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
             width: '100%', maxWidth: 375, backgroundColor: '#FFF',
             borderTopLeftRadius: 24, borderTopRightRadius: 24,
-            padding: '16px 0 32px', boxSizing: 'border-box', zIndex: 3001,
+            padding: '16px 0 calc(32px + env(safe-area-inset-bottom))', boxSizing: 'border-box', zIndex: 3001,
             animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards', display: 'flex', flexDirection: 'column', alignItems: 'center'
           }}>
             <div style={{ width: 40, height: 4, backgroundColor: '#E5E8EB', borderRadius: 4, marginBottom: 24 }} />
