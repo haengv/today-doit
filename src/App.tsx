@@ -423,7 +423,8 @@ export default function App() {
   
   const handleStartAction = () => {
     setActionStartTime(new Date());
-    setCurrentActionStepIndex(0);
+    const nextStepIdx = steps.findIndex(s => !s?.completed);
+    setCurrentActionStepIndex(nextStepIdx !== -1 ? nextStepIdx : 0);
     setScreen('action');
   };
   const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
@@ -804,6 +805,8 @@ export default function App() {
                         <div 
                           onClick={() => {
                             if (completedCount === 0) setActionStartTime(new Date());
+                            const nextStepIdx = displaySteps.findIndex(s => !s?.completed);
+                            setCurrentActionStepIndex(nextStepIdx !== -1 ? nextStepIdx : 0);
                             setScreen('action');
                           }}
                           style={{ 
@@ -1446,49 +1449,39 @@ export default function App() {
 
         {/* Main Content */}
         <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 40, paddingBottom: 150 }}>
-          {/* Layered Card Container (No animation here) */}
+          {/* Action Card Container */}
           <div 
             key={currentActionStepIndex}
             style={{ 
-              position: 'relative', width: 315, height: 257, marginBottom: 36
+              position: 'relative', width: 315, minHeight: 257, marginBottom: 36,
+              backgroundColor: '#FFF', border: '1.5px solid #000', borderRadius: 14,
+              boxShadow: '7px 11px 0px #c5e3ff, 7px 11px 0px 1.5px #000',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '24px 20px',
+              boxSizing: 'border-box'
             }}
           >
-            {/* Background Blue Card */}
-            <div style={{ 
-              position: 'absolute', top: 11, left: 7, width: 315, height: 257,
-              backgroundColor: '#c5e3ff', border: '1.5px solid #000', borderRadius: 14, zIndex: 1
-            }} />
-            
-            {/* Foreground White Card */}
-            <div style={{ 
-              position: 'absolute', top: 0, left: 0, width: 315, height: 257,
-              backgroundColor: '#FFF', border: '1.5px solid #000', borderRadius: 14, zIndex: 2,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 20px',
-              transformOrigin: 'bottom center'
-            }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11, marginBottom: 25, marginTop: 25 }}>
-                <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', letterSpacing: '-0.28px', lineHeight: 1.5 }}>
-                  지금 이것만 해볼까요?
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11, marginBottom: 20 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', letterSpacing: '-0.28px', lineHeight: 1.5 }}>
+                지금 이것만 해볼까요?
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 24, fontWeight: 600, color: '#191f28', letterSpacing: '-0.48px', wordBreak: 'keep-all', textAlign: 'center', lineHeight: 1.4 }}>
+                  {currentStep?.text || '알 수 없는 작업'}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                  <div style={{ fontSize: 24, fontWeight: 600, color: '#191f28', letterSpacing: '-0.48px', wordBreak: 'keep-all', textAlign: 'center', lineHeight: 1.4 }}>
-                    {currentStep?.text || '알 수 없는 작업'}
-                  </div>
-                  <div style={{ backgroundColor: '#f2f4f6', padding: '4px 6px', borderRadius: 4 }}>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>
-                      {currentStep?.timeEstimate || '1분'}이면 충분해요
-                    </div>
+                <div style={{ backgroundColor: '#f2f4f6', padding: '4px 6px', borderRadius: 4 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>
+                    {currentStep?.timeEstimate || '1분'}이면 충분해요
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ fontSize: 11, fontWeight: 400, color: 'rgba(3,24,50,0.46)', letterSpacing: '-0.11px', fontFamily: 'Lexend, sans-serif' }}>
-                  STARTED
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 500, color: 'rgba(0,12,30,0.8)', letterSpacing: '-0.15px', fontFamily: 'Lexend, sans-serif' }}>
-                  {timeString}
-                </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto' }}>
+              <div style={{ fontSize: 11, fontWeight: 400, color: 'rgba(3,24,50,0.46)', letterSpacing: '-0.11px', fontFamily: 'Lexend, sans-serif' }}>
+                STARTED
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 500, color: 'rgba(0,12,30,0.8)', letterSpacing: '-0.15px', fontFamily: 'Lexend, sans-serif' }}>
+                {timeString}
               </div>
             </div>
           </div>
