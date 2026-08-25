@@ -1465,11 +1465,11 @@ export default function App() {
                 지금 이것만 해볼까요?
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                <div style={{ fontSize: 24, fontWeight: 600, color: '#191f28', letterSpacing: '-0.48px', wordBreak: 'keep-all', textAlign: 'center', lineHeight: 1.4 }}>
+                <div style={{ fontSize: 22, fontWeight: 600, color: '#191f28', letterSpacing: '-0.44px', wordBreak: 'keep-all', textAlign: 'center', lineHeight: 1.4 }}>
                   {currentStep?.text || '알 수 없는 작업'}
                 </div>
                 <div style={{ backgroundColor: '#f2f4f6', padding: '4px 6px', borderRadius: 4 }}>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5, textAlign: 'center' }}>
                     {currentStep?.timeEstimate || '1분'}이면 충분해요
                   </div>
                 </div>
@@ -1489,7 +1489,7 @@ export default function App() {
           {/* Next Step Preview */}
           {nextStep ? (
             <div style={{ 
-              width: 335, backgroundColor: '#FFF', border: '1.5px solid #130537', borderRadius: 12, 
+              width: 335, backgroundColor: '#FFF', border: '1.5px solid #B0B8C1', borderRadius: 12, 
               padding: '13.5px 17.5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box' 
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, overflow: 'hidden' }}>
