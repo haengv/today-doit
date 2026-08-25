@@ -639,7 +639,7 @@ export default function App() {
           {/* Post-it UI Goal Card */}
           <div style={{ 
             position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center',
-            transform: isBottomSheetOpen ? 'translateY(-130px) scale(0.85)' : 'translateY(0) scale(1)',
+            transform: isBottomSheetOpen ? 'translateY(-155px) scale(0.6)' : 'translateY(0) scale(1)',
             transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
             transformOrigin: 'top center'
           }}>
@@ -709,7 +709,7 @@ export default function App() {
           </div>
 
           {/* Plus FAB Button */}
-          {!hasActiveGoal && isToday && !isFinishedDay && (
+          {!hasActiveGoal && isToday && !isFinishedDay && !isBottomSheetOpen && (
 
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 20, marginBottom: 28 }}>
               <button
