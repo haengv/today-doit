@@ -12,19 +12,19 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-  min-height: 100dvh;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  overscroll-behavior: none;
   background-color: #fff;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
-  overflow-x: hidden;
 }
 
 body[data-scroll-locked] {
@@ -45,11 +45,11 @@ body[data-scroll-locked] {
 #root > div {
   width: 100%;
   max-width: 100%;
-  height: 100vh;
-  height: 100dvh;
+  height: 100%;
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior-y: none; /* Prevents scroll bounce chaining */
   background-color: #FFF;
   box-shadow: none;
   
