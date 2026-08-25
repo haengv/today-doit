@@ -241,8 +241,7 @@ export default function App() {
         trackEvent('Toss Auth Completed', { userKey: authData.user.userKey, method: 'appLogin_fullstack' });
 
         setScreen('home');
-        setIsBottomSheetOpen(true);
-        setBottomSheetStep(1);
+        setIsBottomSheetOpen(false);
       } catch (err: any) {
         console.error('[Toss Onboarding Auth Error]', err);
         const errMsg = err?.message || '로그인에 실패했습니다. 다시 시도해 주세요.';
@@ -254,8 +253,7 @@ export default function App() {
     } else {
       // Normal browser onboarding (not Toss environment)
       setScreen('home');
-      setIsBottomSheetOpen(true);
-      setBottomSheetStep(1);
+      setIsBottomSheetOpen(false);
     }
   };
   
