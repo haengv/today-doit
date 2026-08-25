@@ -519,7 +519,7 @@ export default function App() {
       </div>
 
       {/* Bottom CTA Area */}
-      <div style={{ position: 'absolute', bottom: 'max(80px, calc(env(safe-area-inset-bottom) + 60px))', left: 20, right: 20, display: 'flex', justifyContent: 'center' }}>
+      <div style={{ position: 'fixed', bottom: 'calc(24px + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '0 20px', display: 'flex', justifyContent: 'center', boxSizing: 'border-box', zIndex: 100 }}>
         <button 
           onClick={handleStartOnboarding}
           style={{ 
@@ -982,7 +982,7 @@ export default function App() {
         </button>
       </div>
 
-      <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 20px 40px' }}>
+      <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 20px calc(140px + env(safe-area-inset-bottom))' }}>
         {/* Title Area */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, marginBottom: 20 }}>
           <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,19,43,0.58)', lineHeight: 1.5 }}>오늘의 할 일</div>
@@ -1108,7 +1108,7 @@ export default function App() {
 
       {/* Bottom CTA (Start & Edit) */}
       {!isGeneratingSteps && (
-        <div style={{ position: 'sticky', bottom: 0, width: '100%', padding: '20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box', marginTop: 'auto' }}>
+        <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '20px 20px calc(20px + env(safe-area-inset-bottom))', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 20%)', zIndex: 100, boxSizing: 'border-box' }}>
           <div style={{ width: '100%', maxWidth: 335, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             <button 
               onClick={() => { 
@@ -1264,7 +1264,7 @@ export default function App() {
         </div>
 
         {/* Steps List */}
-        <div ref={listRef} style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', padding: '20px 20px 100px', boxSizing: 'border-box', touchAction: draggedIndex !== null ? 'none' : 'auto' }}>
+        <div ref={listRef} style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', padding: '20px 20px calc(140px + env(safe-area-inset-bottom))', boxSizing: 'border-box', touchAction: draggedIndex !== null ? 'none' : 'auto' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {steps.map((step, idx) => (
               <div 
@@ -1331,7 +1331,7 @@ export default function App() {
         </div>
 
         {/* Bottom CTA */}
-        <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '30px 20px', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 27%)', zIndex: 100, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '20px 20px calc(24px + env(safe-area-inset-bottom))', background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 27%)', zIndex: 100, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <div style={{ display: 'flex', gap: 8, width: '100%' }}>
             <button 
               onClick={() => setScreen('breakdown')}
@@ -1549,7 +1549,7 @@ export default function App() {
         </div>
 
         {/* Bottom CTAs */}
-        <div style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '0 20px', display: 'flex', gap: 8, boxSizing: 'border-box', zIndex: 10 }}>
+        <div style={{ position: 'fixed', bottom: 'calc(24px + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '0 20px', display: 'flex', gap: 8, boxSizing: 'border-box', zIndex: 10 }}>
           <button 
             onClick={() => { setIsStopPopupOpen(true); trackEvent('Clicked Stop Action'); }}
             style={{ 
