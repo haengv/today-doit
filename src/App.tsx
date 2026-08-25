@@ -832,23 +832,26 @@ export default function App() {
   };
 
   const renderBottomSheet = () => (
-    <>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, display: 'flex', justifyContent: 'center' }}>
+      {/* Dimming Overlay */}
       <div 
         onClick={() => setIsBottomSheetOpen(false)}
         style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-          backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)', zIndex: 2000,
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)'
         }}
       />
+      {/* Sheet */}
       <div 
         style={{
-          position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-          width: '100%', maxWidth: 375,
-          backgroundColor: '#FFF', borderTopLeftRadius: 34, borderTopRightRadius: 34,
-          padding: '16px 20px calc(24px + env(safe-area-inset-bottom))', zIndex: 2002,
+          position: 'absolute', bottom: 20,
+          width: '100%', maxWidth: 355,
+          backgroundColor: '#FFF', borderRadius: 28,
+          padding: '16px 20px 30px', zIndex: 2002,
           animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           display: 'flex', flexDirection: 'column',
-          maxHeight: '90vh', overflowY: 'auto'
+          maxHeight: '85vh', overflowY: 'auto',
+          boxSizing: 'border-box'
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
@@ -967,7 +970,7 @@ export default function App() {
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
-    </>
+    </div>
   );
 
   const renderBreakdown = () => (
