@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "granite dev",
+    "dev": "vite --host",
     "build": "vite build",
     "deploy": "ait deploy",
     "lint": "eslint .",

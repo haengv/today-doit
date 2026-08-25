@@ -206,13 +206,24 @@ export default function App() {
         }
 
         console.log('[Toss Login] Exchanging code with backend server...');
-        const authRes = await fetch('/api/auth/toss', {
+        const apiTarget = isTossApp && !window.location.hostname.includes('localhost')
+          ? 'https://today-doit.vercel.app/api/auth/toss'
+          : '/api/auth/toss';
+
+        const authRes = await fetch(apiTarget, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ authorizationCode, referrer })
         });
 
-        const authData = await authRes.json();
+        const responseText = await authRes.text();
+        let authData;
+        try {
+          authData = JSON.parse(responseText);
+        } catch (parseErr) {
+          console.error('[JSON Parse Error]', responseText);
+          throw new Error(`서버 응답 오류 (HTML 또는 비정상 응답): ${responseText.substring(0, 120)}`);
+        }
 
         if (!authRes.ok) {
           throw new Error(authData.error || '토스 인증 처리 중 오류가 발생했습니다.');
