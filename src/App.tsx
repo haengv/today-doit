@@ -651,7 +651,7 @@ export default function App() {
           {/* Post-it UI Goal Card */}
           <div style={{ 
             position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center',
-            transform: isBottomSheetOpen ? 'translateY(-140px) scale(0.75)' : 'translateY(0) scale(1)',
+            transform: isBottomSheetOpen ? 'translateY(-140px) scale(0.85)' : 'translateY(0) scale(1)',
             transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
             transformOrigin: 'top center'
           }}>
