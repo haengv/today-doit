@@ -156,7 +156,7 @@ const simulateMicroBreakdown = (): Promise<string> => {
 };
 
 import AdminPanel from './AdminPanel';
-import { appLogin } from '@apps-in-toss/web-framework';
+import { appLogin, graniteEvent, closeView } from '@apps-in-toss/web-framework';
 
 export default function App() {
   if (typeof window !== 'undefined' && (window.location.search.includes('reset=true') || window.location.search.includes('clear=true'))) {
@@ -423,6 +423,46 @@ export default function App() {
     localStorage.setItem('doit_startWhen', startWhen);
     localStorage.setItem('doit_startWhere', startWhere);
   }, [goal, goalCategory, steps, history, postItColor, startWhen, startWhere]);
+
+  useEffect(() => {
+    try {
+      const unsubscribe = graniteEvent.addEventListener('backEvent', {
+        onEvent: () => {
+          if (isBottomSheetOpen) {
+            setIsBottomSheetOpen(false);
+          } else if (isAddStepSheetOpen) {
+            setIsAddStepSheetOpen(false);
+          } else if (isHomeCalendarSheetOpen) {
+            setIsHomeCalendarSheetOpen(false);
+          } else if (isTimePickerOpen) {
+            setIsTimePickerOpen(false);
+          } else if (screen === 'breakdown') {
+            setScreen('home');
+          } else if (screen === 'action') {
+            setIsStopPopupOpen(true);
+          } else if (screen === 'editSteps') {
+            setScreen('breakdown');
+          } else if (screen === 'receipt') {
+            setGoal('');
+            setSteps([]);
+            setStartWhen('');
+            setStartWhere('');
+            setScreen('home');
+          } else {
+            closeView();
+          }
+        },
+        onError: (err) => {
+          console.warn('[AppsInToss] backEvent error:', err);
+        }
+      });
+      return () => {
+        unsubscribe();
+      };
+    } catch (e) {
+      console.warn('[AppsInToss] Failed to register backEvent listener:', e);
+    }
+  }, [screen, isBottomSheetOpen, isAddStepSheetOpen, isHomeCalendarSheetOpen, isTimePickerOpen]);
   
   const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
   
