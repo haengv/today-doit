@@ -584,9 +584,9 @@ export default function App() {
     const historyItem = history.find(h => h.date === homeDate.toLocaleDateString('en-US'));
     const isFinishedDay = historyItem ? historyItem.status === 'complete' : false;
 
-    const displayGoal = (historyItem ? historyItem.text : (isToday ? goal : '')) || '';
+    const displayGoal = (historyItem ? historyItem.text : (isToday ? (isBottomSheetOpen ? tempGoal : goal) : '')) || '';
     const displaySteps = (historyItem ? historyItem.steps : (isToday ? steps : [])) || [];
-    const displayCategory = (historyItem ? historyItem.category : (isToday ? goalCategory : 'default')) || 'default';
+    const displayCategory = (historyItem ? historyItem.category : (isToday ? (isBottomSheetOpen ? guessCategoryLocally(tempGoal) : goalCategory) : 'default')) || 'default';
 
     const hasActiveGoal = displayGoal.trim().length > 0;
     const completedCount = displaySteps.filter(s => s?.completed).length;
@@ -648,7 +648,7 @@ export default function App() {
           }}>
             <div 
               style={{ 
-                position: 'relative', width: 220, height: 260, backgroundColor: isToday ? ((hasActiveGoal || isBottomSheetOpen) ? postItColor : '#FAE588') : (historyItem?.status === 'incomplete' ? '#D1D6DB' : (historyItem?.color || '#FAE588')), 
+                position: 'relative', width: 220, height: 260, backgroundColor: isToday ? ((hasActiveGoal || isBottomSheetOpen) ? (isBottomSheetOpen ? tempPostItColor : postItColor) : '#FAE588') : (historyItem?.status === 'incomplete' ? '#D1D6DB' : (historyItem?.color || '#FAE588')), 
                 border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 6,
                 boxShadow: '0px 8px 7.5px rgba(22,22,22,0.13)',
                 display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: 16
