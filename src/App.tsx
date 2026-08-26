@@ -638,7 +638,16 @@ export default function App() {
           </div>
         </div>
         
-        <div style={{ width: '100%', maxWidth: 375, display: 'flex', flexDirection: 'column', alignItems: 'center', position: isBottomSheetOpen ? 'relative' : 'static', zIndex: isBottomSheetOpen ? 2001 : 'auto' }}>
+        <div style={{ 
+          width: '100%', 
+          maxWidth: 375, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          position: isBottomSheetOpen ? 'relative' : 'static', 
+          zIndex: isBottomSheetOpen ? 2001 : 'auto',
+          pointerEvents: isBottomSheetOpen ? 'none' : 'auto'
+        }}>
           {/* Post-it UI Goal Card */}
           <div style={{ 
             position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center',
