@@ -856,10 +856,11 @@ export default function App() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4, lineHeight: 1.5 }}>포스트잇 색상</div>
               <div style={{ display: 'flex', gap: 12 }}>
-                {['#FAE588', '#C8E2FA', '#C4B5FD', '#A7F3D0', '#FCA5A5', '#FCE7F3'].map(color => (
+                 {['#FAE588', '#C8E2FA', '#C4B5FD', '#A7F3D0', '#FCA5A5', '#FCE7F3'].map(color => (
                   <div 
                     key={color}
-                    onClick={() => { setTempPostItColor(color); trackEvent('Selected PostIt Color', { color }); }}
+                    onClick={(e) => { e.stopPropagation(); setTempPostItColor(color); trackEvent('Selected PostIt Color', { color }); }}
+                    onTouchStart={(e) => { e.stopPropagation(); setTempPostItColor(color); trackEvent('Selected PostIt Color', { color }); }}
                     style={{
                       width: 32, height: 32, borderRadius: '50%', backgroundColor: color,
                       border: tempPostItColor === color ? '2px solid #000' : 'none',
@@ -899,7 +900,8 @@ export default function App() {
                 {["포트폴리오 완성하기", "시험 공부하기", "방 청소하기", "발표 자료 만들기", "면접 준비하기"].map(chip => (
                   <div
                     key={chip}
-                    onClick={() => { setTempGoal(chip); trackEvent('Clicked Preset Goal', { goalText: chip }); }}
+                    onClick={(e) => { e.stopPropagation(); setTempGoal(chip); trackEvent('Clicked Preset Goal', { goalText: chip }); }}
+                    onTouchStart={(e) => { e.stopPropagation(); setTempGoal(chip); trackEvent('Clicked Preset Goal', { goalText: chip }); }}
                     style={{
                       backgroundColor: '#F2F4F6', borderRadius: 8, padding: '4px 12px', height: 36,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -915,7 +917,42 @@ export default function App() {
             {/* Done Button */}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
               <div 
-                onClick={async () => {
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (tempGoal.trim().length < 5) return;
+                  const finalGoal = tempGoal.trim();
+                  setGoal(finalGoal);
+                  setPostItColor(tempPostItColor);
+                  trackEvent('Clicked Submit Goal', { goalText: finalGoal });
+                  
+                  setIsBottomSheetOpen(false);
+                  setScreen('breakdown');
+                  setGoalCategory(guessCategoryLocally(finalGoal)); // Guess category locally first so image updates immediately
+                  setIsGeneratingSteps(true);
+                  setBreakdownToastMessage('할 일을 단계별로 쪼개고 있어요.');
+                  setShowBreakdownToast(true);
+                  
+                  let toggle = false;
+                  const messageInterval = setInterval(() => {
+                    toggle = !toggle;
+                    setBreakdownToastMessage(toggle ? '잠시만 기다려주세요!' : '할 일을 단계별로 쪼개고 있어요.');
+                  }, 5500);
+
+                  try {
+                    const result = await generateBreakdown(finalGoal);
+                    setSteps(result.steps);
+                    setGoalCategory(result.category);
+                    const totalEst = result.steps.reduce((acc: number, step: any) => acc + parseInt(step.timeEstimate.replace(/[^0-9]/g, '') || '0', 10), 0);
+                    trackEvent('Set Goal', { goal: finalGoal, category: result.category, stepsCount: result.steps.length, totalEstimatedTime: totalEst });
+                  } finally {
+                    clearInterval(messageInterval);
+                    setIsGeneratingSteps(false);
+                    setBreakdownToastMessage('오늘의 할 일을 단계별로 정리했어요 ✨');
+                    setTimeout(() => setShowBreakdownToast(false), 3000);
+                  }
+                }}
+                onTouchStart={async (e) => {
+                  e.stopPropagation();
                   if (tempGoal.trim().length < 5) return;
                   const finalGoal = tempGoal.trim();
                   setGoal(finalGoal);
