@@ -295,6 +295,8 @@ export default function App() {
   const [newStepText, setNewStepText] = useState('');
   const [newStepTime, setNewStepTime] = useState('5 min');
   const [postItColor, setPostItColor] = useState(() => localStorage.getItem('doit_postItColor') || '#FAE588');
+  const [tempGoal, setTempGoal] = useState('');
+  const [tempPostItColor, setTempPostItColor] = useState('#FAE588');
   const [startWhen, setStartWhen] = useState(() => localStorage.getItem('doit_startWhen') || '');
   const [startWhere, setStartWhere] = useState(() => localStorage.getItem('doit_startWhere') || '');
   const [isFeedbackPopupOpen, setIsFeedbackPopupOpen] = useState(false);
@@ -715,6 +717,8 @@ export default function App() {
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 20, marginBottom: 28 }}>
               <button
                 onClick={() => {
+                  setTempGoal(goal);
+                  setTempPostItColor(postItColor);
                   setIsBottomSheetOpen(true);
                   setBottomSheetStep(1);
                 }}
@@ -855,10 +859,10 @@ export default function App() {
                 {['#FAE588', '#C8E2FA', '#C4B5FD', '#A7F3D0', '#FCA5A5', '#FCE7F3'].map(color => (
                   <div 
                     key={color}
-                    onClick={() => { setPostItColor(color); trackEvent('Selected PostIt Color', { color }); }}
+                    onClick={() => { setTempPostItColor(color); trackEvent('Selected PostIt Color', { color }); }}
                     style={{
                       width: 32, height: 32, borderRadius: '50%', backgroundColor: color,
-                      border: postItColor === color ? '2px solid #000' : 'none',
+                      border: tempPostItColor === color ? '2px solid #000' : 'none',
                       cursor: 'pointer', boxSizing: 'border-box'
                     }}
                   />
@@ -872,8 +876,8 @@ export default function App() {
               
               <input
                 placeholder="오늘 꼭 할 일 한가지를 입력하세요"
-                value={goal}
-                onChange={e => setGoal(e.target.value)}
+                value={tempGoal}
+                onChange={e => setTempGoal(e.target.value)}
                 maxLength={30}
                 onBlur={() => {
                   window.scrollTo(0, 0);
@@ -884,7 +888,7 @@ export default function App() {
                 }}
               />
               
-              {goal.length > 0 && goal.trim().length < 5 && (
+              {tempGoal.length > 0 && tempGoal.trim().length < 5 && (
                 <div style={{ fontSize: 12, color: '#EF4444', marginLeft: 4, marginTop: -4, lineHeight: 1.5 }}>
                   5글자 이상 작성해주세요.
                 </div>
@@ -895,7 +899,7 @@ export default function App() {
                 {["포트폴리오 완성하기", "시험 공부하기", "방 청소하기", "발표 자료 만들기", "면접 준비하기"].map(chip => (
                   <div
                     key={chip}
-                    onClick={() => { setGoal(chip); trackEvent('Clicked Preset Goal', { goalText: chip }); }}
+                    onClick={() => { setTempGoal(chip); trackEvent('Clicked Preset Goal', { goalText: chip }); }}
                     style={{
                       backgroundColor: '#F2F4F6', borderRadius: 8, padding: '4px 12px', height: 36,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -912,12 +916,15 @@ export default function App() {
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
               <div 
                 onClick={async () => {
-                  if (goal.trim().length < 5) return;
-                  trackEvent('Clicked Submit Goal', { goalText: goal });
+                  if (tempGoal.trim().length < 5) return;
+                  const finalGoal = tempGoal.trim();
+                  setGoal(finalGoal);
+                  setPostItColor(tempPostItColor);
+                  trackEvent('Clicked Submit Goal', { goalText: finalGoal });
                   
                   setIsBottomSheetOpen(false);
                   setScreen('breakdown');
-                  setGoalCategory(guessCategoryLocally(goal)); // Guess category locally first so image updates immediately
+                  setGoalCategory(guessCategoryLocally(finalGoal)); // Guess category locally first so image updates immediately
                   setIsGeneratingSteps(true);
                   setBreakdownToastMessage('할 일을 단계별로 쪼개고 있어요.');
                   setShowBreakdownToast(true);
@@ -929,11 +936,11 @@ export default function App() {
                   }, 5500);
 
                   try {
-                    const result = await generateBreakdown(goal);
+                    const result = await generateBreakdown(finalGoal);
                     setSteps(result.steps);
                     setGoalCategory(result.category);
                     const totalEst = result.steps.reduce((acc: number, step: any) => acc + parseInt(step.timeEstimate.replace(/[^0-9]/g, '') || '0', 10), 0);
-                    trackEvent('Set Goal', { goal: goal, category: result.category, stepsCount: result.steps.length, totalEstimatedTime: totalEst });
+                    trackEvent('Set Goal', { goal: finalGoal, category: result.category, stepsCount: result.steps.length, totalEstimatedTime: totalEst });
                   } finally {
                     clearInterval(messageInterval);
                     setIsGeneratingSteps(false);
@@ -942,12 +949,12 @@ export default function App() {
                   }
                 }}
                 style={{ 
-                  backgroundColor: goal.trim().length >= 5 ? '#c5e3ff' : '#E5E8EB',
-                  border: goal.trim().length >= 5 ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid #8B95A1',
+                  backgroundColor: tempGoal.trim().length >= 5 ? '#c5e3ff' : '#E5E8EB',
+                  border: tempGoal.trim().length >= 5 ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid #8B95A1',
                   borderRadius: 12, padding: '13.5px 0',
                   width: '100%', textAlign: 'center', fontSize: 18, fontWeight: 600, lineHeight: 1.5,
-                  color: goal.trim().length >= 5 ? '#130537' : 'rgba(3,24,50,0.46)',
-                  cursor: goal.trim().length >= 5 ? 'pointer' : 'not-allowed'
+                  color: tempGoal.trim().length >= 5 ? '#130537' : 'rgba(3,24,50,0.46)',
+                  cursor: tempGoal.trim().length >= 5 ? 'pointer' : 'not-allowed'
                 }}
               >
                 완료
