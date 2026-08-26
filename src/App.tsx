@@ -875,6 +875,9 @@ export default function App() {
                 value={goal}
                 onChange={e => setGoal(e.target.value)}
                 maxLength={30}
+                onBlur={() => {
+                  window.scrollTo(0, 0);
+                }}
                 style={{ 
                   width: '100%', border: '1.5px solid #B0B8C1', borderRadius: 12, padding: '13.5px 17.5px',
                   outline: 'none', fontSize: 16, fontWeight: 400, color: '#191f28', boxSizing: 'border-box', lineHeight: 1.5
@@ -2410,6 +2413,9 @@ export default function App() {
                     value={newStepText}
                     onChange={(e) => setNewStepText(e.target.value)}
                     placeholder="새 단계 입력"
+                    onBlur={() => {
+                      window.scrollTo(0, 0);
+                    }}
                     style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontFamily: 'Pretendard', fontSize: 16, color: 'rgba(0,12,30,0.8)' }}
                   />
                 </div>
