@@ -257,6 +257,11 @@ export default function App() {
     }
   };
   
+  const formatTimeToKorean = (timeStr: string) => {
+    if (!timeStr) return '';
+    return timeStr.replace(/\s*min/g, '분');
+  };
+
   const [screen, setScreen] = useState<string>(() => {
     const savedGoal = localStorage.getItem('doit_goal');
     return savedGoal ? 'home' : 'onboarding';
@@ -1108,7 +1113,7 @@ export default function App() {
                           <polyline points="12 6 12 12 16 14"></polyline>
                         </svg>
                         <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5, fontFamily: 'Lexend, sans-serif' }}>
-                          {step.timeEstimate.replace('분', ' min')}
+                          {formatTimeToKorean(step.timeEstimate)}
                         </span>
                       </div>
                     </div>
@@ -1360,7 +1365,7 @@ export default function App() {
                       <img src="assets/icon-clock.svg" alt="clock" style={{ width: 16, height: 16, opacity: 0.5 }} />
                       <div style={{ width: '100%', borderBottom: '1px solid transparent' }}>
                         <span style={{ fontFamily: 'Lexend', fontSize: 12, color: 'rgba(3,24,50,0.46)', textAlign: 'center' }}>
-                          {(step.timeEstimate || '25 min').replace('분', ' min')}
+                          {formatTimeToKorean(step.timeEstimate || '25분')}
                         </span>
                       </div>
                     </div>
@@ -1519,7 +1524,7 @@ export default function App() {
               </div>
               <div style={{ backgroundColor: '#f2f4f6', padding: '4px 6px', borderRadius: 4 }}>
                 <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5, textAlign: 'center' }}>
-                  {currentStep?.timeEstimate || '1분'}이면 충분해요
+                  {formatTimeToKorean(currentStep?.timeEstimate || '1분')}이면 충분해요
                 </div>
               </div>
             </div>
@@ -1560,7 +1565,7 @@ export default function App() {
                     <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
                   <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(3,24,50,0.46)', lineHeight: 1.5, fontFamily: 'Lexend, sans-serif' }}>
-                    {nextStep.timeEstimate.replace('분', ' min')}
+                    {formatTimeToKorean(nextStep.timeEstimate)}
                   </span>
                 </div>
               </div>
@@ -2484,7 +2489,7 @@ export default function App() {
                 >
                   <img src="assets/icon-clock.svg" alt="clock" style={{ width: 20, height: 20, opacity: 0.5 }} />
                   <span style={{ fontFamily: 'Lexend', fontSize: 16, color: 'rgba(3,24,50,0.46)', marginTop: 2 }}>
-                    {newStepTime || '5 min'}
+                    {formatTimeToKorean(newStepTime || '5분')}
                   </span>
                 </div>
               </div>
@@ -2592,7 +2597,7 @@ export default function App() {
                 ].map((time) => (
                   <div key={time} style={{ height: 46, display: 'flex', alignItems: 'center', justifyContent: 'center', scrollSnapAlign: 'center', fontSize: 20, fontWeight: 600, color: time === pickerScrollValue ? '#191f28' : '#B0B8C1', fontFamily: 'Lexend', transition: 'color 0.2s' }}>
                     {time.replace(' min', '')}
-                    <span style={{ fontSize: 14, marginLeft: 4, fontWeight: 500, opacity: time === pickerScrollValue ? 1 : 0.6 }}>MIN</span>
+                    <span style={{ fontSize: 14, marginLeft: 4, fontWeight: 500, opacity: time === pickerScrollValue ? 1 : 0.6, fontFamily: 'Pretendard' }}>분</span>
                   </div>
                 ))}
               </div>
