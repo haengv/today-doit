@@ -5,7 +5,7 @@ export default defineConfig({
   brand: {
     displayName: "두잇",
     primaryColor: "#130537",
-    icon: "assets/img-character.png",
+    icon: "public/appsintoss-logo.png",
   },
   web: {
     host: "localhost",
