@@ -897,7 +897,7 @@ export default function App() {
 
               {/* Suggestion Chips */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-                {["포트폴리오 완성하기", "시험 공부하기", "방 청소하기", "발표 자료 만들기", "면접 준비하기"].map(chip => (
+                {["포트폴리오 완성", "시험 공부", "방 청소", "발표 준비", "면접 준비"].map(chip => (
                   <div
                     key={chip}
                     onClick={(e) => { e.stopPropagation(); setTempGoal(chip); trackEvent('Clicked Preset Goal', { goalText: chip }); }}
