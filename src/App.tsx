@@ -572,8 +572,9 @@ export default function App() {
     const d = String(homeDate.getDate()).padStart(2, '0');
     const dateString = `${y}/${m}/${d}`;
 
-    const startOfYear = new Date(homeDate.getFullYear(), 0, 0);
-    const diff = homeDate.getTime() - startOfYear.getTime();
+    // Get quote based on real todayDate so it only changes at midnight, regardless of selected homeDate
+    const startOfYear = new Date(todayDate.getFullYear(), 0, 0);
+    const diff = todayDate.getTime() - startOfYear.getTime();
     const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
     const currentQuote = QUOTES[dayOfYear % QUOTES.length];
 
