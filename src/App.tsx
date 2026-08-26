@@ -1672,6 +1672,7 @@ export default function App() {
                         confettiDivs.forEach(div => div.remove());
                       }, 2500);
                     }
+                    setTab('history');
                     setScreen('receipt');
                   }}
                   style={{ 
@@ -2521,7 +2522,15 @@ export default function App() {
         </div>
       )}
       
-      {tab === 'history' && renderHistory()}
+      {tab === 'history' && (
+        screen === 'receipt' ? (
+          <>
+            {renderHistory()}
+            {renderReceipt()}
+          </>
+        ) :
+        renderHistory()
+      )}
 
       {renderFeedbackPopup()}
 
