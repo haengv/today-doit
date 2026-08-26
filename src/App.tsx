@@ -423,6 +423,44 @@ export default function App() {
     localStorage.setItem('doit_startWhen', startWhen);
     localStorage.setItem('doit_startWhere', startWhere);
   }, [goal, goalCategory, steps, history, postItColor, startWhen, startWhere]);
+  
+  
+  const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
+  
+  const [currentActionStepIndex, setCurrentActionStepIndex] = useState(0);
+  
+  const handleStartAction = () => {
+    setActionStartTime(new Date());
+    const nextStepIdx = steps.findIndex(s => !s?.completed);
+    setCurrentActionStepIndex(nextStepIdx !== -1 ? nextStepIdx : 0);
+    setScreen('action');
+  };
+  const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
+  const [showActionPopup, setShowActionPopup] = useState(false);
+  const [isAnimatingNext, setIsAnimatingNext] = useState(false);
+  const [isGeneratingSteps, setIsGeneratingSteps] = useState(false);
+  const [isStopPopupOpen, setIsStopPopupOpen] = useState(false);
+  const [showBreakdownToast, setShowBreakdownToast] = useState(false);
+  const [breakdownToastMessage, setBreakdownToastMessage] = useState('');
+  const [homeDate, setHomeDate] = useState<Date>(new Date());
+  const [checkParticles, setCheckParticles] = useState<any[]>([]);
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+  const [timePickerTarget, setTimePickerTarget] = useState<number | 'new' | null>(null);
+  const [pickerScrollValue, setPickerScrollValue] = useState<string>('5 min');
+
+  // editSteps hooks
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragStartY, setDragStartY] = useState<number>(0);
+  const [dragOffset, setDragOffset] = useState<number>(0);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const initialPointer = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (screen !== 'action') {
+      setShowActionPopup(false);
+    }
+  }, [screen]);
 
   useEffect(() => {
     const isWebView = typeof window !== 'undefined' && !!(window as any).ReactNativeWebView;
@@ -467,43 +505,6 @@ export default function App() {
       console.warn('[AppsInToss] Failed to register backEvent listener:', e);
     }
   }, [screen, isBottomSheetOpen, isAddStepSheetOpen, isHomeCalendarSheetOpen, isTimePickerOpen]);
-  
-  const [actionStartTime, setActionStartTime] = useState<Date | null>(null);
-  
-  const [currentActionStepIndex, setCurrentActionStepIndex] = useState(0);
-  
-  const handleStartAction = () => {
-    setActionStartTime(new Date());
-    const nextStepIdx = steps.findIndex(s => !s?.completed);
-    setCurrentActionStepIndex(nextStepIdx !== -1 ? nextStepIdx : 0);
-    setScreen('action');
-  };
-  const [bottomSheetStep, setBottomSheetStep] = useState<1 | 2>(1);
-  const [showActionPopup, setShowActionPopup] = useState(false);
-  const [isAnimatingNext, setIsAnimatingNext] = useState(false);
-  const [isGeneratingSteps, setIsGeneratingSteps] = useState(false);
-  const [isStopPopupOpen, setIsStopPopupOpen] = useState(false);
-  const [showBreakdownToast, setShowBreakdownToast] = useState(false);
-  const [breakdownToastMessage, setBreakdownToastMessage] = useState('');
-  const [homeDate, setHomeDate] = useState<Date>(new Date());
-  const [checkParticles, setCheckParticles] = useState<any[]>([]);
-  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
-  const [timePickerTarget, setTimePickerTarget] = useState<number | 'new' | null>(null);
-  const [pickerScrollValue, setPickerScrollValue] = useState<string>('5 min');
-
-  // editSteps hooks
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragStartY, setDragStartY] = useState<number>(0);
-  const [dragOffset, setDragOffset] = useState<number>(0);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-  const initialPointer = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    if (screen !== 'action') {
-      setShowActionPopup(false);
-    }
-  }, [screen]);
 
   const moveStep = (index: number, direction: 'up' | 'down') => {
     if (direction === 'up' && index === 0) return;
