@@ -639,7 +639,7 @@ export default function App() {
           {/* Post-it UI Goal Card */}
           <div style={{ 
             position: 'relative', paddingTop: 36, width: '100%', display: 'flex', justifyContent: 'center',
-            transform: isBottomSheetOpen ? 'translateY(-155px) scale(0.6)' : 'translateY(0) scale(1)',
+            transform: isBottomSheetOpen ? 'translateY(-140px) scale(0.75)' : 'translateY(0) scale(1)',
             transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
             transformOrigin: 'top center'
           }}>
@@ -836,9 +836,11 @@ export default function App() {
       {/* Dimming Overlay */}
       <div 
         onClick={() => setIsBottomSheetOpen(false)}
+        onTouchStart={() => setIsBottomSheetOpen(false)}
         style={{
           position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)'
+          backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)',
+          cursor: 'pointer'
         }}
       />
       {/* Sheet */}
@@ -848,7 +850,7 @@ export default function App() {
           width: '100%', maxWidth: 355,
           backgroundColor: '#FFF', borderRadius: 28,
           padding: '16px 20px 30px', zIndex: 2002,
-          animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           display: 'flex', flexDirection: 'column',
           maxHeight: '85vh', overflowY: 'auto',
           boxSizing: 'border-box'
@@ -2389,9 +2391,11 @@ export default function App() {
           {/* Backdrop */}
           <div 
             onClick={() => setIsAddStepSheetOpen(false)}
+            onTouchStart={() => setIsAddStepSheetOpen(false)}
             style={{
               position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)'
+              backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)',
+              cursor: 'pointer'
             }}
           />
           {/* Sheet */}
@@ -2401,7 +2405,7 @@ export default function App() {
               width: '100%', maxWidth: 355,
               backgroundColor: '#FFF', borderRadius: 28,
               paddingBottom: 30,
-              animation: 'slideUpCentered 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
               display: 'flex', flexDirection: 'column',
               boxSizing: 'border-box'
             }}
@@ -2576,7 +2580,7 @@ export default function App() {
       )}
 
       {/* Bottom Navigation & Floating Button Container */}
-      {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && screen !== 'action' && screen !== 'editSteps' && (
+      {screen !== 'onboarding' && screen !== 'breakdown' && screen !== 'receipt' && screen !== 'action' && screen !== 'editSteps' && !isBottomSheetOpen && !isAddStepSheetOpen && !isHomeCalendarSheetOpen && !isTimePickerOpen && (
         <div style={{
           position: 'fixed', bottom: 30, left: '50%', transform: 'translateX(-50%)',
           width: '100%', maxWidth: 375, height: 51, pointerEvents: 'none', zIndex: 1000
