@@ -257,9 +257,9 @@ export default function App() {
     }
   };
   
-  const formatTimeToKorean = (timeStr: string) => {
-    if (!timeStr) return '';
-    return timeStr.replace(/\s*min/g, '분');
+  const formatTimeToKorean = (timeStr: any) => {
+    if (timeStr === null || timeStr === undefined) return '';
+    return String(timeStr).replace(/\s*min/g, '분');
   };
 
   const [screen, setScreen] = useState<string>(() => {
@@ -427,6 +427,7 @@ export default function App() {
   useEffect(() => {
     const isWebView = typeof window !== 'undefined' && !!(window as any).ReactNativeWebView;
     if (!isWebView) return;
+    if (!graniteEvent || typeof graniteEvent.addEventListener !== 'function') return;
 
     try {
       const unsubscribe = graniteEvent.addEventListener('backEvent', {
