@@ -5,7 +5,7 @@ export default defineConfig({
   brand: {
     displayName: "두잇",
     primaryColor: "#130537",
-    icon: "public/assets/img-character.png",
+    icon: "https://today-doit.vercel.app/assets/img-character.png",
   },
   web: {
     host: "localhost",
