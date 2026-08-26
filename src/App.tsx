@@ -731,7 +731,7 @@ export default function App() {
           {hasActiveGoal && <div style={{ height: 28 }} />}
 
           {/* Dynamic Bottom Area */}
-          {!hasActiveGoal ? null : (
+          {isBottomSheetOpen || !hasActiveGoal ? null : (
             <>
               {isFinishedDay ? (
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 20, padding: '0 20px', boxSizing: 'border-box' }}>
@@ -779,22 +779,7 @@ export default function App() {
                     </div>
 
                     {/* Next Action Box */}
-                    {displaySteps.length === 0 ? (
-                      <div 
-                        onClick={() => {
-                          setIsBottomSheetOpen(true);
-                          setBottomSheetStep(1);
-                        }}
-                        style={{ 
-                          width: '100%', padding: '14px 16px', backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, 
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', boxSizing: 'border-box'
-                        }}
-                      >
-                        <span style={{ fontSize: 16, fontWeight: 600, color: '#130537', fontFamily: "'Pretendard', sans-serif" }}>
-                          세부 행동 단계 작성하기 ⚡️
-                        </span>
-                      </div>
-                    ) : (!allCompleted && nextStep && (
+                    {displaySteps.length > 0 && !allCompleted && nextStep && (
                       <div style={{ 
                         width: '100%', padding: '14px 16px', backgroundColor: '#FFF', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12, 
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box'
@@ -821,7 +806,7 @@ export default function App() {
                           </svg>
                         </div>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </>
           )}
