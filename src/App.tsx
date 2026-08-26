@@ -425,6 +425,9 @@ export default function App() {
   }, [goal, goalCategory, steps, history, postItColor, startWhen, startWhere]);
 
   useEffect(() => {
+    const isWebView = typeof window !== 'undefined' && !!(window as any).ReactNativeWebView;
+    if (!isWebView) return;
+
     try {
       const unsubscribe = graniteEvent.addEventListener('backEvent', {
         onEvent: () => {
