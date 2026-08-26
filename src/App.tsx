@@ -867,7 +867,7 @@ export default function App() {
         {bottomSheetStep === 1 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Post-it Color Section */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4, lineHeight: 1.5 }}>포스트잇 색상</div>
               <div style={{ display: 'flex', gap: 12 }}>
                  {['#FAE588', '#C8E2FA', '#C4B5FD', '#A7F3D0', '#FCA5A5', '#FCE7F3'].map(color => (
@@ -886,7 +886,7 @@ export default function App() {
             </div>
 
             {/* Goal Input Section */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4, lineHeight: 1.5 }}>오늘 할 일</div>
               
               <input
