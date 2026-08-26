@@ -322,27 +322,7 @@ export default function App() {
     }, 3000);
   };
 
-  const devClicksRef = useRef(0);
-  const handleDevClick = () => {
-    devClicksRef.current += 1;
-    if (devClicksRef.current >= 5) {
-      localStorage.removeItem('doit_jwtToken');
-      localStorage.removeItem('doit_tossUserKey');
-      localStorage.removeItem('doit_goal');
-      localStorage.removeItem('doit_steps');
-      localStorage.removeItem('doit_history');
-      localStorage.removeItem('doit_goalCategory');
-      localStorage.removeItem('doit_startWhen');
-      localStorage.removeItem('doit_startWhere');
-      localStorage.removeItem('doit_postItColor');
-      showToast('🛠️ 데이터가 초기화되었습니다! 앱을 재시작합니다.');
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } else {
-      showToast(`초기화하려면 ${5 - devClicksRef.current}번 더 누르세요.`);
-    }
-  };
+  
 
   useEffect(() => {
     const todayStr = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' });
@@ -667,13 +647,11 @@ export default function App() {
         {/* Main Content Area */}
         <div style={{ width: '100%', maxWidth: 335, textAlign: 'left', marginBottom: 32, marginTop: 16 }}>
           <div 
-            onClick={handleDevClick}
             style={{ 
               display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
               border: '1.5px solid rgba(0,12,30,0.8)', 
               borderRadius: '30px 30px 30px 6px', 
-              padding: '12px 24px', backgroundColor: '#FFF',
-              cursor: 'pointer'
+              padding: '12px 24px', backgroundColor: '#FFF'
             }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, marginRight: 16 }}>
