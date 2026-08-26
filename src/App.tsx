@@ -2514,6 +2514,9 @@ export default function App() {
                 <input 
                   autoFocus
                   type="text"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={newStepText}
                   onChange={(e) => setNewStepText(e.target.value)}
                   placeholder="새 단계 입력"
@@ -2533,6 +2536,9 @@ export default function App() {
                   type="text"
                   pattern="[0-9]*"
                   inputMode="numeric"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={newStepTime}
                   onChange={(e) => setNewStepTime(e.target.value.replace(/[^0-9]/g, ''))}
                   placeholder="분 단위로 입력"
