@@ -829,7 +829,7 @@ export default function App() {
         onTouchStart={() => setIsBottomSheetOpen(false)}
         style={{
           position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(1.5px)', WebkitBackdropFilter: 'blur(1.5px)',
+          backgroundColor: 'rgba(0,0,0,0.3)',
           cursor: 'pointer'
         }}
       />
