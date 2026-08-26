@@ -298,7 +298,7 @@ export default function App() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isAddStepSheetOpen, setIsAddStepSheetOpen] = useState(false);
   const [newStepText, setNewStepText] = useState('');
-  const [newStepTime, setNewStepTime] = useState('5 min');
+  const [newStepTime, setNewStepTime] = useState('5');
   const [postItColor, setPostItColor] = useState(() => localStorage.getItem('doit_postItColor') || '#FAE588');
   const [tempGoal, setTempGoal] = useState('');
   const [tempPostItColor, setTempPostItColor] = useState('#FAE588');
@@ -1127,7 +1127,7 @@ export default function App() {
               <button 
                 onClick={() => {
                   setNewStepText('');
-                  setNewStepTime('1분');
+                  setNewStepTime('5');
                   setIsAddStepSheetOpen(true);
                 }}
                 style={{ 
@@ -1399,7 +1399,11 @@ export default function App() {
               완료
             </button>
             <button 
-              onClick={() => setIsAddStepSheetOpen(true)}
+              onClick={() => {
+                setNewStepText('');
+                setNewStepTime('5');
+                setIsAddStepSheetOpen(true);
+              }}
               style={{ 
                 width: 54, height: 54, flexShrink: 0, background: '#333D4B', borderRadius: 72,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 'none'
@@ -2452,63 +2456,94 @@ export default function App() {
               position: 'absolute', bottom: 20,
               width: '100%', maxWidth: 355,
               backgroundColor: '#FFF', borderRadius: 28,
-              paddingBottom: 30,
+              padding: '16px 20px 30px',
               animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              display: 'flex', flexDirection: 'column',
+              display: 'flex', flexDirection: 'column', gap: 20,
               boxSizing: 'border-box'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 16, paddingBottom: 16 }}>
+            {/* Drag Handle */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div style={{ width: 48, height: 4, backgroundColor: '#E5E8EB', borderRadius: 40 }} />
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
-                {/* Input Container */}
-                <div style={{ flex: 1, border: '1.5px solid #b0b8c1', borderRadius: 12, padding: '13.5px 17.5px', display: 'flex', alignItems: 'center' }}>
-                  <input 
-                    autoFocus
-                    type="text"
-                    value={newStepText}
-                    onChange={(e) => setNewStepText(e.target.value)}
-                    placeholder="새 단계 입력"
-                    onBlur={() => {
-                      window.scrollTo(0, 0);
-                    }}
-                    style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontFamily: 'Pretendard', fontSize: 16, color: 'rgba(0,12,30,0.8)' }}
-                  />
-                </div>
-                
-                {/* Time Picker Container */}
-                <div 
-                  onClick={() => {
-                    setTimePickerTarget('new');
-                    setIsTimePickerOpen(true);
+            {/* Section 1: 새 단계 추가 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4, lineHeight: 1.5 }}>새 단계 추가</div>
+              <div style={{ border: '1.5px solid #b0b8c1', borderRadius: 12, padding: '13.5px 17.5px', display: 'flex', alignItems: 'center' }}>
+                <input 
+                  autoFocus
+                  type="text"
+                  value={newStepText}
+                  onChange={(e) => setNewStepText(e.target.value)}
+                  placeholder="새 단계 입력"
+                  onBlur={() => {
+                    window.scrollTo(0, 0);
                   }}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 2px', borderRadius: 12, cursor: 'pointer' }}
-                >
-                  <img src="assets/icon-clock.svg" alt="clock" style={{ width: 20, height: 20, opacity: 0.5 }} />
-                  <span style={{ fontFamily: 'Lexend', fontSize: 16, color: 'rgba(3,24,50,0.46)', marginTop: 2 }}>
-                    {formatTimeToKorean(newStepTime || '5분')}
-                  </span>
-                </div>
+                  style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontFamily: 'Pretendard', fontSize: 16, color: 'rgba(0,12,30,0.8)' }}
+                />
               </div>
             </div>
 
+            {/* Section 2: 예상 소요 시간 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(3,18,40,0.7)', marginLeft: 4, lineHeight: 1.5 }}>예상 소요 시간</div>
+              <div style={{ border: '1.5px solid #b0b8c1', borderRadius: 12, padding: '13.5px 17.5px', display: 'flex', alignItems: 'center' }}>
+                <input 
+                  type="text"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  value={newStepTime}
+                  onChange={(e) => setNewStepTime(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="분 단위로 입력"
+                  onBlur={() => {
+                    window.scrollTo(0, 0);
+                  }}
+                  style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontFamily: 'Pretendard', fontSize: 16, color: 'rgba(0,12,30,0.8)' }}
+                />
+              </div>
+            </div>
+
+            {/* Chips Section */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {['5', '15', '30', '60', '120'].map((mins) => (
+                <div 
+                  key={mins}
+                  onClick={() => setNewStepTime(mins)}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#f2f4f6',
+                    borderRadius: 10,
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: '#4e5968',
+                    cursor: 'pointer',
+                    fontFamily: 'Pretendard',
+                    transition: 'all 0.2s',
+                    border: newStepTime === mins ? '1.5px solid rgba(0,12,30,0.8)' : '1.5px solid transparent',
+                  }}
+                >
+                  {mins}분
+                </div>
+              ))}
+            </div>
+
             {/* CTA Button */}
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 20px 0', width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', width: '100%', boxSizing: 'border-box' }}>
               <button 
                 onClick={() => {
                   if (!newStepText.trim()) return;
+                  const duration = newStepTime.trim() || '5';
                   const newStep: Step = {
                     id: Date.now().toString(),
                     text: newStepText,
                     completed: false,
-                    timeEstimate: newStepTime || '5 min'
+                    timeEstimate: `${duration}분`
                   };
-                  trackEvent('Added Step', { stepText: newStepText, timeEstimate: newStepTime || '5 min' });
+                  trackEvent('Added Step', { stepText: newStepText, timeEstimate: `${duration}분` });
                   setSteps([...steps, newStep]);
                   setNewStepText('');
+                  setNewStepTime('5');
                   setIsAddStepSheetOpen(false);
                 }}
                 style={{ 
