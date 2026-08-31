@@ -5,7 +5,16 @@ import mixpanel from 'mixpanel-browser';
 const trackEvent = (eventName: string, properties?: Record<string, any>) => {
   try {
     if (import.meta.env.VITE_MIXPANEL_TOKEN) {
-      mixpanel.track(eventName, properties);
+      const isTossApp = typeof window !== 'undefined' && (
+        navigator.userAgent.toLowerCase().includes('toss') || 
+        window.location.search.includes('is_toss=true') || 
+        window.location.search.includes('ait=true')
+      );
+      const mergedProperties = {
+        ...properties,
+        isTossApp
+      };
+      mixpanel.track(eventName, mergedProperties);
     }
   } catch (err) {
     console.warn('[Analytics] Track error ignored:', err);
