@@ -19,6 +19,12 @@ const trackEvent = (eventName: string, properties?: Record<string, any>) => {
   } catch (err) {
     console.warn('[Analytics] Track error ignored:', err);
   }
+
+  try {
+    Analytics.click({ log_name: eventName, ...properties });
+  } catch (err) {
+    console.warn('[Toss Analytics] Track error ignored:', err);
+  }
 };
 
 type TabState = 'home' | 'history';
@@ -165,7 +171,7 @@ const simulateMicroBreakdown = (): Promise<string> => {
 };
 
 import AdminPanel from './AdminPanel';
-import { appLogin, graniteEvent, closeView } from '@apps-in-toss/web-framework';
+import { appLogin, graniteEvent, closeView, Analytics } from '@apps-in-toss/web-framework';
 
 export default function App() {
   if (typeof window !== 'undefined' && (window.location.search.includes('reset=true') || window.location.search.includes('clear=true'))) {
