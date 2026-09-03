@@ -400,8 +400,22 @@ export default function App() {
           t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
           y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
       })(window, document, "clarity", "script", clarityId);
+
+      const isToss = typeof window !== 'undefined' && (
+        navigator.userAgent.toLowerCase().includes('toss') || 
+        window.location.search.includes('is_toss=true') || 
+        window.location.search.includes('ait=true')
+      );
+
+      if (typeof (window as any).clarity === 'function') {
+        (window as any).clarity("set", "isTossApp", isToss ? "true" : "false");
+        (window as any).clarity("set", "platform", isToss ? "toss" : "web");
+        if (tossUserKey) {
+          (window as any).clarity("identify", tossUserKey);
+        }
+      }
     }
-  }, []);
+  }, [tossUserKey]);
 
   useEffect(() => {
     if (screen === 'home') {
