@@ -206,6 +206,14 @@ export default function App() {
   );
 
   const handleStartOnboarding = async () => {
+    // 1. 이미 로그인된 토큰이 있는 경우: 로딩 화면 없이 즉시 홈으로 이동
+    const existingToken = jwtToken || (typeof window !== 'undefined' ? localStorage.getItem('doit_jwtToken') : null);
+    if (existingToken) {
+      setScreen('home');
+      setIsBottomSheetOpen(false);
+      return;
+    }
+
     if (isTossApp) {
       setIsLoggingIn(true);
       setLoginError(null);
@@ -584,18 +592,23 @@ export default function App() {
       <div style={{ position: 'fixed', bottom: 'calc(24px + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 375, padding: '0 20px', display: 'flex', justifyContent: 'center', boxSizing: 'border-box', zIndex: 100 }}>
         <button 
           onClick={handleStartOnboarding}
+          disabled={isLoggingIn}
           style={{ 
             backgroundColor: '#c5e3ff', border: '1.5px solid rgba(0,12,30,0.8)', borderRadius: 12,
             width: '100%', maxWidth: 335, padding: '13.5px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            cursor: 'pointer', transition: 'transform 0.1s'
+            cursor: isLoggingIn ? 'default' : 'pointer', transition: 'transform 0.1s', opacity: isLoggingIn ? 0.7 : 1
           }}
           className="neo-btn"
         >
-          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537', lineHeight: 1.5 }}>시작하기</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14"></path>
-            <path d="M12 5l7 7-7 7"></path>
-          </svg>
+          <span style={{ fontSize: 18, fontWeight: 600, color: '#130537', lineHeight: 1.5 }}>
+            {isLoggingIn ? '시작하는 중...' : '시작하기'}
+          </span>
+          {!isLoggingIn && (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#130537" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14"></path>
+              <path d="M12 5l7 7-7 7"></path>
+            </svg>
+          )}
         </button>
       </div>
     </div>
@@ -2447,27 +2460,6 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: 'inherit', position: 'relative' }}>
-      {/* Fullscreen Loading Overlay for Toss Login */}
-      {isLoggingIn && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-          backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          zIndex: 99999, gap: 16
-        }}>
-          <div style={{
-            width: 40, height: 40,
-            border: '4px solid #F2F4F6',
-            borderTop: '4px solid #3182F6',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite'
-          }} />
-          <span style={{ fontSize: 16, fontWeight: 600, color: '#333D4B', fontFamily: "'Pretendard', sans-serif" }}>
-            토스로 안전하게 로그인하는 중...
-          </span>
-        </div>
-      )}
-
       {/* Screens Render Logic */}
       {tab === 'home' && (
         screen === 'onboarding' ? renderOnboarding() :
